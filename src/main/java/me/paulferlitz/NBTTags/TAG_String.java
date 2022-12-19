@@ -28,7 +28,6 @@ public class TAG_String
         sb.append(readTagPayload(nbtByteArray, currentPosition));
 
         lengthInBytes = 1 + LENGTH_PREFIX_BYTE_LENGTH + PAYLOAD_BYTE_SIZE;
-        sb.append("START:" + currentPosition + " - END:" + (currentPosition + lengthInBytes));
         return sb.toString();
     }
 
