@@ -88,15 +88,16 @@ public class TAG_List
         byteArr[1] = nbtByteArray[currentPosition + 1 + NAME_BYTE_LENGTH + nameLength + 2];
         byteArr[2] = nbtByteArray[currentPosition + 1 + NAME_BYTE_LENGTH + nameLength + 3];
         byteArr[3] = nbtByteArray[currentPosition + 1 + NAME_BYTE_LENGTH + nameLength + 4];
-        int currStringSize = ByteBuffer.wrap(byteArr).order(ByteOrder.BIG_ENDIAN).getInt();
+        int tagListSize = ByteBuffer.wrap(byteArr).order(ByteOrder.BIG_ENDIAN).getInt();
 
         if (PAYLOAD_TYPE_ID == 8)
         {
-            for (int i = 0; i < currStringSize; i++)
+            for (int i = 0; i < tagListSize; i++)
             {
-                sb.append(TAG_String.readWholeTag(nbtByteArray, currentPosition + 1 - 1 + NAME_BYTE_LENGTH + nameLength + TYPE_PREFIX_BYTE_LENGTH + LENGTH_PREFIX_BYTE_LENGTH + PAYLOAD_BYTE_SIZE));
-                if (i < currStringSize - 1) sb.append(",\n");
-                PAYLOAD_BYTE_SIZE += TAG_String.getLastTagsLength() - 1;
+                int offset = 1 + NAME_BYTE_LENGTH + nameLength + TYPE_PREFIX_BYTE_LENGTH + LENGTH_PREFIX_BYTE_LENGTH + PAYLOAD_BYTE_SIZE;
+                sb.append(TAG_String.readWholeTag(nbtByteArray, currentPosition + offset));
+                if (i < tagListSize - 1) sb.append(",\n");
+                PAYLOAD_BYTE_SIZE += (TAG_String.getLastTagsLength() - 1);
             }
         } else
         {
