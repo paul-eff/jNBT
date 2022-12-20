@@ -67,6 +67,7 @@ public class Main
                     case TAG_List.ID:
                         System.out.println(TAG_List.readWholeTag(nbtFileByteArray, byteArrayCounter));
                         byteArrayCounter += TAG_List.getLastTagsLength();
+                        System.out.println("List End Position " + byteArrayCounter);
                         continue;
                     case TAG_Compound.ID:
                         System.out.println(TAG_Compound.readWholeTag(nbtFileByteArray, byteArrayCounter));
