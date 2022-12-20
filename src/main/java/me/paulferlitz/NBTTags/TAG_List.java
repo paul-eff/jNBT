@@ -94,7 +94,7 @@ public class TAG_List
         {
             for (int i = 0; i < tagListSize; i++)
             {
-                int offset = 1 + NAME_BYTE_LENGTH + nameLength + TYPE_PREFIX_BYTE_LENGTH + LENGTH_PREFIX_BYTE_LENGTH + PAYLOAD_BYTE_SIZE;
+                int offset = NAME_BYTE_LENGTH + nameLength + TYPE_PREFIX_BYTE_LENGTH + LENGTH_PREFIX_BYTE_LENGTH + PAYLOAD_BYTE_SIZE;
                 sb.append(TAG_String.readWholeTag(nbtByteArray, currentPosition + offset));
                 if (i < tagListSize - 1) sb.append(",\n");
                 PAYLOAD_BYTE_SIZE += (TAG_String.getLastTagsLength() - 1);
