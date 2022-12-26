@@ -1,8 +1,9 @@
 package me.paulferlitz.NBTTags;
 
+import me.paulferlitz.Helpers.BinaryHelpers;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 
 public class TAG_Byte
 {
@@ -56,14 +57,15 @@ public class TAG_Byte
      */
     private static String readTagName(byte[] nbtByteArray, int currentPosition, int nameLength)
     {
-        StringBuilder sb = new StringBuilder();
+        /*StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < nameLength; i++)
         {
             sb.append(new String(new byte[]{nbtByteArray[currentPosition + 1 + NAME_BYTE_LENGTH + i]}, StandardCharsets.UTF_8));
         }
 
-        return sb.toString().equals("") ? "null" : sb.toString();
+        return sb.toString().equals("") ? "null" : sb.toString();*/
+        return BinaryHelpers.readNextString(nbtByteArray, currentPosition, nameLength);
     }
 
     /**
@@ -75,6 +77,7 @@ public class TAG_Byte
      */
     private static byte readTagPayload(byte[] nbtByteArray, int currentPosition, int nameLength)
     {
-        return nbtByteArray[currentPosition + 1 + NAME_BYTE_LENGTH + nameLength];
+        //return nbtByteArray[currentPosition + 1 + NAME_BYTE_LENGTH + nameLength];
+        return BinaryHelpers.readNextByte(nbtByteArray, currentPosition + 1 + NAME_BYTE_LENGTH + nameLength);
     }
 }
