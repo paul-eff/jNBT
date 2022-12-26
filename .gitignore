@@ -1,6 +1,7 @@
 # Own ignore entries
 playerTestData.dat
 compressed.dat
+playerTestData_copressed.dat
 
 # Created by https://www.toptal.com/developers/gitignore/api/java,jetbrains,intellij,windows,macos,linux,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=java,jetbrains,intellij,windows,macos,linux,visualstudiocode
