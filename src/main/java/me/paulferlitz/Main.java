@@ -1,6 +1,6 @@
 package me.paulferlitz;
 
-import me.paulferlitz.Helpers.FileHelper;
+import me.paulferlitz.IO.NBTReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,12 +13,10 @@ public class Main
     {
         System.out.println("Loading jNBT...");
 
-        try
-        {
-            byte[] nbtByteArray = FileHelper.loadNBTFileToBytes(nbtFile);
-
-        } catch (IOException e)
-        {
+        NBTReader reader = new NBTReader(nbtFile);
+        try {
+            System.out.println(reader.readNBTTag(0));
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

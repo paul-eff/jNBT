@@ -1,10 +1,10 @@
-package me.paulferlitz.Helpers;
+package me.paulferlitz.IO;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.util.zip.GZIPInputStream;
 
-public class FileHelper
+public class NBTFileHandler
 {
     public static byte[] loadNBTFileToBytes(File file) throws IOException
     {
@@ -32,6 +32,28 @@ public class FileHelper
         // TODO: Implement zlib (aka DEFLATE) check and decompression
 
         return Files.readAllBytes(file.toPath());
+    }
+
+    public static DataInputStream laodFileToStream(File file) throws IOException
+    {
+        if (Files.notExists(file.toPath())) {
+            throw new FileNotFoundException(String.format("The path %s doesn't exist!", file.getPath()));
+        }
+
+        InputStream fileStream;
+
+        if (isGzipped(file))
+        {
+            System.out.println(String.format("The file %s was compressed with gzip, decompressing...", file.getName()));
+            fileStream = new GZIPInputStream(new FileInputStream(file));
+        }else
+        {
+            // TODO: Implement zlib (aka DEFLATE) check and decompression
+
+            fileStream = new FileInputStream(file);
+        }
+
+        return new DataInputStream(fileStream);
     }
 
     private static boolean isGzipped(File file)
