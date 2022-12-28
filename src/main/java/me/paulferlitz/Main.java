@@ -15,7 +15,7 @@ public class Main
 
         NBTReader reader = new NBTReader(nbtFile);
         try {
-            System.out.println(reader.readNBTTag(0));
+            System.out.println(reader.read());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

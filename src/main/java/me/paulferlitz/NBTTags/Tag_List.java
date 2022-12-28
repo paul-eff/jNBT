@@ -61,8 +61,6 @@ public class Tag_List extends Tag
         return typeID;
     }
 
-    // TODO: Implement a tag type ID to tag type String method.
-
     /**
      * Method for generating a formatable string representation of the tag.
      *
@@ -72,13 +70,10 @@ public class Tag_List extends Tag
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("Tag_List(\"" + getName() + ", type=" + getType() + ", size=" + getValue().size() + "):\n");
+        sb.append("Tag_List(name=" + getName() + ", type=" + getType() + ", size=" + getValue().size() + "):");
         for (Tag tag : getValue())
         {
-            if (getValue().indexOf(tag) < (getValue().size() - 1))
-            {
-                sb.append("  " + tag.toString() + "\n");
-            }
+            sb.append("\n  " + tag.toString().replace("\n", "\n  "));
         }
         return sb.toString();
     }
