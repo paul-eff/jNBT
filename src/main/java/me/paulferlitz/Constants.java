@@ -17,11 +17,16 @@ public class Constants
         Tag_Int_Array(11),
         Tag_Long_Array(12);
 
-        public final int id;
+        private final int id;
 
         NBTTags(int id)
         {
             this.id = id;
+        }
+
+        public int getId()
+        {
+            return id;
         }
 
         public static NBTTags getById(int id)

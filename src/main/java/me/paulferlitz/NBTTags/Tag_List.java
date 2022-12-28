@@ -1,6 +1,6 @@
 package me.paulferlitz.NBTTags;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Class representing a NBT list tag.
@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class Tag_List extends Tag
 {
-    private final List<Tag> value;
+    private final ArrayList<Tag> value;
 
     private final int typeID;
 
@@ -19,7 +19,7 @@ public class Tag_List extends Tag
      * @param typeID Type ID of the type found in the list.
      * @param value  List of all contained tags.
      */
-    public Tag_List(int typeID, List<Tag> value)
+    public Tag_List(int typeID, ArrayList<Tag> value)
     {
         super(9);
         this.typeID = typeID;
@@ -33,7 +33,7 @@ public class Tag_List extends Tag
      * @param typeID Type ID of the type found in the list.
      * @param value  List of all contained tags.
      */
-    public Tag_List(String name, int typeID, List<Tag> value)
+    public Tag_List(String name, int typeID, ArrayList<Tag> value)
     {
         super(9, name);
         this.typeID = typeID;
@@ -46,7 +46,7 @@ public class Tag_List extends Tag
      * @return The value/playload of the tag.
      */
     @Override
-    public List<Tag> getValue()
+    public ArrayList<Tag> getValue()
     {
         return value;
     }
