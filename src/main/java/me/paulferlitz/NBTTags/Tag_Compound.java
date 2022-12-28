@@ -54,13 +54,10 @@ public class Tag_Compound extends Tag
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("Tag_Compound(\"" + getName() + "\", size=" + getValue().size() + "):\n");
+        sb.append("Tag_Compound(name=" + getName() + ", size=" + getValue().size() + "):");
         for (Tag tag : getValue())
         {
-            if (getValue().indexOf(tag) < (getValue().size() - 1))
-            {
-                sb.append("  " + tag.toString() + "\n");
-            }
+            sb.append("\n  " + tag.toString().replace("\n", "\n  "));
         }
         return sb.toString();
     }

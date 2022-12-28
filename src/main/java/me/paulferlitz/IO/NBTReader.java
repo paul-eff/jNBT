@@ -15,13 +15,21 @@ public class NBTReader
 
     public NBTReader(File nbtFile)
     {
-        try {
+        try
+        {
             this.stream = NBTFileHandler.laodFileToStream(nbtFile);
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             throw new RuntimeException(e);
         }
     }
-    public Tag readNBTTag(int depth) throws IOException
+
+    public Tag read() throws IOException
+    {
+        return readNBTTag(0);
+    }
+
+    private Tag readNBTTag(int depth) throws IOException
     {
         int type = stream.readByte();
         String name = "";
@@ -39,9 +47,11 @@ public class NBTReader
 
     private Tag readNBTPayload(int type, String name, int depth) throws IOException
     {
-        switch(Constants.NBTTags.getById(type))
+        switch (Constants.NBTTags.getById(type))
         {
             case Tag_End:
+                if (depth == 0)
+                    throw new IOException("Tag_End found before the first Tag_Compound was started. Invalid!");
                 return new Tag_End();
             case Tag_Byte:
                 return new Tag_Byte(name, stream.readByte());
@@ -69,14 +79,14 @@ public class NBTReader
                 ArrayList<Tag> tagList = new ArrayList();
                 int listType = stream.readByte();
                 arrayLength = stream.readInt();
-                for(int i = 0; i < arrayLength; i++)
+                for (int i = 0; i < arrayLength; i++)
                 {
                     tagList.add(readNBTPayload(listType, "", depth + 1));
                 }
                 return new Tag_List(name, listType, tagList);
             case Tag_Compound:
                 tagList = new ArrayList();
-                while(true)
+                while (true)
                 {
                     Tag tag = readNBTTag(depth + 1);
                     if (tag.getId() == Constants.NBTTags.Tag_End.getId()) break;
