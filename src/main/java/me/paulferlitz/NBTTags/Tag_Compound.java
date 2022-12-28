@@ -1,6 +1,6 @@
 package me.paulferlitz.NBTTags;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Class representing a NBT compound tag.
@@ -9,14 +9,14 @@ import java.util.List;
  */
 public class Tag_Compound extends Tag
 {
-    private final List<Tag> value;
+    private final ArrayList<Tag> value;
 
     /**
      * Create a compound tag with the value.
      *
      * @param value List of all contained tags.
      */
-    public Tag_Compound(List<Tag> value)
+    public Tag_Compound(ArrayList<Tag> value)
     {
         super(10);
         this.value = value;
@@ -28,7 +28,7 @@ public class Tag_Compound extends Tag
      * @param name  Name of the tag.
      * @param value List of all contained tags.
      */
-    public Tag_Compound(String name, List<Tag> value)
+    public Tag_Compound(String name, ArrayList<Tag> value)
     {
         super(10, name);
         this.value = value;
@@ -40,7 +40,7 @@ public class Tag_Compound extends Tag
      * @return The value/playload of the tag.
      */
     @Override
-    public List<Tag> getValue()
+    public ArrayList<Tag> getValue()
     {
         return value;
     }
