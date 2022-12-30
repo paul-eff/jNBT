@@ -6,11 +6,11 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Main class with example on how the parser can be used.
+ * Example class with an example on how the parser can be used.
  *
  * @author Paul Ferlitz
  */
-public class Main
+public class Example
 {
     // File not included in this library!
     private final static File nbtFile = new File("./src/main/resources/playerTestData.dat");
