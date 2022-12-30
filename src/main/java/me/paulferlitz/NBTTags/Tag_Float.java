@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import me.paulferlitz.Constants;
+
 /**
  * Class representing a NBT float tag.
  *
@@ -16,7 +18,7 @@ public class Tag_Float extends Tag
      */
     public Tag_Float(float value)
     {
-        super(5);
+        super(Constants.NBTTags.Tag_Float.getId());
         this.value = value;
     }
 
@@ -28,7 +30,7 @@ public class Tag_Float extends Tag
      */
     public Tag_Float(String name, float value)
     {
-        super(5, name);
+        super(Constants.NBTTags.Tag_Float.getId(), name);
         this.value = value;
     }
 
@@ -51,6 +53,6 @@ public class Tag_Float extends Tag
     @Override
     public String toString()
     {
-        return "Tag_Float(\"" + getName() + "\"): " + getValue();
+        return Constants.NBTTags.Tag_Float.getName() + "(\"" + getName() + "\"): " + getValue();
     }
 }

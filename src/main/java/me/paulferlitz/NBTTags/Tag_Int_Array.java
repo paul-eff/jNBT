@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import me.paulferlitz.Constants;
+
 import java.util.Arrays;
 
 /**
@@ -18,7 +20,7 @@ public class Tag_Int_Array extends Tag
      */
     public Tag_Int_Array(int[] value)
     {
-        super(11);
+        super(Constants.NBTTags.Tag_Int_Array.getId());
         this.value = value;
     }
 
@@ -30,7 +32,7 @@ public class Tag_Int_Array extends Tag
      */
     public Tag_Int_Array(String name, int[] value)
     {
-        super(11, name);
+        super(Constants.NBTTags.Tag_Int_Array.getId(), name);
         this.value = value;
     }
 
@@ -53,6 +55,6 @@ public class Tag_Int_Array extends Tag
     @Override
     public String toString()
     {
-        return "Tag_Int_Array(\"" + getName() + "\"): " + Arrays.toString(getValue());
+        return Constants.NBTTags.Tag_Int_Array.getName() + "(\"" + getName() + "\"): " + Arrays.toString(getValue());
     }
 }
