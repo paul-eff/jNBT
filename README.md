@@ -12,7 +12,7 @@ A Java library for interacting with Minecraft NBT files.
 ### WIP
 - Edit and write operations
 - Java Minecraft NBT files (zlib DEFLATE)
-- Supprto for JSON (import & export)
+- Support for JSON (import & export)
 ### Future
 - Bedrock Minecraft NBT files
 - GUI
@@ -20,9 +20,17 @@ A Java library for interacting with Minecraft NBT files.
 # Usage
 
 - Obviously download the jar
-- Execute the jar through your terminal with the following command:
+- Add it as a dependency to your project (dependent on your IDE)
+- Take a look into the `Example.java` file or try something like:
 ```java
-java -jar jNBT_0_1.jar <pathToNBTFile>
+// Parse and output NBT file
+NBTReader reader = new NBTReader(new File("./path/to/NBT/file"));
+
+try {
+    System.out.println(reader.read());
+} catch (IOException e) {
+    throw new RuntimeException(e);
+}
 ```
 
 # Sources
