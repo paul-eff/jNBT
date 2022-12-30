@@ -1,5 +1,40 @@
-# jNBT
-A Java library for interacting with Minecraft NBT files
+# jNBT v0.1
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.1-blue">
+  <img src="https://img.shields.io/badge/minecraft-1.19 (Java)-green">
+  <img src="https://img.shields.io/badge/java-11-red">
+</p>
+A Java library for interacting with Minecraft NBT files.
+
+### Currently supports
+- Read operation
+- Java Minecraft NBT files (raw & gzip)
+### WIP
+- Edit and write operations
+- Java Minecraft NBT files (zlib DEFLATE)
+- Supprto for JSON (import & export)
+### Future
+- Bedrock Minecraft NBT files
+- GUI
+
+# Usage
+
+- Obviously download the jar
+- Execute the jar through your terminal with the following command:
+```java
+java -jar jNBT_0_1.jar <pathToNBTFile>
+```
 
 # Sources
-https://wiki.vg/NBT
+- https://wiki.vg/NBT
+- https://minecraft.fandom.com/wiki/NBT_format#SNBT_format
+
+# Disclaimer
+Please always make a backup of your files before using this tool.
+Whilst it was thoroughly tested, there is always the chance that a bug might occur!
+
+If you need support for a specific version or a custom feature, please leave me a message or issue :)!
+
+# Remark
+Minecraft is a registered trademark of Mojang AB.
+
