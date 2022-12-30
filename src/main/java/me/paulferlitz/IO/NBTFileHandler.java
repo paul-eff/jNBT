@@ -4,8 +4,20 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * Class for managing the loading and conversion of a given NBT file to the desired stream.
+ *
+ * @author Paul Ferlitz
+ */
 public class NBTFileHandler
 {
+    /**
+     * Method to fully load a NBT file and return it as a {@link DataInputStream}.
+     *
+     * @param file The target file.
+     * @return The file as {@link DataInputStream}.
+     * @throws IOException When encountering an error whilst reading the file to a {@link DataInputStream}.
+     */
     public static DataInputStream laodFileToStream(File file) throws IOException
     {
         InputStream fileStream;
@@ -17,7 +29,7 @@ public class NBTFileHandler
 
         if (isGzipped(file))
         {
-            System.out.println(String.format("The file %s was compressed with gzip, decompressing...", file.getName()));
+            System.out.printf("The file %s was compressed with gzip, decompressing...%n", file.getName());
             fileStream = new GZIPInputStream(new FileInputStream(file));
         } else
         {
@@ -28,6 +40,12 @@ public class NBTFileHandler
         return new DataInputStream(fileStream);
     }
 
+    /**
+     * Method to check if a file was compressed with Gzip.
+     *
+     * @param file The target file.
+     * @return {@code True} if the file was compressed with Gzip.
+     */
     private static boolean isGzipped(File file)
     {
         try

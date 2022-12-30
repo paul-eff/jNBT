@@ -25,7 +25,7 @@ public class Tag_Long_Array extends Tag
     /**
      * Create a long array tag with name and value.
      *
-     * @param name Name of the tag.
+     * @param name  Name of the tag.
      * @param value Long array value of the tag.
      */
     public Tag_Long_Array(String name, long[] value)

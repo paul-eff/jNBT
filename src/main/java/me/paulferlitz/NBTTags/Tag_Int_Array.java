@@ -25,7 +25,7 @@ public class Tag_Int_Array extends Tag
     /**
      * Create a int array tag with name and value.
      *
-     * @param name Name of the tag.
+     * @param name  Name of the tag.
      * @param value Int array value of the tag.
      */
     public Tag_Int_Array(String name, int[] value)

@@ -9,10 +9,20 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+/**
+ * Class for handlich the parsing and formatting of a Java NBT file.
+ *
+ * @author Paul Ferlitz
+ */
 public class NBTReader
 {
     private DataInputStream stream;
 
+    /**
+     * Create a reader by passing it the target NBT file.
+     *
+     * @param nbtFile The target NBT file.
+     */
     public NBTReader(File nbtFile)
     {
         try
@@ -24,11 +34,24 @@ public class NBTReader
         }
     }
 
+    /**
+     * Method to parse the set NBT file.
+     *
+     * @return The root NBT tag, holding the entire file, to then interact with.
+     * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
+     */
     public Tag read() throws IOException
     {
         return readNBTTag(0);
     }
 
+    /**
+     * Method to read an entire NBT tag.
+     *
+     * @param depth Parameter, lateron increment by recursion, to keep track of current depth in NBT file.
+     * @return The tag read at the current position in the {@link NBTReader#stream}.
+     * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
+     */
     private Tag readNBTTag(int depth) throws IOException
     {
         int type = stream.readByte();
@@ -45,6 +68,15 @@ public class NBTReader
         return readNBTPayload(type, name, depth);
     }
 
+    /**
+     * Method to only read a NBT tag's payload.
+     *
+     * @param type The type of the NBT tag, which's payload should be read.
+     * @param name The name of the NBT tag.
+     * @param depth The current depth at which is beeing read.
+     * @return The complete read NBT tag.
+     * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
+     */
     private Tag readNBTPayload(int type, String name, int depth) throws IOException
     {
         switch (Constants.NBTTags.getById(type))
@@ -76,7 +108,7 @@ public class NBTReader
                 stream.readFully(byteBuffer);
                 return new Tag_String(name, new String(byteBuffer, StandardCharsets.UTF_8));
             case Tag_List:
-                ArrayList<Tag> tagList = new ArrayList();
+                ArrayList<Tag> tagList = new ArrayList<>();
                 int listType = stream.readByte();
                 arrayLength = stream.readInt();
                 for (int i = 0; i < arrayLength; i++)
@@ -85,7 +117,7 @@ public class NBTReader
                 }
                 return new Tag_List(name, listType, tagList);
             case Tag_Compound:
-                tagList = new ArrayList();
+                tagList = new ArrayList<>();
                 while (true)
                 {
                     Tag tag = readNBTTag(depth + 1);

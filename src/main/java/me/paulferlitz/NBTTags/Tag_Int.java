@@ -23,7 +23,7 @@ public class Tag_Int extends Tag
     /**
      * Create a int tag with name and value.
      *
-     * @param name Name of the tag.
+     * @param name  Name of the tag.
      * @param value Int value of the tag.
      */
     public Tag_Int(String name, int value)

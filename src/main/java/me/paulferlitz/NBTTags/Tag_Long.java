@@ -23,7 +23,7 @@ public class Tag_Long extends Tag
     /**
      * Create a long tag with name and value.
      *
-     * @param name Name of the tag.
+     * @param name  Name of the tag.
      * @param value Long value of the tag.
      */
     public Tag_Long(String name, long value)
