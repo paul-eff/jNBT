@@ -1,7 +1,15 @@
 package me.paulferlitz;
 
+/**
+ * Class holding globally needed constants.
+ *
+ * @author Paul Ferlitz
+ */
 public class Constants
 {
+    /**
+     * Enum to hold all critical information about every available NBT tag.
+     */
     public enum NBTTags
     {
         Tag_End(0, "Tag_End"),
@@ -21,22 +29,44 @@ public class Constants
         private final int id;
         private final String name;
 
+        /**
+         * Created a NBT tag.
+         *
+         * @param id   The tag's ID.
+         * @param name The tag's name.
+         */
         NBTTags(int id, String name)
         {
             this.id = id;
             this.name = name;
         }
 
+        /**
+         * Method to get a tags ID.
+         *
+         * @return The tag's ID.
+         */
         public int getId()
         {
             return id;
         }
 
+        /**
+         * Method to get a tags name.
+         *
+         * @return The tag's name.
+         */
         public String getName()
         {
             return name;
         }
 
+        /**
+         * Method to fetch a tag by supplying an ID.
+         *
+         * @param id The target tag's ID.
+         * @return The tag corresponding to the ID.
+         */
         public static NBTTags getById(int id)
         {
             for (NBTTags tag : NBTTags.values())

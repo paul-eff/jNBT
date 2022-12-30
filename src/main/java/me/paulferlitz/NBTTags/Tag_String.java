@@ -23,7 +23,7 @@ public class Tag_String extends Tag
     /**
      * Create a string tag with name and value.
      *
-     * @param name Name of the tag.
+     * @param name  Name of the tag.
      * @param value String value of the tag.
      */
     public Tag_String(String name, String value)

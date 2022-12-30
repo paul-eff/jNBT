@@ -23,7 +23,7 @@ public class Tag_Short extends Tag
     /**
      * Create a short tag with name and value.
      *
-     * @param name Name of the tag.
+     * @param name  Name of the tag.
      * @param value Short value of the tag.
      */
     public Tag_Short(String name, short value)

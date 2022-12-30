@@ -5,18 +5,25 @@ import me.paulferlitz.IO.NBTReader;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Main class with example on how the parser can be used.
+ *
+ * @author Paul Ferlitz
+ */
 public class Main
 {
+    // File not included in library!
     private final static File nbtFile = new File("./src/main/resources/playerTestData.dat");
 
     public static void main(String[] args)
     {
-        System.out.println("Loading jNBT...");
-
+        // Actual relevant lines of code when using this yourself!
         NBTReader reader = new NBTReader(nbtFile);
-        try {
+        try
+        {
             System.out.println(reader.read());
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             throw new RuntimeException(e);
         }
     }

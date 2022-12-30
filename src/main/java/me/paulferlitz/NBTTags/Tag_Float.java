@@ -23,7 +23,7 @@ public class Tag_Float extends Tag
     /**
      * Create a float tag with name and value.
      *
-     * @param name Name of the tag.
+     * @param name  Name of the tag.
      * @param value Float value of the tag.
      */
     public Tag_Float(String name, float value)
