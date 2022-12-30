@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import me.paulferlitz.Constants;
+
 /**
  * Class representing a NBT string tag.
  *
@@ -16,7 +18,7 @@ public class Tag_String extends Tag
      */
     public Tag_String(String value)
     {
-        super(8);
+        super(Constants.NBTTags.Tag_String.getId());
         this.value = value;
     }
 
@@ -28,7 +30,7 @@ public class Tag_String extends Tag
      */
     public Tag_String(String name, String value)
     {
-        super(8, name);
+        super(Constants.NBTTags.Tag_String.getId(), name);
         this.value = value;
     }
 
@@ -51,6 +53,6 @@ public class Tag_String extends Tag
     @Override
     public String toString()
     {
-        return "Tag_String(\"" + getName() + "\"): " + getValue();
+        return Constants.NBTTags.Tag_String.getName() + "(\"" + getName() + "\"): " + getValue();
     }
 }

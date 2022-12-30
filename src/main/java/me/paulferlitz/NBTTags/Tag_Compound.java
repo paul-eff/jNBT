@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import me.paulferlitz.Constants;
+
 import java.util.ArrayList;
 
 /**
@@ -18,7 +20,7 @@ public class Tag_Compound extends Tag
      */
     public Tag_Compound(ArrayList<Tag> value)
     {
-        super(10);
+        super(Constants.NBTTags.Tag_Compound.getId());
         this.value = value;
     }
 
@@ -30,7 +32,7 @@ public class Tag_Compound extends Tag
      */
     public Tag_Compound(String name, ArrayList<Tag> value)
     {
-        super(10, name);
+        super(Constants.NBTTags.Tag_Compound.getId(), name);
         this.value = value;
     }
 
@@ -54,7 +56,8 @@ public class Tag_Compound extends Tag
     public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("Tag_Compound(name=" + getName() + ", size=" + getValue().size() + "):");
+        sb.append(Constants.NBTTags.Tag_Compound.getName());
+        sb.append("(name=" + getName() + ", size=" + getValue().size() + "):");
         for (Tag tag : getValue())
         {
             sb.append("\n  " + tag.toString().replace("\n", "\n  "));

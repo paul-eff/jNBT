@@ -12,7 +12,7 @@ import java.io.IOException;
  */
 public class Main
 {
-    // File not included in library!
+    // File not included in this library!
     private final static File nbtFile = new File("./src/main/resources/playerTestData.dat");
 
     public static void main(String[] args)

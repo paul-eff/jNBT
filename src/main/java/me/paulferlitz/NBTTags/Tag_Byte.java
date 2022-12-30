@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import me.paulferlitz.Constants;
+
 /**
  * Class representing a NBT byte tag.
  *
@@ -16,7 +18,7 @@ public class Tag_Byte extends Tag
      */
     public Tag_Byte(byte value)
     {
-        super(1);
+        super(Constants.NBTTags.Tag_Byte.getId());
         this.value = value;
     }
 
@@ -28,7 +30,7 @@ public class Tag_Byte extends Tag
      */
     public Tag_Byte(String name, byte value)
     {
-        super(1, name);
+        super(Constants.NBTTags.Tag_Byte.getId(), name);
         this.value = value;
     }
 
@@ -51,6 +53,6 @@ public class Tag_Byte extends Tag
     @Override
     public String toString()
     {
-        return "Tag_Byte(\"" + getName() + "\"): " + getValue();
+        return Constants.NBTTags.Tag_Byte.getName() + "(\"" + getName() + "\"): " + getValue();
     }
 }

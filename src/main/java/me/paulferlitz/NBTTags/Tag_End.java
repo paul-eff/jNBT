@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import me.paulferlitz.Constants;
+
 /**
  * Class representing a NBT end tag.
  *
@@ -12,7 +14,7 @@ public class Tag_End extends Tag
      */
     public Tag_End()
     {
-        super(0);
+        super(Constants.NBTTags.Tag_End.getId());
     }
 
     /**
@@ -34,6 +36,6 @@ public class Tag_End extends Tag
     @Override
     public String toString()
     {
-        return "Tag_End()";
+        return Constants.NBTTags.Tag_End.getName() + "()";
     }
 }
