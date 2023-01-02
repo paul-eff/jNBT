@@ -24,7 +24,7 @@ A Java library for interacting with Minecraft NBT files.
 - Take a look into the `Example.java` file or try something like:
 ```java
 // Parse and output NBT file
-NBTReader reader = new NBTReader(new File("./path/to/NBT/file"));
+NBTReader reader = new NBTReader(new File("./path/to/NBT/file.dat"));
 
 try {
     System.out.println(reader.read());
