@@ -1,6 +1,9 @@
 package me.paulferlitz;
 
 import me.paulferlitz.IO.NBTReader;
+import me.paulferlitz.NBTTags.Tag;
+import me.paulferlitz.NBTTags.Tag_Compound;
+import me.paulferlitz.NBTTags.Tag_Short;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +24,11 @@ public class Example
         NBTReader reader = new NBTReader(nbtFile);
         try
         {
-            System.out.println(reader.read());
+            // For adding element to root
+            Tag_Compound root = (Tag_Compound) reader.read();
+            root.getValue().add(new Tag_Short("THIS_IS_A_TEST", (short) 111));
+
+            System.out.println(root);
         } catch (IOException e)
         {
             throw new RuntimeException(e);
