@@ -2,6 +2,7 @@ package me.paulferlitz.NBTTags;
 
 import me.paulferlitz.Constants;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Arrays;
  */
 public class Tag_Byte_Array extends Tag
 {
-    private final byte[] value;
+    private byte[] value;
 
     /**
      * Create a byte array tag with the value.
@@ -45,6 +46,17 @@ public class Tag_Byte_Array extends Tag
     public byte[] getValue()
     {
         return value;
+    }
+
+    /**
+     * Method to add new values to the array.
+     *
+     * @return True if the element was added succesfully.
+     */
+    @Override
+    public void addValue()
+    {
+        //TODO: Started add method
     }
 
     /**
