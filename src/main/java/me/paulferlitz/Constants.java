@@ -17,7 +17,7 @@ public class Constants
         Tag_Short(2, "Tag_Short"),
         Tag_Int(3, "Tag_Int"),
         Tag_Long(4, "Tag_Long"),
-        Tag_Float(5, ""),
+        Tag_Float(5, "Tag_Float"),
         Tag_Double(6, "Tag_Double"),
         Tag_Byte_Array(7, "Tag_Byte_Array"),
         Tag_String(8, "Tag_String"),
