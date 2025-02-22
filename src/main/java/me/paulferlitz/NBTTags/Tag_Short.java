@@ -1,58 +1,38 @@
 package me.paulferlitz.NBTTags;
 
-import me.paulferlitz.Constants;
-
 /**
  * Class representing a NBT short tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_Short extends Tag
+public class Tag_Short extends Tag<Short>
 {
-    private final short value;
-
     /**
-     * Create a short tag with the value.
-     *
-     * @param value Short value of the tag.
+     * Create an empty short tag.
      */
-    public Tag_Short(short value)
+    public Tag_Short()
     {
-        super(Constants.NBTTags.Tag_Short.getId());
-        this.value = value;
+        super(NBTTags.Tag_Short.getId());
     }
 
     /**
-     * Create a short tag with name and value.
+     * Create a short tag with name and data set to null.
      *
-     * @param name  Name of the tag.
-     * @param value Short value of the tag.
+     * @param name Name of the tag.
      */
-    public Tag_Short(String name, short value)
+    public Tag_Short(String name)
     {
-        super(Constants.NBTTags.Tag_Short.getId(), name);
-        this.value = value;
+        super(NBTTags.Tag_Short.getId(), name);
     }
 
     /**
-     * Method returning the tag's value.
+     * Create a short tag with name and data.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag.
+     * @param data The initial data of the tag.
      */
-    @Override
-    public Short getValue()
+    public Tag_Short(String name, short data)
     {
-        return value;
-    }
-
-    /**
-     * Method for generating a formatable string representation of the tag.
-     *
-     * @return String representatin of tag.
-     */
-    @Override
-    public String toString()
-    {
-        return Constants.NBTTags.Tag_Short.getName() + "(\"" + getName() + "\"): " + getValue();
+        super(NBTTags.Tag_Short.getId(), name, data);
     }
 }

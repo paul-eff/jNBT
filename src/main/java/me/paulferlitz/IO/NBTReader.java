@@ -1,6 +1,5 @@
 package me.paulferlitz.IO;
 
-import me.paulferlitz.Constants;
 import me.paulferlitz.NBTTags.*;
 
 import java.io.DataInputStream;
@@ -35,6 +34,16 @@ public class NBTReader
     }
 
     /**
+     * Create a reader by passing it the target NBT file.
+     *
+     * @param dis A {@link DataInputStream} containing a NBT file.
+     */
+    public NBTReader(DataInputStream dis)
+    {
+        this.stream = dis;
+    }
+
+    /**
      * Method to parse the set NBT file.
      *
      * @return The root NBT tag, holding the entire file, to then interact with.
@@ -57,7 +66,7 @@ public class NBTReader
         int type = stream.readByte();
         String name = "";
 
-        if (type != Constants.NBTTags.Tag_End.getId())
+        if (type != NBTTags.Tag_End.getId())
         {
             int nameLength = stream.readShort();
             byte[] byteBuffer = new byte[nameLength];
@@ -79,14 +88,14 @@ public class NBTReader
      */
     private Tag readNBTPayload(int type, String name, int depth) throws IOException
     {
-        switch (Constants.NBTTags.getById(type))
+        switch (NBTTags.getById(type))
         {
             case Tag_End:
                 if (depth == 0)
                     throw new IOException("Tag_End found before the first Tag_Compound was started. Invalid!");
                 return new Tag_End();
             case Tag_Byte:
-                return new Tag_Byte(name, stream.readByte());
+                return new Tag_Double(name, stream.readByte());
             case Tag_Short:
                 return new Tag_Short(name, stream.readShort());
             case Tag_Int:
@@ -108,7 +117,7 @@ public class NBTReader
                 stream.readFully(byteBuffer);
                 return new Tag_String(name, new String(byteBuffer, StandardCharsets.UTF_8));
             case Tag_List:
-                ArrayList<Tag> tagList = new ArrayList<>();
+                ArrayList<Tag<?>> tagList = new ArrayList<>();
                 int listType = stream.readByte();
                 arrayLength = stream.readInt();
                 for (int i = 0; i < arrayLength; i++)
@@ -121,7 +130,7 @@ public class NBTReader
                 while (true)
                 {
                     Tag tag = readNBTTag(depth + 1);
-                    if (tag.getId() == Constants.NBTTags.Tag_End.getId()) break;
+                    if (tag.getId() == NBTTags.Tag_End.getId()) break;
                     tagList.add(tag);
                 }
                 return new Tag_Compound(name, tagList);
@@ -141,6 +150,7 @@ public class NBTReader
                     longArray[i] = stream.readLong();
                 }
                 return new Tag_Long_Array(name, longArray);
+            case null:
             default:
                 throw new IllegalStateException("Unexpected value: " + type);
         }

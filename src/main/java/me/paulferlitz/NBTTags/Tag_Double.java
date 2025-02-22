@@ -1,58 +1,38 @@
 package me.paulferlitz.NBTTags;
 
-import me.paulferlitz.Constants;
-
 /**
  * Class representing a NBT double tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_Double extends Tag
+public class Tag_Double extends Tag<Double>
 {
-    private final double value;
-
     /**
-     * Create a double tag with the value.
-     *
-     * @param value Double value of the tag.
+     * Create an empty double tag.
      */
-    public Tag_Double(double value)
+    public Tag_Double()
     {
-        super(Constants.NBTTags.Tag_Double.getId());
-        this.value = value;
+        super(NBTTags.Tag_Double.getId());
     }
 
     /**
-     * Create a double tag with name and value.
+     * Create a double tag with name and data set to null.
      *
      * @param name Name of the tag.
-     * @param value Double value of the tag.
      */
-    public Tag_Double(String name, double value)
+    public Tag_Double(String name)
     {
-        super(Constants.NBTTags.Tag_Double.getId(), name);
-        this.value = value;
+        super(NBTTags.Tag_Double.getId(), name);
     }
 
     /**
-     * Method returning the tag's value.
+     * Create a double tag with name and data.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag.
+     * @param data The initial data of the tag.
      */
-    @Override
-    public Double getValue()
+    public Tag_Double(String name, double data)
     {
-        return value;
-    }
-
-    /**
-     * Method for generating a formatable string representation of the tag.
-     *
-     * @return String representatin of tag.
-     */
-    @Override
-    public String toString()
-    {
-        return Constants.NBTTags.Tag_Double.getName() + "(\"" + getName() + "\"): " + getValue();
+        super(NBTTags.Tag_Double.getId(), name, data);
     }
 }

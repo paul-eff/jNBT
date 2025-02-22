@@ -1,31 +1,41 @@
 package me.paulferlitz.NBTTags;
 
-import me.paulferlitz.Constants;
-
 /**
  * Class representing a NBT end tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_End extends Tag
+public class Tag_End extends Tag<Object>
 {
     /**
-     * Create an end tag with the value.
+     * Create an empty end tag.
      */
     public Tag_End()
     {
-        super(Constants.NBTTags.Tag_End.getId());
+        super(NBTTags.Tag_End.getId());
     }
 
     /**
-     * Method returning the tag's value.
+     * Create an end tag with name and data set to null.
+     * WARNING: This constructor is here only for future proofing. As per NBT spec this tag should not have a name.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag.
      */
-    @Override
-    public Object getValue()
+    public Tag_End(String name)
     {
-        return null;
+        super(NBTTags.Tag_End.getId(), name);
+    }
+
+    /**
+     * Create a double tag with name and data.
+     * WARNING: This constructor is here only for future proofing. As per NBT spec this tag should not have a name nor data.
+     *
+     * @param name Name of the tag.
+     * @param data The initial data of the tag.
+     */
+    public Tag_End(String name, Object data)
+    {
+        super(NBTTags.Tag_Double.getId(), name, data);
     }
 
     /**
@@ -36,6 +46,6 @@ public class Tag_End extends Tag
     @Override
     public String toString()
     {
-        return Constants.NBTTags.Tag_End.getName() + "()";
+        return NBTTags.Tag_End.getName() + "()";
     }
 }

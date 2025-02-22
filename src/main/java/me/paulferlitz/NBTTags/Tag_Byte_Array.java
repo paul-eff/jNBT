@@ -1,72 +1,38 @@
 package me.paulferlitz.NBTTags;
 
-import me.paulferlitz.Constants;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
 /**
  * Class representing a NBT byte array tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_Byte_Array extends Tag
+public class Tag_Byte_Array extends Tag<byte[]>
 {
-    private byte[] value;
-
     /**
-     * Create a byte array tag with the value.
-     *
-     * @param value Byte array value of the tag.
+     * Create an empty byte array tag.
      */
-    public Tag_Byte_Array(byte[] value)
+    public Tag_Byte_Array()
     {
-        super(Constants.NBTTags.Tag_Byte_Array.getId());
-        this.value = value;
+        super(NBTTags.Tag_Byte_Array.getId());
     }
 
     /**
-     * Create a byte array tag with name and value.
+     * Create a byte array tag with name and data set to null.
      *
      * @param name Name of the tag.
-     * @param value Byte array value of the tag.
      */
-    public Tag_Byte_Array(String name, byte[] value)
+    public Tag_Byte_Array(String name)
     {
-        super(Constants.NBTTags.Tag_Byte_Array.getId(), name);
-        this.value = value;
+        super(NBTTags.Tag_Byte_Array.getId(), name);
     }
 
     /**
-     * Method returning the tag's value.
+     * Create a byte array tag with name and data.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag.
+     * @param data The initial data of the tag.
      */
-    @Override
-    public byte[] getValue()
+    public Tag_Byte_Array(String name, byte[] data)
     {
-        return value;
-    }
-
-    /**
-     * Method to add new values to the array.
-     *
-     * @return True if the element was added succesfully.
-     */
-    @Override
-    public void addValue()
-    {
-        //TODO: Started add method
-    }
-
-    /**
-     * Method for generating a formatable string representation of the tag.
-     *
-     * @return String representatin of tag.
-     */
-    @Override
-    public String toString()
-    {
-        return Constants.NBTTags.Tag_Byte_Array.getName() + "(\"" + getName() + "\"): " + Arrays.toString(getValue());
+        super(NBTTags.Tag_Byte_Array.getId(), name, data);
     }
 }

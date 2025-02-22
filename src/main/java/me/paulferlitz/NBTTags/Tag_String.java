@@ -1,58 +1,38 @@
 package me.paulferlitz.NBTTags;
 
-import me.paulferlitz.Constants;
-
 /**
  * Class representing a NBT string tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_String extends Tag
+public class Tag_String extends Tag<String>
 {
-    private final String value;
-
     /**
-     * Create a string tag with the value.
-     *
-     * @param value String value of the tag.
+     * Create an empty string tag.
      */
-    public Tag_String(String value)
+    public Tag_String()
     {
-        super(Constants.NBTTags.Tag_String.getId());
-        this.value = value;
+        super(NBTTags.Tag_String.getId());
     }
 
     /**
-     * Create a string tag with name and value.
+     * Create a string tag with name and data set to null.
      *
-     * @param name  Name of the tag.
-     * @param value String value of the tag.
+     * @param name Name of the tag.
      */
-    public Tag_String(String name, String value)
+    public Tag_String(String name)
     {
-        super(Constants.NBTTags.Tag_String.getId(), name);
-        this.value = value;
+        super(NBTTags.Tag_String.getId(), name);
     }
 
     /**
-     * Method returning the tag's value.
+     * Create a string tag with name and data.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag.
+     * @param data The initial data of the tag.
      */
-    @Override
-    public String getValue()
+    public Tag_String(String name, String data)
     {
-        return value;
-    }
-
-    /**
-     * Method for generating a formatable string representation of the tag.
-     *
-     * @return String representatin of tag.
-     */
-    @Override
-    public String toString()
-    {
-        return Constants.NBTTags.Tag_String.getName() + "(\"" + getName() + "\"): " + getValue();
+        super(NBTTags.Tag_String.getId(), name, data);
     }
 }

@@ -1,58 +1,38 @@
 package me.paulferlitz.NBTTags;
 
-import me.paulferlitz.Constants;
-
 /**
  * Class representing a NBT int tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_Int extends Tag
+public class Tag_Int extends Tag<Integer>
 {
-    private final int value;
-
     /**
-     * Create a int tag with the value.
-     *
-     * @param value Int value of the tag.
+     * Create an empty int tag.
      */
-    public Tag_Int(int value)
+    public Tag_Int()
     {
-        super(Constants.NBTTags.Tag_Int.getId());
-        this.value = value;
+        super(NBTTags.Tag_Int.getId());
     }
 
     /**
-     * Create a int tag with name and value.
+     * Create a int tag with name and data set to null.
      *
-     * @param name  Name of the tag.
-     * @param value Int value of the tag.
+     * @param name Name of the tag.
      */
-    public Tag_Int(String name, int value)
+    public Tag_Int(String name)
     {
-        super(Constants.NBTTags.Tag_Int.getId(), name);
-        this.value = value;
+        super(NBTTags.Tag_Int.getId(), name);
     }
 
     /**
-     * Method returning the tag's value.
+     * Create a int tag with name and data.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag.
+     * @param data The initial data of the tag.
      */
-    @Override
-    public Integer getValue()
+    public Tag_Int(String name, int data)
     {
-        return value;
-    }
-
-    /**
-     * Method for generating a formatable string representation of the tag.
-     *
-     * @return String representatin of tag.
-     */
-    @Override
-    public String toString()
-    {
-        return Constants.NBTTags.Tag_Int.getName() + "(\"" + getName() + "\"): " + getValue();
+        super(NBTTags.Tag_Int.getId(), name, data);
     }
 }

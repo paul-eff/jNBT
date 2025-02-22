@@ -1,60 +1,38 @@
 package me.paulferlitz.NBTTags;
 
-import me.paulferlitz.Constants;
-
-import java.util.Arrays;
-
 /**
  * Class representing a NBT long array tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_Long_Array extends Tag
+public class Tag_Long_Array extends Tag<long[]>
 {
-    private final long[] value;
-
     /**
-     * Create a long array tag with the value.
-     *
-     * @param value Long array value of the tag.
+     * Create an empty long array tag.
      */
-    public Tag_Long_Array(long[] value)
+    public Tag_Long_Array()
     {
-        super(Constants.NBTTags.Tag_Long_Array.getId());
-        this.value = value;
+        super(NBTTags.Tag_Long_Array.getId());
     }
 
     /**
-     * Create a long array tag with name and value.
+     * Create a long array tag with name and data set to null.
      *
-     * @param name  Name of the tag.
-     * @param value Long array value of the tag.
+     * @param name Name of the tag.
      */
-    public Tag_Long_Array(String name, long[] value)
+    public Tag_Long_Array(String name)
     {
-        super(Constants.NBTTags.Tag_Long_Array.getId(), name);
-        this.value = value;
+        super(NBTTags.Tag_Long_Array.getId(), name);
     }
 
     /**
-     * Method returning the tag's value.
+     * Create a long array tag with name and data.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag.
+     * @param data The initial data of the tag.
      */
-    @Override
-    public long[] getValue()
+    public Tag_Long_Array(String name, long[] data)
     {
-        return value;
-    }
-
-    /**
-     * Method for generating a formatable string representation of the tag.
-     *
-     * @return String representatin of tag.
-     */
-    @Override
-    public String toString()
-    {
-        return Constants.NBTTags.Tag_Long_Array.getName() + "(\"" + getName() + "\"): " + Arrays.toString(getValue());
+        super(NBTTags.Tag_Long_Array.getId(), name, data);
     }
 }

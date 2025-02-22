@@ -1,14 +1,18 @@
 package me.paulferlitz.NBTTags;
 
+import java.util.Objects;
+import java.util.function.Consumer;
+
 /**
- * Class representing a basic NBT tag.
+ * Class representing a basic NBT tag with generic data type.
  *
  * @author Paul Ferlitz
  */
-public abstract class Tag
+public abstract class Tag<T>
 {
     private final int id;
-    private final String name;
+    private String name;
+    protected T data;
 
     /**
      * Create a NBT tag with ID.
@@ -17,29 +21,39 @@ public abstract class Tag
      */
     public Tag(int id)
     {
-        this.id = id;
-        this.name = "null";
+        this(id, "null", null);
     }
 
     /**
-     * Create a NBT tag with ID and name.
+     * Create a NBT tag with ID and name and data set to null.
      *
      * @param id ID of the tag.
-     * @param name Name of the tag. Can be null or empty.
+     * @param name Name of the tag.
      */
     public Tag(int id, String name)
     {
-        this.id = id;
-        if (name == null || name.equals(""))
-        {
-            this.name = "null";
-        }else {
-            this.name = name;
-        }
+        this(id, name, null);
     }
 
     /**
-     * Method returing the tag's ID.
+     * Create a NBT tag with ID, name and data.
+     *
+     * @param id ID of the tag.
+     * @param name Name of the tag. Can be null or empty.
+     * @param data The initial data of the tag.
+     */
+    public Tag(int id, String name, T data)
+    {
+        if (NBTTags.getById(id) == null) {
+            throw new IllegalArgumentException("Invalid ID: " + id);
+        }
+        this.id = id;
+        this.name = (name == null || name.isEmpty()) ? "null" : name;
+        this.data = data;
+    }
+
+    /**
+     * Method returning the tag's ID.
      *
      * @return The ID of this tag.
      */
@@ -49,7 +63,7 @@ public abstract class Tag
     }
 
     /**
-     * Method returing the tag's name.
+     * Method returning the tag's name.
      *
      * @return The name of this tag.
      */
@@ -59,16 +73,77 @@ public abstract class Tag
     }
 
     /**
-     * Method returning the tag's value.
+     * Method for setting the tag's name.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag. Can be null or empty.
      */
-    public abstract Object getValue();
+    public void setName(String name)
+    {
+        this.name = (name == null || name.isEmpty()) ? "null" : name;
+    }
+
+    /**
+     * Method returning the tag's data.
+     *
+     * @return The data/payload of the tag.
+     */
+    public T getData()
+    {
+        return data;
+    }
+
+    /**
+     * Method for setting the tag's data.
+     *
+     * @param data The data/payload of the tag.
+     */
+    public void setData(T data)
+    {
+        this.data = data;
+    }
+
+    /**
+     * Method for applying an operation to the tag.
+     *
+     * @param operation Operation to apply to the tag.
+     */
+    public void applyOperation(Consumer<Tag<T>> operation)
+    {
+        operation.accept(this);
+    }
+
+    /**
+     * Method for checking if the tag is equal to another object.
+     *
+     * @param obj Object to compare to.
+     * @return True if the tag is equal to the object.
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Tag<?> tag = (Tag<?>) obj;
+        return id == tag.id &&
+                Objects.equals(name, tag.name) &&
+                Objects.equals(data, tag.data);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(id, name, data);
+    }
 
     /**
      * Method for generating a formatable string representation of the tag.
      *
-     * @return String representatin of tag.
+     * @return String representation of tag.
      */
-    public abstract String toString();
+    @Override
+    public String toString()
+    {
+        return NBTTags.getById(getId()).getName() + "(\"" + getName() + "\"): " + getData();
+    }
 }

@@ -24,10 +24,7 @@ public class Example
         NBTReader reader = new NBTReader(nbtFile);
         try
         {
-            // For adding element to root
-            Tag_Compound root = (Tag_Compound) reader.read();
-            root.getValue().add(new Tag_Short("THIS_IS_A_TEST", (short) 111));
-
+            Tag root = reader.read();
             System.out.println(root);
         } catch (IOException e)
         {

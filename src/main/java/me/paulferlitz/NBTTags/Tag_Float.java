@@ -1,58 +1,38 @@
 package me.paulferlitz.NBTTags;
 
-import me.paulferlitz.Constants;
-
 /**
  * Class representing a NBT float tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_Float extends Tag
+public class Tag_Float extends Tag<Float>
 {
-    private final float value;
-
     /**
-     * Create a float tag with the value.
-     *
-     * @param value Float value of the tag.
+     * Create an empty float tag.
      */
-    public Tag_Float(float value)
+    public Tag_Float()
     {
-        super(Constants.NBTTags.Tag_Float.getId());
-        this.value = value;
+        super(NBTTags.Tag_Float.getId());
     }
 
     /**
-     * Create a float tag with name and value.
+     * Create a float tag with name and data set to null.
      *
-     * @param name  Name of the tag.
-     * @param value Float value of the tag.
+     * @param name Name of the tag.
      */
-    public Tag_Float(String name, float value)
+    public Tag_Float(String name)
     {
-        super(Constants.NBTTags.Tag_Float.getId(), name);
-        this.value = value;
+        super(NBTTags.Tag_Float.getId(), name);
     }
 
     /**
-     * Method returning the tag's value.
+     * Create a float tag with name and data.
      *
-     * @return The value/playload of the tag.
+     * @param name Name of the tag.
+     * @param data The initial data of the tag.
      */
-    @Override
-    public Float getValue()
+    public Tag_Float(String name, float data)
     {
-        return value;
-    }
-
-    /**
-     * Method for generating a formatable string representation of the tag.
-     *
-     * @return String representatin of tag.
-     */
-    @Override
-    public String toString()
-    {
-        return Constants.NBTTags.Tag_Float.getName() + "(\"" + getName() + "\"): " + getValue();
+        super(NBTTags.Tag_Float.getId(), name, data);
     }
 }
