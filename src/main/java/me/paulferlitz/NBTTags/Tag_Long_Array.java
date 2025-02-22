@@ -5,7 +5,7 @@ package me.paulferlitz.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Long_Array extends Tag<long[]>
+public class Tag_Long_Array extends Basic_Tag<long[]>
 {
     /**
      * Create an empty long array tag.

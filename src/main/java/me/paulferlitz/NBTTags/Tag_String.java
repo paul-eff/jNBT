@@ -5,7 +5,7 @@ package me.paulferlitz.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_String extends Tag<String>
+public class Tag_String extends Basic_Tag<String>
 {
     /**
      * Create an empty string tag.

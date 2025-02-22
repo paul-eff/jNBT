@@ -5,7 +5,7 @@ package me.paulferlitz.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Int extends Tag<Integer>
+public class Tag_Int extends Basic_Tag<Integer>
 {
     /**
      * Create an empty int tag.

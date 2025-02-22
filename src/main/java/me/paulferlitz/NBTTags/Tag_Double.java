@@ -5,7 +5,7 @@ package me.paulferlitz.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Double extends Tag<Double>
+public class Tag_Double extends Basic_Tag<Double>
 {
     /**
      * Create an empty double tag.

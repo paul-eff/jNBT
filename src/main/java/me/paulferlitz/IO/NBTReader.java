@@ -49,9 +49,13 @@ public class NBTReader
      * @return The root NBT tag, holding the entire file, to then interact with.
      * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
      */
-    public Tag read() throws IOException
+    public Collection_Tag read() throws IOException
     {
-        return readNBTTag(0);
+        /*
+         * As per the NBT specs (https://minecraft.wiki/w/NBT_format), every NBT file must be a compound tag at the root.
+         * If you feel the urge to ask me to implement the ability to parse non-standard NBT files I kindly ask you to do it yourself >:(.
+         */
+        return (Collection_Tag) readNBTTag(0);
     }
 
     /**

@@ -5,7 +5,7 @@ package me.paulferlitz.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Long extends Tag<Long>
+public class Tag_Long extends Basic_Tag<Long>
 {
     /**
      * Create an empty long tag.

@@ -1,14 +1,13 @@
 package me.paulferlitz.NBTTags;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /**
  * Class representing a NBT compound tag.
  *
  * @author Paul Ferlitz
  */
-public class Tag_Compound extends Tag<ArrayList<Tag<?>>>
+public class Tag_Compound extends Collection_Tag
 {
     /**
      * Create an empty compound tag.
@@ -57,39 +56,5 @@ public class Tag_Compound extends Tag<ArrayList<Tag<?>>>
         sb.append("\n" + NBTTags.Tag_End.getName());
         sb.append("(name=" + getName() + ")");
         return sb.toString();
-    }
-
-    /**
-     * Method to find a tag in the collection by name.
-     *
-     * @param name The name of the tag to find.
-     * @param global Search and delete from anywhere in the tag or stay on current level.
-     */
-    public Tag findTagByName(String name, boolean global)
-    {
-        //TODO: Proper error handling if null Tag found
-        if(name.equals("null") || name.isEmpty())
-        {
-            return null;
-        }
-        for (Tag tag : data)
-        {
-            if (tag.getName().equals(name))
-            {
-                return tag;
-            }
-            if(global)
-            {
-                if (tag instanceof Tag_Compound)
-                {
-                    return ((Tag_Compound) tag).findTagByName(name, true);
-                }
-                if (tag instanceof Tag_List)
-                {
-                    return ((Tag_List) tag).findTagByName(name, true);
-                }
-            }
-        }
-        return null;
     }
 }

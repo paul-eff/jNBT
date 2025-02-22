@@ -5,7 +5,7 @@ package me.paulferlitz.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Float extends Tag<Float>
+public class Tag_Float extends Basic_Tag<Float>
 {
     /**
      * Create an empty float tag.

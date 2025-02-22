@@ -99,11 +99,33 @@ public abstract class Tag<T>
      */
     public void setData(T data)
     {
-        this.data = data;
+        if (this.data.getClass() == data.getClass())
+        {
+            this.data = data;
+        }else
+        {
+            throw new IllegalArgumentException(String.format("Tag type mismatch! Expected %s, got %s", this.data.getClass(), data.getClass()));
+        }
     }
 
     /**
-     * Method for applying an operation to the tag.
+     * Method for editing the tag as a whole.
+     *
+     * @param newTag The new tag to replace this tag with.
+     */
+    public void editTag(Tag<?> newTag) {
+        if (this.getId() == newTag.getId())
+        {
+            this.setName(newTag.getName());
+            this.setData((T) newTag.getData());
+        } else
+        {
+            throw new IllegalArgumentException(String.format("Tag type mismatch! Expected %d, got %d", this.getId(), newTag.getId()));
+        }
+    }
+
+    /**
+     * Method for applying a custom operation to the tag.
      *
      * @param operation Operation to apply to the tag.
      */

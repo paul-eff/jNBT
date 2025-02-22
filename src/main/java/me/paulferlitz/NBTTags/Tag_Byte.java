@@ -5,7 +5,7 @@ package me.paulferlitz.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Byte extends Tag<Byte>
+public class Tag_Byte extends Basic_Tag<Byte>
 {
     /**
      * Create an empty byte tag.
