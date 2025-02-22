@@ -1,20 +1,24 @@
-# jNBT v0.1
+# jNBT v0.2
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1-blue">
-  <img src="https://img.shields.io/badge/minecraft-1.19 (Java)-green">
-  <img src="https://img.shields.io/badge/java-11-red">
+  <img src="https://img.shields.io/badge/version-0.2-blue">
+  <img src="https://img.shields.io/badge/minecraft-1.21.4 (Java)-green">
+  <img src="https://img.shields.io/badge/java-21-red">
 </p>
-A Java library for interacting with Minecraft NBT files.
+Currently there aren't many sophisticated methods to interact with Minecraft NBT files in Java (read, edit and write). 
+And those that are around have not been updated in a while. With this library I want to provide an up to date and efficient way to interact with NBT files.
+
+This NBT library will in the near future be the base of my Anvil library (WIP) and the [MinecraftOfflineOnlineConverter](https://github.com/paul-eff/MinecraftOfflineOnlineConverter).
 
 ### Currently supports
 - Read operation
 - Java Minecraft NBT files (raw & gzip)
 ### WIP
-- Edit and write operations
+- Edit operations
+- Write operations
 - Java Minecraft NBT files (zlib DEFLATE)
-- Support for JSON (import & export)
 ### Future
 - Bedrock Minecraft NBT files
+- Anvil (other repository)
 - GUI
 
 # Usage
