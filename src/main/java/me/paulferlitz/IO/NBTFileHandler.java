@@ -19,48 +19,79 @@ public class NBTFileHandler
      * @return The file as {@link DataInputStream}.
      * @throws IOException When encountering an error whilst reading the file to a {@link DataInputStream}.
      */
-    public static DataInputStream laodFileToStream(File file) throws IOException
+    public static DataInputStream loadNBTToReader(File file) throws IOException
     {
-        InputStream fileStream;
-
         if (Files.notExists(file.toPath()))
         {
-            throw new FileNotFoundException(String.format("The path %s doesn't exist!", file.getPath()));
+            throw new FileNotFoundException(String.format("The file %s doesn't exist!", file.getPath()));
         }
 
-        if (isGzipped(file))
-        {
-            System.out.printf("The file %s was compressed with gzip, decompressing...%n", file.getName());
-            fileStream = new GZIPInputStream(new FileInputStream(file));
-        } else
-        {
-            // TODO: Implement zlib (aka DEFLATE) check and decompression
-            fileStream = new FileInputStream(file);
-        }
+        InputStream fileStream;
 
+        switch (getCompressionType(file))
+        {
+            case NONE:
+                System.out.printf("The file %s was uncompressed.%n", file.getName(), Compression_Types.GZIP.getName());
+                fileStream = new FileInputStream(file);
+                break;
+            case GZIP:
+                System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.GZIP.getName());
+                fileStream = new GZIPInputStream(new FileInputStream(file));
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("The file %s is compressed with an unsupported format!", file.getName()));
+        }
         return new DataInputStream(fileStream);
     }
 
-    public static DataOutputStream targetFileToStream(File file) throws IOException {
+    /**
+     * Method to create a {@link DataOutputStream} to later write a NBT file.
+     * If the file already exists, a backup will be created.
+     *
+     * @param file The target file.
+     * @param compression The compression type of the file.
+     * @return The file as {@link DataOutputStream}.
+     * @throws IOException When encountering an error whilst reading the file to a {@link DataOutputStream}.
+     */
+    public static DataOutputStream loadNBTToWriter(File file, Compression_Types compression) throws IOException
+    {
+        if (Files.exists(file.toPath()))
+        {
+            File backupFile = new File(file.getPath() + ".bak");
+            Files.copy(file.toPath(), backupFile.toPath());
+            System.out.printf("Created backup of file %s%n", file.getName());
+        }
+
         OutputStream fileStream;
 
-        if (Files.notExists(file.toPath()))
+        switch (compression)
         {
-            throw new FileNotFoundException(String.format("The path %s doesn't exist!", file.getPath()));
-        }
-
-        if (isGzipped(file) && false)
-        {
-            file = new File("./src/main/resources/playerdata-new.dat");
-            // TODO: Correctly implement GZIP and co.
-            System.out.printf("The file %s was compressed with gzip, compressing...%n", file.getName());
-            fileStream = new GZIPOutputStream(new FileOutputStream(file));
-        } else
-        {
-            // TODO: Implement zlib (aka DEFLATE) check and decompression
-            fileStream = new FileOutputStream(file);
+            case NONE:
+                System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.NONE.getName());
+                fileStream = new FileOutputStream(file);
+                break;
+            case GZIP:
+                System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.GZIP.getName());
+                fileStream = new GZIPOutputStream(new FileOutputStream(file));
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("The compression type %s is not supported!", compression));
         }
         return new DataOutputStream(fileStream);
+    }
+
+    /**
+     * Method to get the compression type of a file.
+     *
+     * @param file The target file.
+     * @return The compression type of the file.
+     */
+    public static Compression_Types getCompressionType(File file)
+    {
+        if (isGzipped(file)) return Compression_Types.GZIP;
+        else if (isZlibed(file)) return Compression_Types.ZLIB;
+        else if (isLZ4ed(file)) return Compression_Types.LZ4;
+        else return Compression_Types.NONE;
     }
 
     /**
@@ -82,5 +113,27 @@ public class NBTFileHandler
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Method to check if a file was compressed with Zlib.
+     *
+     * @param file The target file.
+     * @return {@code True} if the file was compressed with Zlib.
+     */
+    private static boolean isZlibed(File file)
+    {
+        return false;
+    }
+
+    /**
+     * Method to check if a file was compressed with LZ4.
+     *
+     * @param file The target file.
+     * @return {@code True} if the file was compressed with LZ4.
+     */
+    private static boolean isLZ4ed(File file)
+    {
+        return false;
     }
 }

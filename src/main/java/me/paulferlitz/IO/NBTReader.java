@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class NBTReader
 {
-    private DataInputStream stream;
+    private final DataInputStream stream;
 
     /**
      * Create a reader by passing it the target NBT file.
@@ -26,7 +26,7 @@ public class NBTReader
     {
         try
         {
-            this.stream = NBTFileHandler.laodFileToStream(nbtFile);
+            this.stream = NBTFileHandler.loadNBTToReader(nbtFile);
         } catch (IOException e)
         {
             throw new RuntimeException(e);
@@ -34,7 +34,7 @@ public class NBTReader
     }
 
     /**
-     * Create a reader by passing it the target NBT file.
+     * Create a reader by passing it a {@link DataInputStream}.
      *
      * @param dis A {@link DataInputStream} containing a NBT file.
      */
@@ -44,7 +44,17 @@ public class NBTReader
     }
 
     /**
+     * Method to close the reader.
+     *
+     * @throws IOException When encountering an error whilst closing the reader.
+     */
+    public void close() throws IOException {
+        stream.close();
+    }
+
+    /**
      * Method to parse the set NBT file.
+     * Executing this method will close the reader.
      *
      * @return The root NBT tag, holding the entire file, to then interact with.
      * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
@@ -55,8 +65,17 @@ public class NBTReader
          * As per the NBT specs (https://minecraft.wiki/w/NBT_format), every NBT file must be a compound tag at the root.
          * If you feel the urge to ask me to implement the ability to parse non-standard NBT files I kindly ask you to do it yourself >:(.
          */
-        Tag_Compound tag = (Tag_Compound) readNBTTag(0);
-        this.stream.close();
+        Tag_Compound tag;
+        try
+        {
+            tag = (Tag_Compound) readNBTTag(0);
+        } catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        } finally
+        {
+            this.close();
+        }
         return tag;
     }
 
@@ -79,7 +98,6 @@ public class NBTReader
             stream.readFully(byteBuffer);
             name = new String(byteBuffer, StandardCharsets.UTF_8);
         }
-        System.out.println("Reading tag: " + name + " with type: " + NBTTags.getById(type));
         return readNBTPayload(type, name, depth);
     }
 
