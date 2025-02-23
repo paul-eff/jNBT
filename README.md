@@ -1,6 +1,6 @@
-# jNBT v0.3
+# jNBT v0.7
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.3-blue">
+  <img src="https://img.shields.io/badge/version-0.7-blue">
   <img src="https://img.shields.io/badge/minecraft-1.21.4 (Java)-green">
   <img src="https://img.shields.io/badge/java-21-red">
 </p>
@@ -12,10 +12,11 @@ This NBT library will in the near future be the base of my Anvil library (WIP) a
 ### Currently supports
 - Read operation
 - Adding, removing, finding and editing elements in the NBT file 
+- Write operation
 - Java Minecraft NBT files (raw & gzip)
 ### WIP
-- Write operations
 - Java Minecraft NBT files (zlib DEFLATE)
+- Write with GZIP
 ### Future
 - Bedrock Minecraft NBT files
 - Anvil (other repository)
