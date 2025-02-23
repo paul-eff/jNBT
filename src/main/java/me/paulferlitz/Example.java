@@ -24,7 +24,7 @@ public class Example
         try
         {
             // Fetch and print the whole NBT file
-            Collection_Tag root = reader.read();
+            Tag_Compound root = reader.read();
             System.out.println(root);
 
             // Fetch and print the "Inventory" list
@@ -37,7 +37,6 @@ public class Example
             diamondHoe.addTag(new Tag_Int("count", 1));
             diamondHoe.addTag(new Tag_Double("Slot", 1.0));
             diamondHoe.addTag(new Tag_String("id", "minecraft:diamond_hoe"));
-            ((Collection_Tag) inventory).addTag(diamondHoe);
 
             // Remove an item from the "Inventory" list - accessing the inventory's data directly (getData array)
             ((Collection_Tag) inventory).getData().remove(1);
