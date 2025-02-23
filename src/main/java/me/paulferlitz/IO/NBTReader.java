@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
- * Class for handlich the parsing and formatting of a Java NBT file.
+ * Class for handling the parsing and formatting of a Java NBT file.
  *
  * @author Paul Ferlitz
  */
@@ -55,7 +55,9 @@ public class NBTReader
          * As per the NBT specs (https://minecraft.wiki/w/NBT_format), every NBT file must be a compound tag at the root.
          * If you feel the urge to ask me to implement the ability to parse non-standard NBT files I kindly ask you to do it yourself >:(.
          */
-        return (Tag_Compound) readNBTTag(0);
+        Tag_Compound tag = (Tag_Compound) readNBTTag(0);
+        this.stream.close();
+        return tag;
     }
 
     /**
@@ -77,7 +79,7 @@ public class NBTReader
             stream.readFully(byteBuffer);
             name = new String(byteBuffer, StandardCharsets.UTF_8);
         }
-
+        System.out.println("Reading tag: " + name + " with type: " + NBTTags.getById(type));
         return readNBTPayload(type, name, depth);
     }
 

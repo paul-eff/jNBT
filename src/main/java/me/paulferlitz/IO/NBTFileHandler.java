@@ -3,6 +3,7 @@ package me.paulferlitz.IO;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Class for managing the loading and conversion of a given NBT file to the desired stream.
@@ -38,6 +39,28 @@ public class NBTFileHandler
         }
 
         return new DataInputStream(fileStream);
+    }
+
+    public static DataOutputStream targetFileToStream(File file) throws IOException {
+        OutputStream fileStream;
+
+        if (Files.notExists(file.toPath()))
+        {
+            throw new FileNotFoundException(String.format("The path %s doesn't exist!", file.getPath()));
+        }
+
+        if (isGzipped(file) && false)
+        {
+            file = new File("./src/main/resources/playerdata-new.dat");
+            // TODO: Correctly implement GZIP and co.
+            System.out.printf("The file %s was compressed with gzip, compressing...%n", file.getName());
+            fileStream = new GZIPOutputStream(new FileOutputStream(file));
+        } else
+        {
+            // TODO: Implement zlib (aka DEFLATE) check and decompression
+            fileStream = new FileOutputStream(file);
+        }
+        return new DataOutputStream(fileStream);
     }
 
     /**
