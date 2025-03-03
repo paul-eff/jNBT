@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import java.util.Arrays;
+
 /**
  * Class representing a NBT byte array tag.
  *
@@ -34,5 +36,11 @@ public class Tag_Byte_Array extends Basic_Tag<byte[]>
     public Tag_Byte_Array(String name, byte[] data)
     {
         super(NBTTags.Tag_Byte_Array.getId(), name, data);
+    }
+
+    @Override
+    public String toString()
+    {
+        return NBTTags.getById(getId()).getName() + "(\"" + getName() + "\"): " + Arrays.toString(getData());
     }
 }

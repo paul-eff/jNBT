@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import java.util.Arrays;
+
 /**
  * Class representing a NBT int array tag.
  *
@@ -34,5 +36,11 @@ public class Tag_Int_Array extends Basic_Tag<int[]>
     public Tag_Int_Array(String name, int[] data)
     {
         super(NBTTags.Tag_Int_Array.getId(), name, data);
+    }
+
+    @Override
+    public String toString()
+    {
+        return NBTTags.getById(getId()).getName() + "(\"" + getName() + "\"): " + Arrays.toString(getData());
     }
 }

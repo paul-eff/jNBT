@@ -1,5 +1,7 @@
 package me.paulferlitz.NBTTags;
 
+import java.util.Arrays;
+
 /**
  * Class representing a NBT long array tag.
  *
@@ -34,5 +36,11 @@ public class Tag_Long_Array extends Basic_Tag<long[]>
     public Tag_Long_Array(String name, long[] data)
     {
         super(NBTTags.Tag_Long_Array.getId(), name, data);
+    }
+
+    @Override
+    public String toString()
+    {
+        return NBTTags.getById(getId()).getName() + "(\"" + getName() + "\"): " + Arrays.toString(getData());
     }
 }
