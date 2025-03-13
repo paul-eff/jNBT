@@ -8,7 +8,7 @@ Currently there aren't any sophisticated libraries to interact with Minecraft NB
 And those that are around haven't been updated in a while. 
 With this library I want to provide an up to date and efficient (and also overengineered) way to interact with NBT files.
 
-This NBT library will in the near future be the base of my Anvil library (WIP) and the [MinecraftOfflineOnlineConverter](https://github.com/paul-eff/MinecraftOfflineOnlineConverter).
+This NBT library is part of [jMCX](https://github.com/paul-eff/jMCX) and the [MinecraftOfflineOnlineConverter](https://github.com/paul-eff/MinecraftOfflineOnlineConverter).
 
 ### Supports
 - All tags present in the current [NBT specification](https://minecraft.wiki/w/NBT_format)
@@ -19,7 +19,6 @@ This NBT library will in the near future be the base of my Anvil library (WIP) a
 - Extract read/write methods to each tag (internal stuff, nothing functional)
 ### Future
 - Bedrock Minecraft NBT files
-- Anvil (other repository)
 - SNBT support (maybe)
 - GUI (BIG maybe!)
 
