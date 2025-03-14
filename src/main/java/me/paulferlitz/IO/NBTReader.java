@@ -2,6 +2,7 @@ package me.paulferlitz.IO;
 
 import me.paulferlitz.NBTTags.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +51,19 @@ public class NBTReader
      */
     public void close() throws IOException {
         stream.close();
+    }
+
+    /**
+     * Converts a byte array into a DataInputStream (to be read by NBTReader).
+     * @param chunkData The byte array to convert.
+     * @return The DataInputStream.
+     */
+    public static DataInputStream byteArrayToDataInputStream(byte[] chunkData) {
+        // Convert the byte array into a ByteArrayInputStream
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(chunkData);
+
+        // Wrap the ByteArrayInputStream with a DataInputStream
+        return new DataInputStream(byteArrayInputStream);
     }
 
     /**
@@ -119,7 +133,7 @@ public class NBTReader
                     throw new IOException("Tag_End found before the first Tag_Compound was started. Invalid!");
                 return new Tag_End();
             case Tag_Byte:
-                return new Tag_Double(name, stream.readByte());
+                return new Tag_Byte(name, stream.readByte());
             case Tag_Short:
                 return new Tag_Short(name, stream.readShort());
             case Tag_Int:
