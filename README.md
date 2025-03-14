@@ -13,9 +13,9 @@ This NBT library is part of [jMCX](https://github.com/paul-eff/jMCX) and the [Mi
 ### Supports
 - All tags present in the current [NBT specification](https://minecraft.wiki/w/NBT_format)
 - All common operations: reading, editing (add, remove, replace, update) and writing
-- Compression types: GZIP and NONE
+- Compression types: GZIP, ZLIB and NONE
 ### WIP
-- Compression types: ZLIB and LZ4
+- Compression types: LZ4
 - Extract read/write methods to each tag (internal stuff, nothing functional)
 ### Future
 - Bedrock Minecraft NBT files

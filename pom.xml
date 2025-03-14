@@ -6,7 +6,7 @@
 
     <groupId>me.paulferlitz</groupId>
     <artifactId>jNBT</artifactId>
-    <version>0.2</version>
+    <version>1.0</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

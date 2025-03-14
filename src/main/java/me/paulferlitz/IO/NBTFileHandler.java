@@ -2,8 +2,10 @@ package me.paulferlitz.IO;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.InflaterInputStream;
 
 /**
  * Class for managing the loading and conversion of a given NBT file to the desired stream.
@@ -37,6 +39,10 @@ public class NBTFileHandler
             case GZIP:
                 System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.GZIP.getName());
                 fileStream = new GZIPInputStream(new FileInputStream(file));
+                break;
+            case ZLIB:
+                System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.ZLIB.getName());
+                fileStream = new InflaterInputStream(new FileInputStream(file));
                 break;
             default:
                 throw new IllegalArgumentException(String.format("The file %s is compressed with an unsupported format!", file.getName()));
@@ -73,6 +79,10 @@ public class NBTFileHandler
             case GZIP:
                 System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.GZIP.getName());
                 fileStream = new GZIPOutputStream(new FileOutputStream(file));
+                break;
+            case ZLIB:
+                System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.ZLIB.getName());
+                fileStream = new DeflaterOutputStream(new FileOutputStream(file));
                 break;
             default:
                 throw new IllegalArgumentException(String.format("The compression type %s is not supported!", compression));
@@ -123,7 +133,17 @@ public class NBTFileHandler
      */
     private static boolean isZlibed(File file)
     {
-        return false;
+        try
+        {
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            int magic = raf.read() & 0xff | (raf.read() << 8) & 0xff00;
+            raf.close();
+            return (magic & 0x0f00) == 0x0800; // Check for zlib header
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
