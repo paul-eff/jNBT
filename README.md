@@ -1,6 +1,6 @@
-# jNBT v1.0
+# jNBT v1.1
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0-blue">
+  <img src="https://img.shields.io/badge/version-1.1-blue">
   <img src="https://img.shields.io/badge/minecraft-1.21.4 (Java)-green">
   <img src="https://img.shields.io/badge/java-21-red">
 </p>

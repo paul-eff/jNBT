@@ -27,7 +27,7 @@ public class Tag_End extends Basic_Tag<Object>
     }
 
     /**
-     * Create a double tag with name and data.
+     * Create an end tag with name and data.
      * WARNING: This constructor is here only for future proofing. As per NBT spec this tag should not have a name nor data.
      *
      * @param name Name of the tag.

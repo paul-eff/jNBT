@@ -107,7 +107,7 @@ public class NBTReader
 
         if (type != NBTTags.Tag_End.getId())
         {
-            int nameLength = stream.readShort();
+            int nameLength = stream.readUnsignedShort();
             byte[] byteBuffer = new byte[nameLength];
             stream.readFully(byteBuffer);
             name = new String(byteBuffer, StandardCharsets.UTF_8);
@@ -148,7 +148,7 @@ public class NBTReader
                 int arrayLength = stream.readInt();
                 byte[] byteBuffer = new byte[arrayLength];
                 stream.readFully(byteBuffer);
-                return new Tag_Byte_Array(name, stream.readNBytes(arrayLength));
+                return new Tag_Byte_Array(name, byteBuffer);
             case Tag_String:
                 arrayLength = stream.readUnsignedShort();
                 byteBuffer = new byte[arrayLength];
