@@ -48,13 +48,13 @@ public class Tag_Compound extends Collection_Tag
     {
         StringBuilder sb = new StringBuilder();
         sb.append(NBTTags.Tag_Compound.getName());
-        sb.append("(name=" + getName() + ", size=" + getData().size() + "):");
+        sb.append("(name=").append(getName()).append(", size=").append(getData().size()).append("):");
         for (Tag<?> tag : getData())
         {
-            sb.append("\n  " + tag.toString().replace("\n", "\n  "));
+            sb.append("\n  ").append(tag.toString().replace("\n", "\n  "));
         }
-        sb.append("\n" + NBTTags.Tag_End.getName());
-        sb.append("(name=" + getName() + ")");
+        sb.append("\n").append(NBTTags.Tag_End.getName());
+        sb.append("(name=").append(getName()).append(")");
         return sb.toString();
     }
 }

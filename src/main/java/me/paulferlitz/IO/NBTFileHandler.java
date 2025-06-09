@@ -112,15 +112,13 @@ public class NBTFileHandler
      */
     private static boolean isGzipped(File file)
     {
-        try
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
         {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            if (raf.length() < 2) return false;
             int magic = raf.read() & 0xff | (raf.read() << 8) & 0xff00;
-            raf.close();
             return magic == GZIPInputStream.GZIP_MAGIC;
         } catch (Exception e)
         {
-            e.printStackTrace();
             return false;
         }
     }
@@ -133,15 +131,13 @@ public class NBTFileHandler
      */
     private static boolean isZlibed(File file)
     {
-        try
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
         {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            if (raf.length() < 2) return false;
             int magic = raf.read() & 0xff | (raf.read() << 8) & 0xff00;
-            raf.close();
             return (magic & 0x0f00) == 0x0800; // Check for zlib header
         } catch (Exception e)
         {
-            e.printStackTrace();
             return false;
         }
     }

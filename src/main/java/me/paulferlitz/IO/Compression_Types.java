@@ -11,6 +11,16 @@ public enum Compression_Types
 
     private final int id;
     private final String compressionType;
+    
+    private static final Compression_Types[] ID_LOOKUP = new Compression_Types[4];
+    
+    static
+    {
+        for (Compression_Types type : values())
+        {
+            ID_LOOKUP[type.id] = type;
+        }
+    }
 
     /**
      * Created a compression type.
@@ -52,10 +62,6 @@ public enum Compression_Types
      */
     public static Compression_Types getById(int id)
     {
-        for (Compression_Types type : Compression_Types.values())
-        {
-            if (type.getId() == id) return type;
-        }
-        return null;
+        return (id >= 0 && id < ID_LOOKUP.length) ? ID_LOOKUP[id] : null;
     }
 }

@@ -18,6 +18,16 @@ public enum NBTTags
 
     private final int id;
     private final String name;
+    
+    private static final NBTTags[] ID_LOOKUP = new NBTTags[13];
+    
+    static
+    {
+        for (NBTTags tag : values())
+        {
+            ID_LOOKUP[tag.id] = tag;
+        }
+    }
 
     /**
      * Created a NBT tag.
@@ -59,10 +69,6 @@ public enum NBTTags
      */
     public static NBTTags getById(int id)
     {
-        for (NBTTags tag : NBTTags.values())
-        {
-            if (tag.id == id) return tag;
-        }
-        return null;
+        return (id >= 0 && id < ID_LOOKUP.length) ? ID_LOOKUP[id] : null;
     }
 }

@@ -155,16 +155,16 @@ public class NBTReader
                 stream.readFully(byteBuffer);
                 return new Tag_String(name, new String(byteBuffer, StandardCharsets.UTF_8));
             case Tag_List:
-                ArrayList<Tag<?>> tagList = new ArrayList<>();
                 int listType = stream.readByte();
                 arrayLength = stream.readInt();
+                ArrayList<Tag<?>> tagList = new ArrayList<>(arrayLength);
                 for (int i = 0; i < arrayLength; i++)
                 {
                     tagList.add(readNBTPayload(listType, "", depth + 1));
                 }
                 return new Tag_List(name, listType, tagList);
             case Tag_Compound:
-                tagList = new ArrayList<>();
+                tagList = new ArrayList<>(16);
                 while (true)
                 {
                     Tag tag = readNBTTag(depth + 1);

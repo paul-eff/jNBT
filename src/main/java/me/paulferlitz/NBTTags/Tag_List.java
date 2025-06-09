@@ -63,13 +63,13 @@ public class Tag_List extends Collection_Tag
     {
         StringBuilder sb = new StringBuilder();
         sb.append(NBTTags.Tag_List.getName());
-        sb.append("(name=" + getName() + ", type=" + getListTypeID() + ", size=" + getData().size() + "):");
+        sb.append("(name=").append(getName()).append(", type=").append(getListTypeID()).append(", size=").append(getData().size()).append("):");
         for (Tag<?> tag : getData())
         {
-            sb.append("\n  " + tag.toString().replace("\n", "\n  "));
+            sb.append("\n  ").append(tag.toString().replace("\n", "\n  "));
         }
-        sb.append("\n" + NBTTags.Tag_End.getName());
-        sb.append("(name=" + getName() + ")");
+        sb.append("\n").append(NBTTags.Tag_End.getName());
+        sb.append("(name=").append(getName()).append(")");
         return sb.toString();
     }
 }

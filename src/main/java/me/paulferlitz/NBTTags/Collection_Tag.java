@@ -47,8 +47,13 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      *
      * @param tag Tag to add.
      */
-    public void addTag(Tag<?> tag) {
-        addAllTags(List.of(tag));
+    public void addTag(Tag<?> tag)
+    {
+        if (this instanceof Tag_List list && tag.getId() != list.getListTypeID())
+        {
+            throw new IllegalArgumentException(String.format("Mixed datatypes! Expected %d but got %d", list.getListTypeID(), tag.getId()));
+        }
+        this.getData().add(tag);
     }
 
     /**
