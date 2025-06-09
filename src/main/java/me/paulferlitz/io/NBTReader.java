@@ -19,7 +19,7 @@ import java.util.ArrayList;
  */
 public class NBTReader implements INBTReader
 {
-    private final DataInputStream stream;
+    private final PositionTrackingDataInputStream stream;
 
     /**
      * Create a reader by passing it the target NBT file.
@@ -30,10 +30,12 @@ public class NBTReader implements INBTReader
     {
         try
         {
-            this.stream = NBTFileHandler.loadNBTToReader(nbtFile);
+            DataInputStream baseStream = NBTFileHandler.loadNBTToReader(nbtFile);
+            this.stream = new PositionTrackingDataInputStream(baseStream);
         } catch (IOException e)
         {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to initialize NBT reader for file: " + 
+                nbtFile.getAbsolutePath(), e);
         }
     }
 
@@ -44,7 +46,7 @@ public class NBTReader implements INBTReader
      */
     public NBTReader(DataInputStream dis)
     {
-        this.stream = dis;
+        this.stream = new PositionTrackingDataInputStream(dis);
     }
 
     /**
@@ -57,65 +59,80 @@ public class NBTReader implements INBTReader
     }
 
     /**
-     * Converts a byte array into a DataInputStream (to be read by NBTReader).
-     * @param chunkData The byte array to convert.
-     * @return The DataInputStream.
+     * Converts a byte array into a position-tracking DataInputStream for NBT reading.
+     * 
+     * @param chunkData The byte array to convert
+     * @return A {@link PositionTrackingDataInputStream} for enhanced error reporting
      */
-    public static DataInputStream byteArrayToDataInputStream(byte[] chunkData) {
-        // Convert the byte array into a ByteArrayInputStream
+    public static PositionTrackingDataInputStream byteArrayToDataInputStream(byte[] chunkData) {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(chunkData);
-
-        // Wrap the ByteArrayInputStream with a DataInputStream
-        return new DataInputStream(byteArrayInputStream);
+        return new PositionTrackingDataInputStream(byteArrayInputStream);
     }
 
     /**
-     * Method to parse the set NBT file.
-     * Executing this method will close the reader.
+     * Parses the NBT file and returns the root compound tag.
+     * This method automatically closes the reader when parsing is complete or if an error occurs.
      *
-     * @return The root NBT tag, holding the entire file, to then interact with.
-     * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
+     * @return The root {@link ICompoundTag} containing the complete NBT structure
+     * @throws IOException If the file cannot be read, is corrupted, or doesn't follow NBT specification
      */
     public ICompoundTag read() throws IOException
     {
-        /*
-         * As per the NBT specs (https://minecraft.wiki/w/NBT_format), every NBT file must be a compound tag at the root.
-         * If you feel the urge to ask me to implement the ability to parse non-standard NBT files I kindly ask you to do it yourself >:(.
-         */
-        Tag_Compound tag;
         try
         {
-            tag = (Tag_Compound) readNBTTag(0);
+            Tag_Compound tag = (Tag_Compound) readNBTTag(0);
+            return tag;
         } catch (IOException e)
         {
-            throw new RuntimeException(e);
+            throw e; // Re-throw IOException directly
+        } catch (Exception e)
+        {
+            throw new IOException("Failed to parse NBT data: " + e.getMessage(), e);
         } finally
         {
             this.close();
         }
-        return tag;
     }
 
     /**
-     * Method to read an entire NBT tag.
+     * Reads an entire NBT tag including its name header.
      *
-     * @param depth Parameter, lateron increment by recursion, to keep track of current depth in NBT file.
-     * @return The tag read at the current position in the {@link NBTReader#stream}.
-     * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
+     * @param depth Current nesting depth for validation and error reporting
+     * @return The complete tag read from the stream
+     * @throws IOException If tag structure is invalid or stream is corrupted
      */
     private Tag readNBTTag(int depth) throws IOException
     {
-        int type = stream.readByte();
-        String name = "";
-
-        if (type != NBTTags.Tag_End.getId())
+        try
         {
-            int nameLength = stream.readUnsignedShort();
-            byte[] byteBuffer = new byte[nameLength];
-            stream.readFully(byteBuffer);
-            name = new String(byteBuffer, StandardCharsets.UTF_8);
+            int type = stream.readByte();
+            String name = "";
+
+            if (type != NBTTags.Tag_End.getId())
+            {
+                int nameLength = stream.readUnsignedShort();
+                if (nameLength < 0 || nameLength > 32767) // Reasonable limit for NBT names
+                {
+                    throw new IOException(stream.createContextualError(
+                        String.format("Invalid tag name length: %d", nameLength)));
+                }
+                
+                byte[] byteBuffer = new byte[nameLength];
+                stream.readFully(byteBuffer);
+                name = new String(byteBuffer, StandardCharsets.UTF_8);
+            }
+            
+            stream.setCurrentContext(depth, name, type);
+            return readNBTPayload(type, name, depth);
         }
-        return readNBTPayload(type, name, depth);
+        catch (IOException e)
+        {
+            if (e.getMessage().contains("[Position:")) 
+            {
+                throw e; // Already has context
+            }
+            throw new IOException(stream.createContextualError("Failed to read NBT tag: " + e.getMessage()), e);
+        }
     }
 
     /**
@@ -129,11 +146,21 @@ public class NBTReader implements INBTReader
      */
     private Tag readNBTPayload(int type, String name, int depth) throws IOException
     {
-        switch (NBTTags.getById(type))
+        NBTTags tagType = NBTTags.getById(type);
+        if (tagType == null)
+        {
+            throw new IOException(stream.createContextualError(
+                String.format("Unknown tag type: %d", type)));
+        }
+
+        switch (tagType)
         {
             case Tag_End:
                 if (depth == 0)
-                    throw new IOException("Tag_End found before the first Tag_Compound was started. Invalid!");
+                {
+                    throw new IOException(stream.createContextualError(
+                        "Unexpected Tag_End at root level - NBT files must start with a compound tag"));
+                }
                 return new Tag_End();
             case Tag_Byte:
                 return new Tag_Byte(name, stream.readByte());
@@ -149,18 +176,38 @@ public class NBTReader implements INBTReader
                 return new Tag_Double(name, stream.readDouble());
             case Tag_Byte_Array:
                 int arrayLength = stream.readInt();
+                if (arrayLength < 0 || arrayLength > 100_000_000) // 100MB limit
+                {
+                    throw new IOException(stream.createContextualError(
+                        String.format("Invalid byte array length: %d", arrayLength)));
+                }
                 byte[] byteBuffer = new byte[arrayLength];
                 stream.readFully(byteBuffer);
                 return new Tag_Byte_Array(name, byteBuffer);
             case Tag_String:
                 arrayLength = stream.readUnsignedShort();
+                if (arrayLength > 65535) // Max string length in NBT
+                {
+                    throw new IOException(stream.createContextualError(
+                        String.format("Invalid string length: %d", arrayLength)));
+                }
                 byteBuffer = new byte[arrayLength];
                 stream.readFully(byteBuffer);
                 return new Tag_String(name, new String(byteBuffer, StandardCharsets.UTF_8));
             case Tag_List:
                 int listType = stream.readByte();
+                if (NBTTags.getById(listType) == null && listType != 0) // 0 is valid for empty lists
+                {
+                    throw new IOException(stream.createContextualError(
+                        String.format("Invalid list element type: %d", listType)));
+                }
                 arrayLength = stream.readInt();
-                ArrayList<Tag<?>> tagList = new ArrayList<>(arrayLength);
+                if (arrayLength < 0 || arrayLength > 10_000_000) // 10M elements max
+                {
+                    throw new IOException(stream.createContextualError(
+                        String.format("Invalid list length: %d", arrayLength)));
+                }
+                ArrayList<Tag<?>> tagList = new ArrayList<>(Math.min(arrayLength, 1000)); // Pre-size reasonably
                 for (int i = 0; i < arrayLength; i++)
                 {
                     tagList.add(readNBTPayload(listType, "", depth + 1));

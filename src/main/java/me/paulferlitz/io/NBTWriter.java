@@ -98,7 +98,10 @@ public class NBTWriter implements INBTWriter
             writeNBTTag(root);
         } catch (IOException e)
         {
-            throw new RuntimeException(e);
+            throw e; // Re-throw IOException directly
+        } catch (Exception e)
+        {
+            throw new IOException("Failed to write NBT data: " + e.getMessage(), e);
         } finally
         {
             this.close();
