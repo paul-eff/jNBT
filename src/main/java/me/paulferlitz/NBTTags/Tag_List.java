@@ -52,6 +52,65 @@ public class Tag_List extends Collection_Tag
     {
         return listTypeID;
     }
+    
+    /**
+     * Convenience method for adding a String tag to this list with fluent API.
+     * Only works if this list is of type Tag_String.
+     *
+     * @param name The name of the tag.
+     * @param value The string value.
+     * @return This list tag for method chaining.
+     * @throws IllegalArgumentException if list type doesn't match Tag_String.
+     */
+    public Tag_List addString(String name, String value)
+    {
+        this.addTag(new Tag_String(name, value));
+        return this;
+    }
+    
+    /**
+     * Convenience method for adding an Int tag to this list with fluent API.
+     * Only works if this list is of type Tag_Int.
+     *
+     * @param name The name of the tag.
+     * @param value The integer value.
+     * @return This list tag for method chaining.
+     * @throws IllegalArgumentException if list type doesn't match Tag_Int.
+     */
+    public Tag_List addInt(String name, int value)
+    {
+        this.addTag(new Tag_Int(name, value));
+        return this;
+    }
+    
+    /**
+     * Convenience method for adding a Double tag to this list with fluent API.
+     * Only works if this list is of type Tag_Double.
+     *
+     * @param name The name of the tag.
+     * @param value The double value.
+     * @return This list tag for method chaining.
+     * @throws IllegalArgumentException if list type doesn't match Tag_Double.
+     */
+    public Tag_List addDouble(String name, double value)
+    {
+        this.addTag(new Tag_Double(name, value));
+        return this;
+    }
+    
+    /**
+     * Convenience method for adding a Compound tag to this list with fluent API.
+     * Only works if this list is of type Tag_Compound.
+     *
+     * @param name The name of the tag.
+     * @return This list tag for method chaining.
+     * @throws IllegalArgumentException if list type doesn't match Tag_Compound.
+     */
+    public Tag_List addCompound(String name)
+    {
+        this.addTag(new Tag_Compound(name));
+        return this;
+    }
 
     /**
      * Method for generating a formatable string representation of the tag.

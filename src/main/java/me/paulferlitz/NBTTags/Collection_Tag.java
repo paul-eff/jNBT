@@ -44,24 +44,46 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      */
     /**
      * Method for adding another tag to the current tag.
+     * 
+     * <p>Example usage with method chaining:</p>
+     * <pre>{@code
+     * Tag_Compound compound = new Tag_Compound("root");
+     * compound.addTag(new Tag_String("name", "Steve"))
+     *         .addTag(new Tag_Int("level", 50))
+     *         .addTag(new Tag_Double("health", 20.0));
+     * }</pre>
      *
      * @param tag Tag to add.
+     * @return This collection tag for method chaining.
      */
-    public void addTag(Tag<?> tag)
+    public Collection_Tag addTag(Tag<?> tag)
     {
         if (this instanceof Tag_List list && tag.getId() != list.getListTypeID())
         {
             throw new IllegalArgumentException(String.format("Mixed datatypes! Expected %d but got %d", list.getListTypeID(), tag.getId()));
         }
         this.getData().add(tag);
+        return this;
     }
 
     /**
      * Method for adding more tags to the current tag.
+     * 
+     * <p>Example usage with method chaining:</p>
+     * <pre>{@code
+     * List<Tag<?>> playerStats = Arrays.asList(
+     *     new Tag_Int("strength", 15),
+     *     new Tag_Int("dexterity", 12)
+     * );
+     * compound.addAllTags(playerStats)
+     *         .addTag(new Tag_String("class", "warrior"));
+     * }</pre>
      *
      * @param tags List of tags to add.
+     * @return This collection tag for method chaining.
      */
-    public void addAllTags(List<Tag<?>> tags) {
+    public Collection_Tag addAllTags(List<Tag<?>> tags)
+    {
         if (this instanceof Tag_List list)
         {
             for (Tag<?> tag : tags) {
@@ -71,6 +93,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
             }
         }
         this.getData().addAll(tags);
+        return this;
     }
 
     /*
@@ -175,9 +198,12 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      * Method for removing only the first tag found with the given name.
      *
      * @param name Name of the tag to remove.
+     * @return This collection tag for method chaining.
      */
-    public void removeTagByName(String name) {
+    public Collection_Tag removeTagByName(String name)
+    {
         removeTagsByName(name, false);
+        return this;
     }
 
     /**
@@ -217,9 +243,12 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      * Method for removing only the first tag found which matches the given tag.
      *
      * @param targetTag The tag to remove.
+     * @return This collection tag for method chaining.
      */
-    public void removeTag(Tag<?> targetTag) {
+    public Collection_Tag removeTag(Tag<?> targetTag)
+    {
         removeTags(targetTag, false);
+        return this;
     }
 
     /**
