@@ -1,7 +1,7 @@
-# jNBT v1.1
+# jNBT v1.3
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.1-blue">
-  <img src="https://img.shields.io/badge/minecraft-1.21.4 (Java)-green">
+  <img src="https://img.shields.io/badge/version-1.3-blue">
+  <img src="https://img.shields.io/badge/minecraft-1.21.5 (Java)-green">
   <img src="https://img.shields.io/badge/java-21-red">
 </p>
 Currently there aren't any sophisticated libraries to interact with Minecraft NBT files in Java (read, edit and write). 

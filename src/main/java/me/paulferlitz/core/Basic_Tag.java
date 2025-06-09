@@ -1,4 +1,4 @@
-package me.paulferlitz.NBTTags;
+package me.paulferlitz.core;
 
 public class Basic_Tag<T> extends Tag<T>
 {

@@ -1,9 +1,10 @@
-package me.paulferlitz.IO;
+package me.paulferlitz.io;
 
-import me.paulferlitz.NBTTags.NBTTags;
-import me.paulferlitz.NBTTags.Tag;
-import me.paulferlitz.NBTTags.Tag_Compound;
-import me.paulferlitz.NBTTags.Tag_List;
+import me.paulferlitz.api.ICompoundTag;
+import me.paulferlitz.api.ITag;
+import me.paulferlitz.api.IListTag;
+import me.paulferlitz.api.INBTWriter;
+import me.paulferlitz.util.NBTTags;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
  *
  * @author Paul Ferlitz
  */
-public class NBTWriter
+public class NBTWriter implements INBTWriter
 {
     private final DataOutputStream stream;
 
@@ -79,19 +80,19 @@ public class NBTWriter
     }
 
     /**
-     * Method to write a NBT compound tag to file.
-     * Executing this method will close the writer.
+     * Writes the compound tag structure to file and closes the writer.
+     * The NBT specification requires compound tags as file roots, so this method enforces that constraint.
      *
-     * @param root The root NBT tag, holding the entire file, to be written to the file.
-     * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
+     * @param root The root {@link ICompoundTag} containing the complete NBT structure to write
+     * @throws IOException If an error occurs during file writing or if the data is invalid
+     * @throws IllegalArgumentException If root is null
      */
-    public void write(Tag<?> root) throws IOException
+    public void write(ICompoundTag root) throws IOException
     {
-        /*
-         * As per the NBT specs (https://minecraft.wiki/w/NBT_format), every NBT file must be a compound tag at the root.
-         * If you feel the urge to ask me to implement the ability to write non-standard NBT files I kindly ask you to do it yourself >:(.
-         */
-        if (!(root instanceof Tag_Compound)) throw new IOException("Root tag must always be a compound tag if written to file!");
+        if (root == null) 
+        {
+            throw new IllegalArgumentException("Root compound tag cannot be null");
+        }
         try
         {
             writeNBTTag(root);
@@ -104,7 +105,7 @@ public class NBTWriter
         }
     }
 
-    private void writeNBTTag(Tag<?> tag) throws IOException {
+    private void writeNBTTag(ITag<?> tag) throws IOException {
         String name = tag.getName();
         // TODO: Extract charsets to main location
         byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
@@ -116,7 +117,7 @@ public class NBTWriter
         writeNBTPayload(tag);
     }
 
-    private void writeNBTPayload(Tag<?> tag) throws IOException {
+    private void writeNBTPayload(ITag<?> tag) throws IOException {
         switch(NBTTags.getById(tag.getId())) {
             case NBTTags.Tag_End:
                 // Do nothing! Handled by compound.
@@ -150,17 +151,17 @@ public class NBTWriter
                 stream.write(bytes);
                 break;
             case NBTTags.Tag_List:
-                ArrayList<Tag<?>> listTags = (ArrayList<Tag<?>>) tag.getData();
+                ArrayList<ITag<?>> listTags = (ArrayList<ITag<?>>) tag.getData();
                 int size = listTags.size();
 
-                stream.writeByte(((Tag_List) tag).getListTypeID());
+                stream.writeByte(((IListTag) tag).getListTypeID());
                 stream.writeInt(size);
                 for(int i = 0; i < size; i++) {
                     writeNBTPayload(listTags.get(i));
                 }
                 break;
             case NBTTags.Tag_Compound:
-                for(Tag<?> compTag : (ArrayList<Tag<?>>) tag.getData()) {
+                for(ITag<?> compTag : (ArrayList<ITag<?>>) tag.getData()) {
                     writeNBTTag(compTag);
                 }
                 // Simulate Tag_End

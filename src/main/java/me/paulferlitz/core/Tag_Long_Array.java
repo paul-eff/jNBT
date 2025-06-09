@@ -1,6 +1,7 @@
-package me.paulferlitz.NBTTags;
+package me.paulferlitz.core;
 
 import java.util.Arrays;
+import me.paulferlitz.util.NBTTags;
 
 /**
  * Class representing a NBT long array tag.

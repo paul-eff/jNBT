@@ -1,4 +1,6 @@
-package me.paulferlitz.NBTTags;
+package me.paulferlitz.core;
+
+import me.paulferlitz.util.NBTTags;
 
 /**
  * Class representing a NBT long tag.

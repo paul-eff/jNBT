@@ -1,4 +1,4 @@
-package me.paulferlitz.IO;
+package me.paulferlitz.io;
 
 import java.io.*;
 import java.nio.file.Files;

@@ -1,6 +1,9 @@
-package me.paulferlitz.IO;
+package me.paulferlitz.io;
 
-import me.paulferlitz.NBTTags.*;
+import me.paulferlitz.api.ICompoundTag;
+import me.paulferlitz.api.INBTReader;
+import me.paulferlitz.core.*;
+import me.paulferlitz.util.NBTTags;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -14,7 +17,7 @@ import java.util.ArrayList;
  *
  * @author Paul Ferlitz
  */
-public class NBTReader
+public class NBTReader implements INBTReader
 {
     private final DataInputStream stream;
 
@@ -73,7 +76,7 @@ public class NBTReader
      * @return The root NBT tag, holding the entire file, to then interact with.
      * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
      */
-    public Tag_Compound read() throws IOException
+    public ICompoundTag read() throws IOException
     {
         /*
          * As per the NBT specs (https://minecraft.wiki/w/NBT_format), every NBT file must be a compound tag at the root.
