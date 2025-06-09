@@ -2,6 +2,8 @@ package me.paulferlitz.core;
 
 import java.util.ArrayList;
 import me.paulferlitz.api.ICompoundTag;
+import me.paulferlitz.api.ITag;
+import me.paulferlitz.api.IListTag;
 import me.paulferlitz.util.NBTTags;
 
 /**
@@ -155,6 +157,82 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public boolean hasTag(String tagName) {
         return getTagByName(tagName) != null;
+    }
+
+    /*
+     * ========== CONVENIENCE GETTERS (REDUCE CASTING) ==========
+     */
+
+    @Override
+    public ITag<?> getTag(String name)
+    {
+        return getTagByName(name);
+    }
+
+    @Override
+    public String getString(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_String)
+        {
+            return (String) tag.getData();
+        }
+        return null;
+    }
+
+    @Override
+    public int getInt(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Int)
+        {
+            return (Integer) tag.getData();
+        }
+        return 0;
+    }
+
+    @Override
+    public double getDouble(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Double)
+        {
+            return (Double) tag.getData();
+        }
+        return 0.0;
+    }
+
+    @Override
+    public byte getByte(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Byte)
+        {
+            return (Byte) tag.getData();
+        }
+        return 0;
+    }
+
+    @Override
+    public ICompoundTag getCompound(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Compound)
+        {
+            return (ICompoundTag) tag;
+        }
+        return null;
+    }
+
+    @Override
+    public IListTag getList(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_List)
+        {
+            return (IListTag) tag;
+        }
+        return null;
     }
 
     /**

@@ -3,10 +3,12 @@ package me.paulferlitz.api;
 import me.paulferlitz.io.Compression_Types;
 import me.paulferlitz.io.NBTReader;
 import me.paulferlitz.io.NBTWriter;
+import me.paulferlitz.io.NBTFileHandler;
 
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * Factory for creating NBT file I/O handlers with automatic format detection.
@@ -78,5 +80,90 @@ public class NBTFileFactory
     public static INBTWriter createWriter(File nbtFile, Compression_Types compression)
     {
         return new NBTWriter(nbtFile, compression);
+    }
+
+    /*
+     * ========== CONVENIENCE METHODS FOR COMMON OPERATIONS ==========
+     */
+
+    /**
+     * Reads an NBT file completely and returns the root compound tag.
+     * Automatically handles compression detection and resource cleanup.
+     *
+     * @param nbtFile The {@link java.io.File} to read
+     * @return The root {@link ICompoundTag} containing all NBT data
+     * @throws IOException If the file cannot be read or parsed
+     */
+    public static ICompoundTag readNBTFile(File nbtFile) throws IOException
+    {
+        try (INBTReader reader = createReader(nbtFile))
+        {
+            return reader.read();
+        }
+    }
+
+    /**
+     * Writes an NBT compound tag to file with automatic compression detection.
+     * If the file exists, preserves its original compression format.
+     *
+     * @param nbtFile The {@link java.io.File} to write to
+     * @param root The {@link ICompoundTag} to write
+     * @throws IOException If the file cannot be written
+     */
+    public static void writeNBTFile(File nbtFile, ICompoundTag root) throws IOException
+    {
+        try (INBTWriter writer = createWriter(nbtFile))
+        {
+            writer.write(root);
+        }
+    }
+
+    /**
+     * Writes an NBT compound tag to a new file with specified compression.
+     *
+     * @param nbtFile The {@link java.io.File} to write to
+     * @param root The {@link ICompoundTag} to write
+     * @param compression The {@link Compression_Types} to use
+     * @throws IOException If the file cannot be written
+     */
+    public static void writeNBTFile(File nbtFile, ICompoundTag root, Compression_Types compression) throws IOException
+    {
+        try (INBTWriter writer = createWriter(nbtFile, compression))
+        {
+            writer.write(root);
+        }
+    }
+
+    /**
+     * Copies an NBT file to a new location, preserving compression format.
+     *
+     * @param source The source {@link java.io.File} to copy from
+     * @param destination The destination {@link java.io.File} to copy to
+     * @throws IOException If the copy operation fails
+     */
+    public static void copyNBTFile(File source, File destination) throws IOException
+    {
+        ICompoundTag data = readNBTFile(source);
+        Compression_Types compression = NBTFileHandler.getCompressionType(source);
+        writeNBTFile(destination, data, compression);
+    }
+
+    /**
+     * Checks if a file appears to be a valid NBT file by attempting to read its header.
+     *
+     * @param nbtFile The {@link java.io.File} to validate
+     * @return {@code true} if the file appears to be valid NBT, {@code false} otherwise
+     */
+    public static boolean isValidNBTFile(File nbtFile)
+    {
+        try
+        {
+            readNBTFile(nbtFile);
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 }

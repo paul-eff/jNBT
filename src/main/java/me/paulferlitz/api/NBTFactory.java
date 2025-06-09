@@ -416,4 +416,32 @@ public class NBTFactory
     {
         return new Tag_Long_Array(name, value);
     }
+
+    /*
+     * ========== CONVENIENCE METHODS FOR QUICK CREATION ==========
+     */
+
+    /**
+     * Creates a simple NBT structure with key-value string pairs.
+     * Perfect for configuration files or simple data storage.
+     *
+     * @param rootName The name of the root compound tag
+     * @param keyValuePairs Alternating keys and values (key1, value1, key2, value2, ...)
+     * @return A {@link ICompoundTag} containing the key-value pairs
+     * @throws IllegalArgumentException If an odd number of arguments is provided
+     */
+    public static ICompoundTag createSimpleCompound(String rootName, String... keyValuePairs)
+    {
+        if (keyValuePairs.length % 2 != 0)
+        {
+            throw new IllegalArgumentException("Must provide an even number of arguments (key-value pairs)");
+        }
+
+        ICompoundTag compound = createCompound(rootName);
+        for (int i = 0; i < keyValuePairs.length; i += 2)
+        {
+            compound.addString(keyValuePairs[i], keyValuePairs[i + 1]);
+        }
+        return compound;
+    }
 }
