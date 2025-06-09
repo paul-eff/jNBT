@@ -64,8 +64,16 @@ public class NBTFileHandler
         if (Files.exists(file.toPath()))
         {
             File backupFile = new File(file.getPath() + ".bak");
-            Files.copy(file.toPath(), backupFile.toPath());
-            System.out.printf("Created backup of file %s%n", file.getName());
+            try 
+            {
+                Files.copy(file.toPath(), backupFile.toPath(), 
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                System.out.printf("Created backup of file %s -> %s%n", 
+                    file.getName(), backupFile.getName());
+            } catch (IOException e)
+            {
+                throw new IOException("Failed to create backup file: " + e.getMessage(), e);
+            }
         }
 
         OutputStream fileStream;
@@ -105,10 +113,10 @@ public class NBTFileHandler
     }
 
     /**
-     * Method to check if a file was compressed with Gzip.
+     * Checks if a file was compressed with GZIP by examining magic bytes.
      *
-     * @param file The target file.
-     * @return {@code True} if the file was compressed with Gzip.
+     * @param file The target file to check
+     * @return {@code true} if the file has GZIP magic bytes, {@code false} otherwise
      */
     private static boolean isGzipped(File file)
     {
@@ -117,17 +125,20 @@ public class NBTFileHandler
             if (raf.length() < 2) return false;
             int magic = raf.read() & 0xff | (raf.read() << 8) & 0xff00;
             return magic == GZIPInputStream.GZIP_MAGIC;
-        } catch (Exception e)
+        } catch (IOException e)
         {
+            // Log the exception but don't fail compression detection
+            System.err.printf("Warning: Could not check GZIP magic for file %s: %s%n", 
+                file.getName(), e.getMessage());
             return false;
         }
     }
 
     /**
-     * Method to check if a file was compressed with Zlib.
+     * Checks if a file was compressed with ZLIB by examining magic bytes.
      *
-     * @param file The target file.
-     * @return {@code True} if the file was compressed with Zlib.
+     * @param file The target file to check
+     * @return {@code true} if the file has ZLIB magic bytes, {@code false} otherwise
      */
     private static boolean isZlibed(File file)
     {
@@ -136,8 +147,11 @@ public class NBTFileHandler
             if (raf.length() < 2) return false;
             int magic = raf.read() & 0xff | (raf.read() << 8) & 0xff00;
             return (magic & 0x0f00) == 0x0800; // Check for zlib header
-        } catch (Exception e)
+        } catch (IOException e)
         {
+            // Log the exception but don't fail compression detection
+            System.err.printf("Warning: Could not check ZLIB magic for file %s: %s%n", 
+                file.getName(), e.getMessage());
             return false;
         }
     }

@@ -1,8 +1,10 @@
 package me.paulferlitz.examples;
 
 import me.paulferlitz.api.*;
+import me.paulferlitz.builder.*;
 import me.paulferlitz.core.*;
 import me.paulferlitz.io.*;
+import me.paulferlitz.util.NBTTags;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,56 +22,66 @@ public class Example
 
     public static void main(String[] args)
     {
-        // Actual relevant lines of code when using this yourself!
-        INBTReader reader;
-        INBTWriter writer;
         try
         {
-            // === Creating a reader ===
-            reader = NBTFileFactory.createReader(nbtFile);
+            // === IMPROVED API EXAMPLE ===
+            
+            // 1. Simple file reading with convenience method
+            ICompoundTag root = NBTFileFactory.readNBTFile(nbtFile);
+            System.out.println("Loaded NBT file: " + nbtFile.getName());
 
-            // Fetch and print the whole NBT file
-            ICompoundTag root = reader.read();
-            System.out.println(root);
+            // 2. Access data without casting (NEW!)
+            String playerName = root.getString("Name");
+            int playerLevel = root.getInt("Level");
+            IListTag inventory = root.getList("Inventory");
+            
+            System.out.printf("Player: %s (Level %d)%n", playerName, playerLevel);
 
-            // Fetch and print the "Inventory" list
-            // Currently it doesn't matter if you use Tag or Tag<?>. The latter generates less warning though.
-            ITag<?> inventory = ((Tag_Compound) root).getTagByName("Inventory");
-            System.out.println(inventory);
+            // 3. Create new structures using builders with I/O integration
+            CompoundBuilder playerBuilder = NBTBuilder.compound("Player")
+                .addString("Name", "Steve")
+                .addInt("Level", 42)
+                .addDouble("Health", 20.0);
+            
+            // Add inventory as a separate step
+            playerBuilder.addList("Inventory", NBTTags.Tag_Compound)
+                .addCompound("item1")
+                    .addString("id", "minecraft:diamond_sword")
+                    .addInt("Count", 1)
+                .end()
+            .end();
 
-            // Add a new item to the "Inventory" list
-            ICompoundTag diamondHoe = NBTFactory.createCompound();
-            diamondHoe.addInt("count", 1);
-            diamondHoe.addDouble("Slot", 1.0);
-            diamondHoe.addString("id", "minecraft:diamond_hoe");
+            // 4. Build and save directly to file (NEW!)
+            File newPlayerFile = new File("./new_player.dat");
+            playerBuilder.buildAndSave(newPlayerFile, Compression_Types.GZIP);
+            System.out.println("Created new player file: " + newPlayerFile.getName());
 
-            // Remove an item from the "Inventory" list - accessing the inventory's data directly (getData array)
-            ((Collection_Tag) inventory).getData().remove(1);
-            // Remove an item from the "Inventory" list - accessing the inventory's data directly (iterator)
-            Iterator<Tag<?>> iterator = ((Collection_Tag) inventory).getData().iterator();
-            while (iterator.hasNext()) {
-                Tag<?> tag = iterator.next();
-                if (tag instanceof Tag_Compound invItem) {
-                    if (invItem.getTagByName("id").getData().equals("minecraft:diamond_hoe")) {
-                        iterator.remove();
-                        break;
-                    }
-                }
+            // 5. Load existing file and modify it (NEW!)
+            CompoundBuilder modifiedPlayer = NBTBuilder.fromFile(newPlayerFile)
+                .addString("LastLogin", "2024-01-01")
+                .addInt("Experience", 1000);
+
+            // 6. Save modifications
+            modifiedPlayer.buildAndSave(newPlayerFile);
+            System.out.println("Updated player file with new data");
+
+            // 7. Quick validation
+            if (NBTFileFactory.isValidNBTFile(newPlayerFile))
+            {
+                System.out.println("File validation: PASSED");
             }
-            // Remove an element ("Inventory") from the root - using built in remover
-            ((Tag_Compound) root).removeTag(((Tag_Compound) root).getTagByName("Inventory"));
 
-            // === Creating a writer ===
-            // If you are overwriting a file, the writer will determine the compression type automatically
-            writer = NBTFileFactory.createWriter(nbtFile);
-            // In any other case you can specify the compression type
-            writer = NBTFileFactory.createWriter(nbtFile, Compression_Types.GZIP);
-
-            // Write the root back to the file
-            writer.write(root);
+            // 8. Create simple config file
+            ICompoundTag config = NBTFactory.createSimpleCompound("Config",
+                "serverName", "My Server",
+                "maxPlayers", "20",
+                "difficulty", "normal"
+            );
+            NBTFileFactory.writeNBTFile(new File("./config.dat"), config, Compression_Types.NONE);
 
         } catch (IOException e)
         {
+            System.err.println("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
