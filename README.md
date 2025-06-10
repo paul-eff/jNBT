@@ -61,6 +61,11 @@ ICompoundTag player = NBTBuilder.compound("Player")
 
 Explore the `examples/` package for comprehensive usage patterns.
 
+## 📦 Building
+```bash
+mvn clean install
+```
+
 ## ⚠️ Important Notice
 
 **Always backup your files before modification.** While thoroughly tested, data corruption is always possible with file manipulation tools.
