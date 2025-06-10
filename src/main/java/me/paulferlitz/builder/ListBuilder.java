@@ -239,9 +239,25 @@ public class ListBuilder extends NBTBuilder
 
     /**
      * Finishes this nested list and returns to the parent builder.
+     * Automatically integrates the completed list into its parent structure.
+     *
+     * <p><b>When to use {@code end()}:</b></p>
+     * <ul>
+     *   <li>Terminal operations - when finishing the current branch without further chaining</li>
+     *   <li>Simple single-level nesting where parent type is obvious</li>
+     *   <li>Variable storage patterns where builders are stored in variables</li>
+     *   <li>Legacy code compatibility</li>
+     * </ul>
+     *
+     * <p><b>Consider using type-safe alternatives:</b></p>
+     * <ul>
+     *   <li>{@link #endCompound()} - when continuing to build on a compound parent</li>
+     *   <li>{@link #endList()} - when continuing to build on a list parent</li>
+     * </ul>
      *
      * @return the parent {@link NBTBuilder}
      * @throws IllegalStateException if this is a root builder (call {@link #build()} instead)
+     * @since 1.3
      */
     @Override
     public NBTBuilder end()
@@ -255,17 +271,17 @@ public class ListBuilder extends NBTBuilder
         if (parent instanceof CompoundBuilder parentCompound)
         {
             parentCompound.getCompound().addTag(list);
+            return parentCompound;
         }
         else if (parent instanceof ListBuilder parentList)
         {
             parentList.addBuiltTag(list);
+            return parentList;
         }
         else
         {
             throw new IllegalStateException("Unknown parent builder type");
         }
-
-        return parent;
     }
 
     /*
@@ -286,6 +302,77 @@ public class ListBuilder extends NBTBuilder
                 "List type mismatch! Expected %s but list is of type %s", 
                 expectedType.getName(), listType.getName()));
         }
+    }
+
+    /**
+     * Type-safe method to return to a CompoundBuilder parent.
+     * Provides compile-time safety for fluent method chaining when you know the parent is a compound.
+     *
+     * <p><b>When to use {@code endCompound()}:</b></p>
+     * <ul>
+     *   <li>Lists nested within compounds where you need to continue building the compound</li>
+     *   <li>When you want compile-time type safety instead of runtime casting</li>
+     *   <li>Building complex structures with mixed container types</li>
+     * </ul>
+     *
+     * <p><b>Example usage:</b></p>
+     * <pre>{@code
+     * NBTBuilder.compound("Player")
+     *     .addList("inventory", NBTTags.Tag_String)
+     *         .addString("item1", "sword")
+     *         .addString("item2", "potion")
+     *     .endCompound()  // ← Type-safe return to Player compound
+     *     .addInt("level", 50);  // ← Can continue building Player
+     * }</pre>
+     *
+     * @return the parent as a CompoundBuilder
+     * @throws IllegalStateException if parent is not a CompoundBuilder
+     * @since 1.5
+     */
+    public CompoundBuilder endCompound()
+    {
+        NBTBuilder parent = end();
+        if (parent instanceof CompoundBuilder compound) {
+            return compound;
+        }
+        throw new IllegalStateException("Parent is not a CompoundBuilder");
+    }
+
+    /**
+     * Type-safe method to return to a ListBuilder parent.
+     * Provides compile-time safety for fluent method chaining when you know the parent is a list.
+     *
+     * <p><b>When to use {@code endList()}:</b></p>
+     * <ul>
+     *   <li>Nested lists (lists within lists) where you need to continue building the parent list</li>
+     *   <li>When you want compile-time type safety for complex list structures</li>
+     *   <li>Building multi-dimensional array-like structures</li>
+     * </ul>
+     *
+     * <p><b>Example usage:</b></p>
+     * <pre>{@code
+     * NBTBuilder.list("matrix", NBTTags.Tag_List)
+     *     .addList("row1", NBTTags.Tag_Int)
+     *         .addInt("col1", 1)
+     *         .addInt("col2", 2)
+     *     .endList()  // ← Type-safe return to matrix list
+     *     .addList("row2", NBTTags.Tag_Int)  // ← Can continue adding rows
+     *         .addInt("col1", 3)
+     *         .addInt("col2", 4)
+     *     .endList();
+     * }</pre>
+     *
+     * @return the parent as a ListBuilder
+     * @throws IllegalStateException if parent is not a ListBuilder
+     * @since 1.5
+     */
+    public ListBuilder endList()
+    {
+        NBTBuilder parent = end();
+        if (parent instanceof ListBuilder list) {
+            return list;
+        }
+        throw new IllegalStateException("Parent is not a ListBuilder");
     }
 
     /**

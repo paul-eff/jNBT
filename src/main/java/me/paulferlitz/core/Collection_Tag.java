@@ -22,23 +22,25 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
 {
     /**
      * Creates a collection tag with the specified NBT type identifier.
+     * Initializes with an empty ArrayList for child tags.
      *
      * @param id the NBT type identifier
      */
     public Collection_Tag(int id)
     {
-        super(id);
+        super(id, null, new ArrayList<>());
     }
 
     /**
      * Creates a named collection tag with the specified NBT type identifier.
+     * Initializes with an empty ArrayList for child tags.
      *
      * @param id the NBT type identifier
      * @param name the tag name
      */
     public Collection_Tag(int id, String name)
     {
-        super(id, name);
+        super(id, name, new ArrayList<>());
     }
 
     /**
