@@ -8,16 +8,13 @@ import java.io.IOException;
 
 /**
  * Demonstrates compression handling and advanced I/O operations.
- * 
  * Key concepts:
  * - Compression formats: GZIP, ZLIB, NONE
  * - Automatic compression detection
  * - Manual resource management with try-with-resources
  * - File validation and error handling
- * 
  * Most operations use NBTFileFactory convenience methods.
  * Use manual readers/writers for custom error handling.
- * 
  * @author Paul Ferlitz
  */
 public class CompressionAndIOExample

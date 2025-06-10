@@ -8,16 +8,13 @@ import java.io.IOException;
 
 /**
  * Demonstrates type safety and validation features of jNBT.
- * 
  * Key concepts:
  * - Type-safe getters return defaults instead of throwing exceptions
  * - List type enforcement prevents adding wrong types
  * - Data validation strategies for robust applications
  * - Error handling patterns
- * 
  * Always check hasTag() before accessing optional data.
  * Use type-safe getters to avoid ClassCastException.
- * 
  * @author Paul Ferlitz
  */
 public class TypeSafetyAndValidationExample
@@ -155,10 +152,6 @@ public class TypeSafetyAndValidationExample
         
         // Validate health range
         double health = player.getDouble("health");
-        if (health < 0 || health > 20.0) {
-            return false;
-        }
-        
-        return true;
+        return !(health < 0) && !(health > 20.0);
     }
 }

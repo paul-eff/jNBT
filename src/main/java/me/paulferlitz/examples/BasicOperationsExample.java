@@ -9,13 +9,11 @@ import java.io.IOException;
 /**
  * Demonstrates basic NBT operations using jNBT library.
  * Shows fundamental tag creation, compound operations, and file I/O.
- * 
  * Core concepts:
  * - NBTFactory: Primary API for creating tags
  * - NBTFileFactory: File operations with automatic compression
  * - Type-safe getters: Access data without casting
  * - Fluent API: Method chaining for readable code
- * 
  * @author Paul Ferlitz
  */
 public class BasicOperationsExample

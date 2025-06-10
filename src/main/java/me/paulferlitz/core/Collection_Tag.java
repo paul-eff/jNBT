@@ -7,11 +7,9 @@ import me.paulferlitz.api.ITag;
 
 /**
  * Abstract base class for NBT tags that contain collections of other tags.
- * 
  * <p>Provides comprehensive functionality for managing child tags including
  * addition, removal, and retrieval operations. Supports both name-based and
  * object-based lookups with optional recursive searching.</p>
- * 
  * <p>Implements fluent API patterns for method chaining and offers specialized
  * handling for different collection types (compounds vs. lists).</p>
  *

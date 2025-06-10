@@ -9,11 +9,9 @@ import me.paulferlitz.util.NBTTags;
 /**
  * Represents an NBT compound tag - a named collection of heterogeneous tags
  * that forms the backbone of NBT data structures.
- * 
  * <p>Compound tags store multiple child tags of different types, accessed by name.
  * They provide both direct tag manipulation and fluent builder methods for
  * common data types.</p>
- * 
  * <p>Extends {@link Collection_Tag} with compound-specific operations and
  * implements {@link me.paulferlitz.api.ICompoundTag} for standardized access.</p>
  *

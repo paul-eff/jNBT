@@ -7,11 +7,9 @@ import me.paulferlitz.util.NBTTags;
 /**
  * Represents an NBT list tag - a homogeneous collection containing multiple
  * tags of the same type, accessed by index rather than name.
- * 
  * <p>List tags enforce type consistency, ensuring all contained elements
  * match the declared list type. They provide indexed access and fluent
  * builder methods for type-safe element addition.</p>
- * 
  * <p>Extends {@link Collection_Tag} with list-specific type validation and
  * implements {@link me.paulferlitz.api.IListTag} for standardized access.</p>
  *

@@ -12,7 +12,6 @@ import java.io.IOException;
 /**
  * Demonstrates the NBT builder pattern for creating complex structures.
  * Shows different approaches to handle nested structures and when to use each method.
- * 
  * <p><b>Key concepts demonstrated:</b></p>
  * <ul>
  *   <li>Simple compound building with terminal operations</li>
@@ -21,14 +20,12 @@ import java.io.IOException;
  *   <li>Variable storage pattern as alternative to complex chaining</li>
  *   <li>File integration and modification patterns</li>
  * </ul>
- * 
  * <p><b>When to use each approach:</b></p>
  * <ul>
  *   <li><b>end()</b> - Terminal operations, simple nesting, variable storage</li>
  *   <li><b>endCompound()/endList()</b> - Complex chaining, type safety</li>
  *   <li><b>Variable storage</b> - Very complex structures, conditional building</li>
  * </ul>
- * 
  * @author Paul Ferlitz
  */
 public class BuilderPatternExample

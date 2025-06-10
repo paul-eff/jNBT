@@ -8,7 +8,6 @@ import me.paulferlitz.util.NBTTags;
 /**
  * Foundation class for all NBT tags, providing core functionality for data storage,
  * identification, and manipulation within the NBT hierarchy.
- * 
  * <p>Each tag maintains a unique identifier, optional name, and typed data payload.
  * Tags support fluent operations, equality checking, and custom transformations.</p>
  *
