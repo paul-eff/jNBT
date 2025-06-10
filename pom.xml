@@ -7,11 +7,52 @@
     <groupId>me.paulferlitz</groupId>
     <artifactId>jNBT</artifactId>
     <version>1.5</version>
+    <packaging>jar</packaging>
+
+    <name>jNBT</name>
+    <description>A modern, efficient Java library for reading, editing, and writing Minecraft NBT files</description>
+    <url>https://github.com/paul-eff/jNBT</url>
+    <inceptionYear>2023</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/paul-eff/jNBT.git</connection>
+        <developerConnection>scm:git:git@github.com:paul-eff/jNBT.git</developerConnection>
+        <url>https://github.com/paul-eff/jNBT</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/paul-eff/jNBT/issues</url>
+    </issueManagement>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Dependency versions -->
+        <junit.version>5.10.1</junit.version>
+        <maven.compiler.plugin.version>3.12.1</maven.compiler.plugin.version>
     </properties>
+
+    <dependencies>
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>
