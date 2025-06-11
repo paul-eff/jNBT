@@ -56,7 +56,7 @@ ICompoundTag player = NBTBuilder.compound("Player")
 
 ## 📖 Documentation
 
-Explore the `examples/` package for comprehensive usage patterns.
+Explore the `examples/` folder for comprehensive usage patterns.
 
 ## 📦 Building
 ```bash
