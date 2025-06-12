@@ -19,7 +19,7 @@
 - 🛠️ **Fluent Builder API** - Modern builder pattern for easy structure creation
 - 📦 **Smart Compression** - Automatic detection and support for GZIP, ZLIB, and uncompressed files
 - 🔧 **Interface-Based Design** - Clean APIs
-- ⚡ **Type Safety** - Compile-time safety with minimal casting
+- ⚡ **Type Safety** - Minimal casting
 
 ## 🚀 Quick Start
 
@@ -46,16 +46,13 @@ ICompoundTag player = NBTBuilder.compound("Player")
 - All NBT tag types (Byte, Short, Int, Long, Float, Double, String, List, Compound, Arrays)
 - Complete CRUD operations (Create, Read, Update, Delete)
 - Compression formats: **GZIP**, **ZLIB**, **None**
-- Automatic compression detection
-- Fluent builder pattern with type safety
-
-### 🔄 Work in Progress
-- **LZ4** compression support
+- Many concenience methods
 
 ### 🔮 Future Plans
 - Bedrock Edition NBT support
 - SNBT (String NBT) format
-- Graphical NBT editor
+- Conversion to JSON
+- Graphical NBT editor (maybe)
 
 ## 📖 Documentation
 
@@ -73,7 +70,7 @@ mvn clean install
 ## 🔗 Related Projects
 
 This library powers:
-- [jMCX](https://github.com/paul-eff/jMCX) - Minecraft server management
+- [jMCX](https://github.com/paul-eff/jMCX) - Edit Minecraft world files
 - [MinecraftOfflineOnlineConverter](https://github.com/paul-eff/MinecraftOfflineOnlineConverter) - Player data migration
 
 ## 📚 References
