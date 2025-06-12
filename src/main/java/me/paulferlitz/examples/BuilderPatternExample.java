@@ -42,7 +42,7 @@ public class BuilderPatternExample
             .addDouble("difficulty", 1.5)
             .build(); // Terminal operation - build() ends construction
         
-        System.out.println("   Built compound: " + gameData.getString("name"));
+        System.out.println("\tBuilt compound: " + gameData.getString("name"));
         
         // Example 2: Single-level nesting - end() is safe when terminating
         System.out.println("\n2. Single-level nesting - end() for terminal operations:");
@@ -55,7 +55,7 @@ public class BuilderPatternExample
             .end() // Safe: we're finishing the stats compound, no more chaining
             .build();
         
-        System.out.println("   Simple player: " + simplePlayer.getString("name"));
+        System.out.println("\tSimple player: " + simplePlayer.getString("name"));
         
         // Example 3: Complex chaining - type-safe end methods
         System.out.println("\n3. Complex chaining - using type-safe end methods:");
@@ -78,11 +78,11 @@ public class BuilderPatternExample
             .addString("lastLogin", "2024-01-01")
             .build(); // Build final structure
         
-        System.out.println("   Complex player: " + playerData.getString("name"));
+        System.out.println("\tComplex player: " + playerData.getString("name"));
         
         IListTag inventory = playerData.getList("inventory");
         if (inventory != null) {
-            System.out.println("   Inventory items: " + inventory.getData().size());
+            System.out.println("\tInventory items: " + inventory.getData().size());
         }
         
         // Example 4: Variable storage pattern - alternative to complex chaining
@@ -93,7 +93,7 @@ public class BuilderPatternExample
             .addTag((Tag<?>) separateInventory) // Add pre-built list
             .build();
         
-        System.out.println("   Variable player: " + variablePlayer.getString("name"));
+        System.out.println("\tVariable player: " + variablePlayer.getString("name"));
         
         // Example 5: File integration with simple structure
         System.out.println("\n5. File integration (simple structure):");
@@ -105,7 +105,7 @@ public class BuilderPatternExample
             .addByte("pvp", (byte) 1)
             .buildAndSave(configFile, Compression_Types.GZIP);
         
-        System.out.println("   Config saved to file (" + configFile.length() + " bytes)");
+        System.out.println("\tConfig saved to file (" + configFile.length() + " bytes)");
         
         // Load and modify existing file - demonstrates end() in modification context
         NBTBuilder.fromFile(configFile)
@@ -115,14 +115,14 @@ public class BuilderPatternExample
         
         // Verify modification
         ICompoundTag loadedConfig = NBTFileFactory.readNBTFile(configFile);
-        System.out.println("   Modified config MOTD: " + loadedConfig.getString("motd"));
+        System.out.println("\tModified config MOTD: " + loadedConfig.getString("motd"));
         
         // Example 6: Static factory methods for simple cases
         System.out.println("\n6. Static factory methods (no builders needed):");
         ITag<String> title = NBTBuilder.string("title", "Example");
         ITag<Integer> count = NBTBuilder.integer("count", 100);
         
-        System.out.println("   Static factories: " + title.getData() + ", " + count.getData());
+        System.out.println("\tStatic factories: " + title.getData() + ", " + count.getData());
         
         // Cleanup
         configFile.delete();

@@ -36,22 +36,22 @@ public class TypeSafetyAndValidationExample
         int level = playerData.getInt("level");
         double health = playerData.getDouble("health");
         
-        System.out.println("  Player: " + name + " (Level " + level + ", Health " + health + ")");
+        System.out.println("\tPlayer: " + name + " (Level " + level + ", Health " + health + ")");
         
         // Type safety - wrong type returns default
         int nameAsInt = playerData.getInt("name"); // String accessed as int
         String missingField = playerData.getString("missing"); // Non-existent field
         
-        System.out.println("  Wrong type access: " + nameAsInt);
-        System.out.println("  Missing field: " + missingField);
+        System.out.println("\tWrong type access: " + nameAsInt);
+        System.out.println("\tMissing field: " + missingField);
         
         // Safe existence checking
         if (playerData.hasTag("name")) {
-            System.out.println("  Name field exists: " + playerData.getString("name"));
+            System.out.println("\tName field exists: " + playerData.getString("name"));
         }
         
         if (!playerData.hasTag("inventory")) {
-            System.out.println("  Inventory field missing - using default");
+            System.out.println("\tInventory field missing - using default");
         }
         
         // List type enforcement
@@ -63,28 +63,28 @@ public class TypeSafetyAndValidationExample
         stringList.addString("item1", "sword").addString("item2", "shield");
         intList.addInt("score1", 100).addInt("score2", 200);
         
-        System.out.println("  String list size: " + stringList.getData().size());
-        System.out.println("  Int list size: " + intList.getData().size());
+        System.out.println("\tString list size: " + stringList.getData().size());
+        System.out.println("\tInt list size: " + intList.getData().size());
         
         // Type enforcement - these will throw IllegalArgumentException
         try {
             stringList.addInt("invalid", 42);
-            System.out.println("  ERROR: Type violation not caught!");
+            System.out.println("\tERROR: Type violation not caught!");
         } catch (IllegalArgumentException e) {
-            System.out.println("  ✓ Prevented adding int to string list");
+            System.out.println("\t✓ Prevented adding int to string list");
         }
         
         try {
             intList.addString("invalid", "text");
-            System.out.println("  ERROR: Type violation not caught!");
+            System.out.println("\tERROR: Type violation not caught!");
         } catch (IllegalArgumentException e) {
-            System.out.println("  ✓ Prevented adding string to int list");
+            System.out.println("\t✓ Prevented adding string to int list");
         }
         
         // Data validation
         System.out.println("\nData validation:");
         boolean isValid = validatePlayer(playerData);
-        System.out.println("  Player data valid: " + isValid);
+        System.out.println("\tPlayer data valid: " + isValid);
         
         // Test with invalid data
         ICompoundTag invalidPlayer = NBTFactory.createCompound("InvalidPlayer")
@@ -93,7 +93,7 @@ public class TypeSafetyAndValidationExample
             .addDouble("health", 25.0); // Health too high
         
         boolean invalidIsValid = validatePlayer(invalidPlayer);
-        System.out.println("  Invalid player data valid: " + invalidIsValid);
+        System.out.println("\tInvalid player data valid: " + invalidIsValid);
         
         // File validation
         System.out.println("\nFile validation:");
@@ -102,13 +102,13 @@ public class TypeSafetyAndValidationExample
         NBTFileFactory.writeNBTFile(testFile, playerData);
         
         if (NBTFileFactory.isValidNBTFile(testFile)) {
-            System.out.println("  File is valid NBT format");
+            System.out.println("\tFile is valid NBT format");
             
             ICompoundTag loadedData = NBTFileFactory.readNBTFile(testFile);
             boolean contentValid = validatePlayer(loadedData);
-            System.out.println("  File content valid: " + contentValid);
+            System.out.println("\tFile content valid: " + contentValid);
         } else {
-            System.out.println("  File is not valid NBT format");
+            System.out.println("\tFile is not valid NBT format");
         }
         
         // Error handling
@@ -117,9 +117,9 @@ public class TypeSafetyAndValidationExample
         
         try {
             NBTFileFactory.readNBTFile(nonExistentFile);
-            System.out.println("  Should not reach here");
-        } catch (IOException e) {
-            System.out.println("  ✓ Correctly caught file not found error");
+            System.out.println("\tShould not reach here");
+        } catch (RuntimeException e) {
+            System.out.println("\t✓ Correctly caught file not found error");
         }
         
         // Cleanup
@@ -128,8 +128,7 @@ public class TypeSafetyAndValidationExample
     }
     
     /**
-     * Validates player data using business rules.
-     * Returns true if all validation checks pass.
+     * Validates player data. Returns true if all validation checks pass.
      */
     private static boolean validatePlayer(ICompoundTag player)
     {

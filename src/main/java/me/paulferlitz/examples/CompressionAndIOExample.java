@@ -4,6 +4,7 @@ import me.paulferlitz.api.*;
 import me.paulferlitz.io.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -88,7 +89,7 @@ public class CompressionAndIOExample
         try {
             NBTFileFactory.readNBTFile(invalidFile);
             System.out.println("Should not reach here");
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             System.out.println("  Correctly caught error: " + e.getMessage().substring(0, Math.min(50, e.getMessage().length())) + "...");
         }
         

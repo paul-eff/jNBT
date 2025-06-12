@@ -28,9 +28,9 @@ public class BasicOperationsExample
         ITag<Double> health = NBTFactory.createDouble("health", 20.0);
         
         System.out.println("Created tags:");
-        System.out.println("  " + name);
-        System.out.println("  " + level);
-        System.out.println("  " + health);
+        System.out.println("\t" + name);
+        System.out.println("\t" + level);
+        System.out.println("\t" + health);
         
         // Create compound tag with fluent API
         ICompoundTag player = NBTFactory.createCompound("Player")
@@ -73,7 +73,7 @@ public class BasicOperationsExample
         System.out.println("Loaded player: " + loadedPlayer.getString("name"));
         
         // Cleanup
-        testFile.delete();
-        System.out.println("Cleanup completed");
+        boolean success = testFile.delete();
+        System.out.printf("Cleanup %s%n", success ? "succeeded" : "failed");
     }
 }
