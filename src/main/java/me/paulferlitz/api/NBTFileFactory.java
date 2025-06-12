@@ -115,6 +115,13 @@ public class NBTFileFactory
         try (INBTWriter writer = createWriter(nbtFile))
         {
             writer.write(root);
+        } catch (FileNotFoundException e) {
+            // If the file doesn't exist, create a new one with default compression = NONE
+            System.out.println("NBT File could not be found, creating new one and using default compression (NONE).");
+            try (INBTWriter writer = createWriter(nbtFile, Compression_Types.NONE))
+            {
+                writer.write(root);
+            }
         }
     }
 
