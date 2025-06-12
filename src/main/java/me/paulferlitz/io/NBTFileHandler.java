@@ -64,12 +64,12 @@ public class NBTFileHandler
         if (Files.exists(file.toPath()))
         {
             File backupFile = new File(file.getPath() + ".bak");
-            try 
+            try
             {
-                Files.copy(file.toPath(), backupFile.toPath(), 
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                System.out.printf("Created backup of file %s -> %s%n", 
-                    file.getName(), backupFile.getName());
+                Files.copy(file.toPath(), backupFile.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                System.out.printf("Created backup of file %s -> %s%n",
+                        file.getName(), backupFile.getName());
             } catch (IOException e)
             {
                 throw new IOException("Failed to create backup file: " + e.getMessage(), e);
@@ -128,8 +128,8 @@ public class NBTFileHandler
         } catch (IOException e)
         {
             // Log the exception but don't fail compression detection
-            System.err.printf("Warning: Could not check GZIP magic for file %s: %s%n", 
-                file.getName(), e.getMessage());
+            System.err.printf("Warning: Could not check GZIP magic for file %s: %s%n",
+                    file.getName(), e.getMessage());
             return false;
         }
     }
@@ -142,16 +142,23 @@ public class NBTFileHandler
      */
     private static boolean isZlibed(File file)
     {
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
-        {
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
             if (raf.length() < 2) return false;
-            int magic = raf.read() & 0xff | (raf.read() << 8) & 0xff00;
-            return (magic & 0x0f00) == 0x0800; // Check for zlib header
-        } catch (IOException e)
-        {
-            // Log the exception but don't fail compression detection
-            System.err.printf("Warning: Could not check ZLIB magic for file %s: %s%n", 
-                file.getName(), e.getMessage());
+
+            byte[] header = new byte[2];
+            raf.readFully(header);
+
+            // Check zlib header: first two bytes form a 16-bit value that must be divisible by 31
+            int headerValue = ((header[0] & 0xFF) << 8) | (header[1] & 0xFF);
+
+            // Verify it's a valid zlib header
+            if (headerValue % 31 != 0) {
+                return false;
+            }
+
+            int compressionMethod = header[0] & 0x0F;
+            return compressionMethod == 8;
+        } catch (IOException e) {
             return false;
         }
     }
