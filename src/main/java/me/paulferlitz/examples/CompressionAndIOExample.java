@@ -1,7 +1,7 @@
 package me.paulferlitz.examples;
 
 import me.paulferlitz.api.*;
-import me.paulferlitz.io.*;
+import me.paulferlitz.formats.binary.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;

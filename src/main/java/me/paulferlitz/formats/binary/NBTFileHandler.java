@@ -1,4 +1,4 @@
-package me.paulferlitz.io;
+package me.paulferlitz.formats.binary;
 
 import java.io.*;
 import java.nio.file.Files;

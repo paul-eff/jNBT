@@ -1,4 +1,4 @@
-package me.paulferlitz.io;
+package me.paulferlitz.formats.binary;
 
 /**
  * Compression formats supported for NBT file storage.

@@ -2,7 +2,7 @@ package me.paulferlitz;
 
 import me.paulferlitz.api.*;
 import me.paulferlitz.builder.NBTBuilder;
-import me.paulferlitz.io.Compression_Types;
+import me.paulferlitz.formats.binary.Compression_Types;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;

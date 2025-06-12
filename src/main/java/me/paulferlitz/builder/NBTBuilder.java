@@ -255,11 +255,11 @@ public abstract class NBTBuilder
      * Only available for root builders (builders without parents).
      *
      * @param file The {@link java.io.File} to write to
-     * @param compression The {@link me.paulferlitz.io.Compression_Types} to use
+     * @param compression The {@link me.paulferlitz.formats.binary.Compression_Types} to use
      * @throws java.io.IOException If writing fails
      * @throws IllegalStateException If this is not a root builder
      */
-    public void buildAndSave(java.io.File file, me.paulferlitz.io.Compression_Types compression) throws java.io.IOException
+    public void buildAndSave(java.io.File file, me.paulferlitz.formats.binary.Compression_Types compression) throws java.io.IOException
     {
         if (parent != null)
         {

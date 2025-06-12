@@ -1,5 +1,7 @@
 package me.paulferlitz.api;
 
+import me.paulferlitz.formats.binary.Compression_Types;
+
 import java.io.IOException;
 
 /**
@@ -8,7 +10,7 @@ import java.io.IOException;
  *
  * @author Paul Ferlitz
  * @see ICompoundTag
- * @see me.paulferlitz.io.Compression_Types
+ * @see Compression_Types
  */
 public interface INBTReader extends AutoCloseable
 {

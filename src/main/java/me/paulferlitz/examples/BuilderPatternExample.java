@@ -3,7 +3,7 @@ package me.paulferlitz.examples;
 import me.paulferlitz.api.*;
 import me.paulferlitz.builder.*;
 import me.paulferlitz.core.Tag;
-import me.paulferlitz.io.Compression_Types;
+import me.paulferlitz.formats.binary.Compression_Types;
 import me.paulferlitz.util.NBTTags;
 
 import java.io.File;

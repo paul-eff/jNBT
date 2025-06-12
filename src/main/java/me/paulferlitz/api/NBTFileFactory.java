@@ -1,9 +1,9 @@
 package me.paulferlitz.api;
 
-import me.paulferlitz.io.Compression_Types;
-import me.paulferlitz.io.NBTReader;
-import me.paulferlitz.io.NBTWriter;
-import me.paulferlitz.io.NBTFileHandler;
+import me.paulferlitz.formats.binary.Compression_Types;
+import me.paulferlitz.formats.binary.NBTReader;
+import me.paulferlitz.formats.binary.NBTWriter;
+import me.paulferlitz.formats.binary.NBTFileHandler;
 
 import java.io.DataInputStream;
 import java.io.File;
