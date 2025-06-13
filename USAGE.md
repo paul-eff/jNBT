@@ -20,8 +20,8 @@ A comprehensive guide to using the jNBT library for reading, editing, and writin
 ### Reading an NBT File
 
 ```java
-import de.paulferlitz.api.ICompoundTag;
-import de.paulferlitz.api.NBTFileFactory;
+import de.pauleff.api.ICompoundTag;
+import de.pauleff.api.NBTFileFactory;
 
 import java.io.File;
 
