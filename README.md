@@ -18,6 +18,7 @@
 - 🎯 **Complete NBT Support** - All tags from the [official specification](https://minecraft.wiki/w/NBT_format)
 - 🛠️ **Fluent Builder API** - Modern builder pattern for easy structure creation
 - 📦 **Smart Compression** - Automatic detection and support for GZIP, ZLIB, and uncompressed files
+- 📝 **SNBT Support** - Parse and generate Stringified NBT for Minecraft commands
 - 🔧 **Interface-Based Design** - Clean APIs
 - ⚡ **Type Safety** - Minimal casting
 
@@ -40,17 +41,28 @@ ICompoundTag player = NBTBuilder.compound("Player")
     .build();
 ```
 
+**Parse SNBT:**
+```java
+ITag<?> tag = NBTFactory.parseFromSNBT("{display:{Name:\"Custom Item\"}}");
+```
+
+**Generate SNBT:**
+```java
+SNBTSerializer serializer = new SNBTSerializer();
+String snbt = serializer.serialize(tag);
+```
+
 ## 📋 Status
 
 ### ✅ Supported
 - All NBT tag types (Byte, Short, Int, Long, Float, Double, String, List, Compound, Arrays)
 - Complete CRUD operations (Create, Read, Update, Delete)
 - Compression formats: **GZIP**, **ZLIB**, **None**
+- SNBT (Stringified NBT) parsing and generation
 - Many concenience methods
 
 ### 🔮 Future Plans
 - Bedrock Edition NBT support
-- SNBT (String NBT) format
 - Conversion to JSON
 - Graphical NBT editor (maybe)
 
