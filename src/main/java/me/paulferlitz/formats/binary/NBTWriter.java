@@ -1,12 +1,15 @@
 package me.paulferlitz.formats.binary;
 
 import me.paulferlitz.api.ICompoundTag;
-import me.paulferlitz.api.ITag;
 import me.paulferlitz.api.IListTag;
 import me.paulferlitz.api.INBTWriter;
+import me.paulferlitz.api.ITag;
 import me.paulferlitz.util.NBTTags;
 
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -46,7 +49,7 @@ public class NBTWriter implements INBTWriter
      * Create a writer by passing it the target NBT file and how to compress it.
      * A backup of the target file will be made before overwriting it, if it exists.
      *
-     * @param nbtFile The target NBT file.
+     * @param nbtFile     The target NBT file.
      * @param compression The compression type of the file.
      */
     public NBTWriter(File nbtFile, Compression_Types compression)
@@ -75,7 +78,8 @@ public class NBTWriter implements INBTWriter
      *
      * @throws IOException When encountering an error whilst closing the writer.
      */
-    public void close() throws IOException {
+    public void close() throws IOException
+    {
         stream.close();
     }
 
@@ -84,12 +88,12 @@ public class NBTWriter implements INBTWriter
      * The NBT specification requires compound tags as file roots, so this method enforces that constraint.
      *
      * @param root The root {@link ICompoundTag} containing the complete NBT structure to write
-     * @throws IOException If an error occurs during file writing or if the data is invalid
+     * @throws IOException              If an error occurs during file writing or if the data is invalid
      * @throws IllegalArgumentException If root is null
      */
     public void write(ICompoundTag root) throws IOException
     {
-        if (root == null) 
+        if (root == null)
         {
             throw new IllegalArgumentException("Root compound tag cannot be null");
         }
@@ -108,7 +112,8 @@ public class NBTWriter implements INBTWriter
         }
     }
 
-    private void writeNBTTag(ITag<?> tag) throws IOException {
+    private void writeNBTTag(ITag<?> tag) throws IOException
+    {
         String name = tag.getName();
         // TODO: Extract charsets to main location
         byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
@@ -120,8 +125,10 @@ public class NBTWriter implements INBTWriter
         writeNBTPayload(tag);
     }
 
-    private void writeNBTPayload(ITag<?> tag) throws IOException {
-        switch(NBTTags.getById(tag.getId())) {
+    private void writeNBTPayload(ITag<?> tag) throws IOException
+    {
+        switch (NBTTags.getById(tag.getId()))
+        {
             case NBTTags.Tag_End:
                 // Do nothing! Handled by compound.
                 break;
@@ -159,12 +166,14 @@ public class NBTWriter implements INBTWriter
 
                 stream.writeByte(((IListTag) tag).getListTypeID());
                 stream.writeInt(size);
-                for(int i = 0; i < size; i++) {
+                for (int i = 0; i < size; i++)
+                {
                     writeNBTPayload(listTags.get(i));
                 }
                 break;
             case NBTTags.Tag_Compound:
-                for(ITag<?> compTag : (ArrayList<ITag<?>>) tag.getData()) {
+                for (ITag<?> compTag : (ArrayList<ITag<?>>) tag.getData())
+                {
                     writeNBTTag(compTag);
                 }
                 // Simulate Tag_End
@@ -174,7 +183,8 @@ public class NBTWriter implements INBTWriter
                 int[] intArray = (int[]) tag.getData();
                 size = intArray.length;
                 stream.writeInt(size);
-                for (int i = 0; i < size; i++) {
+                for (int i = 0; i < size; i++)
+                {
                     stream.writeInt(intArray[i]);
                 }
                 break;
@@ -182,7 +192,8 @@ public class NBTWriter implements INBTWriter
                 long[] longArray = (long[]) tag.getData();
                 size = longArray.length;
                 stream.writeInt(size);
-                for (int i = 0; i < size; i++) {
+                for (int i = 0; i < size; i++)
+                {
                     stream.writeLong(longArray[i]);
                 }
                 break;

@@ -54,7 +54,7 @@ public class NBTFileHandler
      * Method to create a {@link DataOutputStream} to later write a NBT file.
      * If the file already exists, a backup will be created.
      *
-     * @param file The target file.
+     * @param file        The target file.
      * @param compression The compression type of the file.
      * @return The file as {@link DataOutputStream}.
      * @throws IOException When encountering an error whilst reading the file to a {@link DataOutputStream}.
@@ -142,7 +142,8 @@ public class NBTFileHandler
      */
     private static boolean isZlibed(File file)
     {
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
+        {
             if (raf.length() < 2) return false;
 
             byte[] header = new byte[2];
@@ -152,13 +153,15 @@ public class NBTFileHandler
             int headerValue = ((header[0] & 0xFF) << 8) | (header[1] & 0xFF);
 
             // Verify it's a valid zlib header
-            if (headerValue % 31 != 0) {
+            if (headerValue % 31 != 0)
+            {
                 return false;
             }
 
             int compressionMethod = header[0] & 0x0F;
             return compressionMethod == 8;
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             return false;
         }
     }

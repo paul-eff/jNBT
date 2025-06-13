@@ -1,9 +1,9 @@
 package me.paulferlitz.api;
 
 import me.paulferlitz.formats.binary.Compression_Types;
+import me.paulferlitz.formats.binary.NBTFileHandler;
 import me.paulferlitz.formats.binary.NBTReader;
 import me.paulferlitz.formats.binary.NBTWriter;
-import me.paulferlitz.formats.binary.NBTFileHandler;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -73,7 +73,7 @@ public class NBTFileFactory
      * Creates a writer with explicit compression settings.
      * Creates or overwrites the target file with the specified compression.
      *
-     * @param nbtFile The {@link java.io.File} to write NBT data to
+     * @param nbtFile     The {@link java.io.File} to write NBT data to
      * @param compression The {@link Compression_Types} to apply
      * @return New {@link INBTWriter} ready to write compressed data
      */
@@ -107,7 +107,7 @@ public class NBTFileFactory
      * If the file exists, preserves its original compression format.
      *
      * @param nbtFile The {@link java.io.File} to write to
-     * @param root The {@link ICompoundTag} to write
+     * @param root    The {@link ICompoundTag} to write
      * @throws IOException If the file cannot be written
      */
     public static void writeNBTFile(File nbtFile, ICompoundTag root) throws IOException
@@ -115,7 +115,8 @@ public class NBTFileFactory
         try (INBTWriter writer = createWriter(nbtFile))
         {
             writer.write(root);
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e)
+        {
             // If the file doesn't exist, create a new one with default compression = NONE
             System.out.println("NBT File could not be found, creating new one and using default compression (NONE).");
             try (INBTWriter writer = createWriter(nbtFile, Compression_Types.NONE))
@@ -128,8 +129,8 @@ public class NBTFileFactory
     /**
      * Writes an NBT compound tag to a new file with specified compression.
      *
-     * @param nbtFile The {@link java.io.File} to write to
-     * @param root The {@link ICompoundTag} to write
+     * @param nbtFile     The {@link java.io.File} to write to
+     * @param root        The {@link ICompoundTag} to write
      * @param compression The {@link Compression_Types} to use
      * @throws IOException If the file cannot be written
      */
@@ -144,7 +145,7 @@ public class NBTFileFactory
     /**
      * Copies an NBT file to a new location, preserving compression format.
      *
-     * @param source The source {@link java.io.File} to copy from
+     * @param source      The source {@link java.io.File} to copy from
      * @param destination The destination {@link java.io.File} to copy to
      * @throws IOException If the copy operation fails
      */
@@ -167,8 +168,7 @@ public class NBTFileFactory
         {
             readNBTFile(nbtFile);
             return true;
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             return false;
         }

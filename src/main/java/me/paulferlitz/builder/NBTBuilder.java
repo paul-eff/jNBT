@@ -36,7 +36,7 @@ public abstract class NBTBuilder
     /**
      * Constructs a builder with parent-child relationship for nested structures.
      *
-     * @param name tag name
+     * @param name   tag name
      * @param parent parent builder, null for root builders
      */
     protected NBTBuilder(String name, NBTBuilder parent)
@@ -63,7 +63,7 @@ public abstract class NBTBuilder
     /**
      * Creates a fluent builder for homogeneous list tags.
      *
-     * @param name list tag name
+     * @param name     list tag name
      * @param listType type constraint for all list elements
      * @return new {@link ListBuilder}
      */
@@ -75,7 +75,7 @@ public abstract class NBTBuilder
     /**
      * Creates a string tag with immediate value assignment.
      *
-     * @param name tag name
+     * @param name  tag name
      * @param value string content
      * @return {@link Tag_String} as {@link ITag}
      */
@@ -88,7 +88,7 @@ public abstract class NBTBuilder
     /**
      * Creates an integer tag with immediate value assignment.
      *
-     * @param name tag name
+     * @param name  tag name
      * @param value integer content
      * @return {@link Tag_Int} as {@link ITag}
      */
@@ -101,7 +101,7 @@ public abstract class NBTBuilder
     /**
      * Creates a double-precision tag with immediate value assignment.
      *
-     * @param name tag name
+     * @param name  tag name
      * @param value double content
      * @return {@link Tag_Double} as {@link ITag}
      */
@@ -114,7 +114,7 @@ public abstract class NBTBuilder
     /**
      * Creates a single-precision tag with immediate value assignment.
      *
-     * @param name tag name
+     * @param name  tag name
      * @param value float content
      * @return {@link Tag_Float} as {@link ITag}
      */
@@ -127,7 +127,7 @@ public abstract class NBTBuilder
     /**
      * Creates a byte tag with immediate value assignment.
      *
-     * @param name tag name
+     * @param name  tag name
      * @param value byte content
      * @return {@link Tag_Byte} as {@link ITag}
      */
@@ -140,7 +140,7 @@ public abstract class NBTBuilder
     /**
      * Creates a short integer tag with immediate value assignment.
      *
-     * @param name tag name
+     * @param name  tag name
      * @param value short content
      * @return {@link Tag_Short} as {@link ITag}
      */
@@ -153,7 +153,7 @@ public abstract class NBTBuilder
     /**
      * Creates a long integer tag with immediate value assignment.
      *
-     * @param name tag name
+     * @param name  tag name
      * @param value long content
      * @return {@link Tag_Long} as {@link ITag}
      */
@@ -165,25 +165,6 @@ public abstract class NBTBuilder
 
     /*
      * ========== ABSTRACT METHODS ==========
-     */
-
-    /**
-     * Finalizes construction and returns the completed NBT tag.
-     *
-     * @return immutable tag structure
-     */
-    public abstract ITag<?> build();
-
-    /**
-     * Closes this nested builder and returns control to its parent.
-     *
-     * @return parent builder for continued chaining
-     * @throws IllegalStateException if called on root builder
-     */
-    public abstract NBTBuilder end();
-
-    /*
-     * ========== VALIDATION METHODS ==========
      */
 
     /**
@@ -201,87 +182,6 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Returns the name that will be assigned to the built tag.
-     *
-     * @return tag name
-     */
-    public String getName()
-    {
-        return name;
-    }
-
-    /**
-     * Returns the parent builder in the construction hierarchy.
-     *
-     * @return parent builder, null for root builders
-     */
-    public NBTBuilder getParent()
-    {
-        return parent;
-    }
-
-    /*
-     * ========== I/O INTEGRATION METHODS ==========
-     */
-
-    /**
-     * Builds the NBT structure and writes it directly to a file.
-     * Only available for root builders (builders without parents).
-     *
-     * @param file The {@link java.io.File} to write to
-     * @throws java.io.IOException If writing fails
-     * @throws IllegalStateException If this is not a root builder
-     */
-    public void buildAndSave(java.io.File file) throws java.io.IOException
-    {
-        if (parent != null)
-        {
-            throw new IllegalStateException("buildAndSave() can only be called on root builders");
-        }
-        
-        ITag<?> result = build();
-        if (result instanceof me.paulferlitz.api.ICompoundTag compoundTag)
-        {
-            me.paulferlitz.api.NBTFileFactory.writeNBTFile(file, compoundTag);
-        }
-        else
-        {
-            throw new IllegalStateException("Root NBT structure must be a compound tag");
-        }
-    }
-
-    /**
-     * Builds the NBT structure and writes it to a file with specified compression.
-     * Only available for root builders (builders without parents).
-     *
-     * @param file The {@link java.io.File} to write to
-     * @param compression The {@link me.paulferlitz.formats.binary.Compression_Types} to use
-     * @throws java.io.IOException If writing fails
-     * @throws IllegalStateException If this is not a root builder
-     */
-    public void buildAndSave(java.io.File file, me.paulferlitz.formats.binary.Compression_Types compression) throws java.io.IOException
-    {
-        if (parent != null)
-        {
-            throw new IllegalStateException("buildAndSave() can only be called on root builders");
-        }
-        
-        ITag<?> result = build();
-        if (result instanceof me.paulferlitz.api.ICompoundTag compoundTag)
-        {
-            me.paulferlitz.api.NBTFileFactory.writeNBTFile(file, compoundTag, compression);
-        }
-        else
-        {
-            throw new IllegalStateException("Root NBT structure must be a compound tag");
-        }
-    }
-
-    /*
-     * ========== FACTORY METHODS WITH I/O INTEGRATION ==========
-     */
-
-    /**
      * Creates a compound builder pre-loaded with data from an existing NBT file.
      * The builder can then be used to modify the structure before saving.
      *
@@ -293,7 +193,7 @@ public abstract class NBTBuilder
     {
         me.paulferlitz.api.ICompoundTag loadedData = me.paulferlitz.api.NBTFileFactory.readNBTFile(file);
         CompoundBuilder builder = new CompoundBuilder(loadedData.getName(), null);
-        
+
         // Copy loaded data into the builder
         if (loadedData instanceof me.paulferlitz.core.Tag_Compound concrete)
         {
@@ -302,7 +202,105 @@ public abstract class NBTBuilder
                 builder.addTag(tag);
             }
         }
-        
+
         return builder;
+    }
+
+    /*
+     * ========== VALIDATION METHODS ==========
+     */
+
+    /**
+     * Finalizes construction and returns the completed NBT tag.
+     *
+     * @return immutable tag structure
+     */
+    public abstract ITag<?> build();
+
+    /**
+     * Closes this nested builder and returns control to its parent.
+     *
+     * @return parent builder for continued chaining
+     * @throws IllegalStateException if called on root builder
+     */
+    public abstract NBTBuilder end();
+
+    /**
+     * Returns the name that will be assigned to the built tag.
+     *
+     * @return tag name
+     */
+    public String getName()
+    {
+        return name;
+    }
+
+    /*
+     * ========== I/O INTEGRATION METHODS ==========
+     */
+
+    /**
+     * Returns the parent builder in the construction hierarchy.
+     *
+     * @return parent builder, null for root builders
+     */
+    public NBTBuilder getParent()
+    {
+        return parent;
+    }
+
+    /**
+     * Builds the NBT structure and writes it directly to a file.
+     * Only available for root builders (builders without parents).
+     *
+     * @param file The {@link java.io.File} to write to
+     * @throws java.io.IOException   If writing fails
+     * @throws IllegalStateException If this is not a root builder
+     */
+    public void buildAndSave(java.io.File file) throws java.io.IOException
+    {
+        if (parent != null)
+        {
+            throw new IllegalStateException("buildAndSave() can only be called on root builders");
+        }
+
+        ITag<?> result = build();
+        if (result instanceof me.paulferlitz.api.ICompoundTag compoundTag)
+        {
+            me.paulferlitz.api.NBTFileFactory.writeNBTFile(file, compoundTag);
+        } else
+        {
+            throw new IllegalStateException("Root NBT structure must be a compound tag");
+        }
+    }
+
+    /*
+     * ========== FACTORY METHODS WITH I/O INTEGRATION ==========
+     */
+
+    /**
+     * Builds the NBT structure and writes it to a file with specified compression.
+     * Only available for root builders (builders without parents).
+     *
+     * @param file        The {@link java.io.File} to write to
+     * @param compression The {@link me.paulferlitz.formats.binary.Compression_Types} to use
+     * @throws java.io.IOException   If writing fails
+     * @throws IllegalStateException If this is not a root builder
+     */
+    public void buildAndSave(java.io.File file, me.paulferlitz.formats.binary.Compression_Types compression) throws java.io.IOException
+    {
+        if (parent != null)
+        {
+            throw new IllegalStateException("buildAndSave() can only be called on root builders");
+        }
+
+        ITag<?> result = build();
+        if (result instanceof me.paulferlitz.api.ICompoundTag compoundTag)
+        {
+            me.paulferlitz.api.NBTFileFactory.writeNBTFile(file, compoundTag, compression);
+        } else
+        {
+            throw new IllegalStateException("Root NBT structure must be a compound tag");
+        }
     }
 }

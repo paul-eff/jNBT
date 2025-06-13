@@ -10,20 +10,25 @@ package me.paulferlitz.formats.binary;
  */
 public enum Compression_Types
 {
-    /** No compression - raw NBT binary data */
+    /**
+     * No compression - raw NBT binary data
+     */
     NONE(0, "NONE"),
-    /** GZIP compression - most common for Minecraft saves */
+    /**
+     * GZIP compression - most common for Minecraft saves
+     */
     GZIP(1, "GZIP"),
-    /** ZLIB compression - used by some Minecraft components */
+    /**
+     * ZLIB compression - used by some Minecraft components
+     */
     ZLIB(2, "ZLIB"),
-    /** LZ4 compression - planned support for high-performance scenarios */
+    /**
+     * LZ4 compression - planned support for high-performance scenarios
+     */
     LZ4(3, "LZ4");
 
-    private final int id;
-    private final String compressionType;
-    
     private static final Compression_Types[] ID_LOOKUP = new Compression_Types[4];
-    
+
     static
     {
         for (Compression_Types type : values())
@@ -32,16 +37,30 @@ public enum Compression_Types
         }
     }
 
+    private final int id;
+    private final String compressionType;
+
     /**
      * Creates a compression type entry with its identifier and name.
      *
-     * @param id The numeric identifier for this compression type
+     * @param id              The numeric identifier for this compression type
      * @param compressionType The human-readable compression name
      */
     Compression_Types(int id, String compressionType)
     {
         this.id = id;
         this.compressionType = compressionType;
+    }
+
+    /**
+     * Looks up a compression type by its numeric identifier.
+     *
+     * @param id The compression type ID to find
+     * @return The corresponding {@link Compression_Types} enum, or {@code null} if ID is invalid
+     */
+    public static Compression_Types getById(int id)
+    {
+        return (id >= 0 && id < ID_LOOKUP.length) ? ID_LOOKUP[id] : null;
     }
 
     /**
@@ -62,16 +81,5 @@ public enum Compression_Types
     public String getName()
     {
         return this.compressionType;
-    }
-
-    /**
-     * Looks up a compression type by its numeric identifier.
-     *
-     * @param id The compression type ID to find
-     * @return The corresponding {@link Compression_Types} enum, or {@code null} if ID is invalid
-     */
-    public static Compression_Types getById(int id)
-    {
-        return (id >= 0 && id < ID_LOOKUP.length) ? ID_LOOKUP[id] : null;
     }
 }

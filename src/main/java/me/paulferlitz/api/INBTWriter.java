@@ -20,7 +20,7 @@ public interface INBTWriter extends AutoCloseable
      * The writer handles compression and proper binary encoding automatically.
      *
      * @param root The {@link ICompoundTag} to write as the file root
-     * @throws IOException If an error occurs during file writing
+     * @throws IOException              If an error occurs during file writing
      * @throws IllegalArgumentException If root is null
      */
     void write(ICompoundTag root) throws IOException;

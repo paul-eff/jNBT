@@ -25,7 +25,7 @@ public interface IListTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>>
      * Adds a string element to this list.
      * Only works if this list stores string tags.
      *
-     * @param name The element name
+     * @param name  The element name
      * @param value The {@link java.lang.String} value to store
      * @return This list for fluent method chaining
      * @throws IllegalArgumentException if this list doesn't store string tags
@@ -36,7 +36,7 @@ public interface IListTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>>
      * Adds an integer element to this list.
      * Only works if this list stores integer tags.
      *
-     * @param name The element name
+     * @param name  The element name
      * @param value The {@link java.lang.Integer} value to store
      * @return This list for fluent method chaining
      * @throws IllegalArgumentException if this list doesn't store integer tags
@@ -47,7 +47,7 @@ public interface IListTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>>
      * Adds a double-precision floating point element to this list.
      * Only works if this list stores double tags.
      *
-     * @param name The element name
+     * @param name  The element name
      * @param value The {@link java.lang.Double} value to store
      * @return This list for fluent method chaining
      * @throws IllegalArgumentException if this list doesn't store double tags

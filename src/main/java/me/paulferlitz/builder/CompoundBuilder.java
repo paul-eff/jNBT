@@ -1,7 +1,8 @@
 package me.paulferlitz.builder;
 
 import me.paulferlitz.api.ICompoundTag;
-import me.paulferlitz.core.*;
+import me.paulferlitz.core.Tag;
+import me.paulferlitz.core.Tag_Compound;
 import me.paulferlitz.util.NBTTags;
 
 /**
@@ -21,10 +22,10 @@ import me.paulferlitz.util.NBTTags;
  *     .build();
  * }</pre>
  *
+ * @author Paul Ferlitz
  * @see NBTBuilder
  * @see ListBuilder
  * @see Tag_Compound
- * @author Paul Ferlitz
  */
 public class CompoundBuilder extends NBTBuilder
 {
@@ -33,7 +34,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Creates a new compound builder ready for tag assembly.
      *
-     * @param name the compound's identifier
+     * @param name   the compound's identifier
      * @param parent the parent builder for nesting support, or null for root compounds
      */
     public CompoundBuilder(String name, NBTBuilder parent)
@@ -50,7 +51,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Stores a string value with the specified name.
      *
-     * @param name the tag identifier
+     * @param name  the tag identifier
      * @param value the string content
      * @return this builder for chaining
      */
@@ -64,7 +65,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Stores an integer value with the specified name.
      *
-     * @param name the tag identifier
+     * @param name  the tag identifier
      * @param value the numeric content
      * @return this builder for chaining
      */
@@ -78,7 +79,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Stores a double-precision value with the specified name.
      *
-     * @param name the tag identifier
+     * @param name  the tag identifier
      * @param value the floating-point content
      * @return this builder for chaining
      */
@@ -92,7 +93,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Stores a single-precision float with the specified name.
      *
-     * @param name the tag identifier
+     * @param name  the tag identifier
      * @param value the floating-point content
      * @return this builder for chaining
      */
@@ -106,7 +107,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Stores a byte value with the specified name.
      *
-     * @param name the tag identifier
+     * @param name  the tag identifier
      * @param value the byte content
      * @return this builder for chaining
      */
@@ -120,7 +121,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Stores a short integer with the specified name.
      *
-     * @param name the tag identifier
+     * @param name  the tag identifier
      * @param value the numeric content
      * @return this builder for chaining
      */
@@ -134,7 +135,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Stores a long integer with the specified name.
      *
-     * @param name the tag identifier
+     * @param name  the tag identifier
      * @param value the numeric content
      * @return this builder for chaining
      */
@@ -166,7 +167,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Creates a new list within this compound and switches to list-building mode.
      *
-     * @param name the list identifier
+     * @param name     the list identifier
      * @param listType the element type this list will contain
      * @return a {@link ListBuilder} for adding list elements
      * @see NBTTags
@@ -245,13 +246,11 @@ public class CompoundBuilder extends NBTBuilder
         {
             parentCompound.compound.addTag(compound);
             return parentCompound;
-        }
-        else if (parent instanceof ListBuilder parentList)
+        } else if (parent instanceof ListBuilder parentList)
         {
             parentList.addBuiltTag(compound);
             return parentList;
-        }
-        else
+        } else
         {
             throw new IllegalStateException("Unknown parent builder type");
         }
@@ -284,7 +283,8 @@ public class CompoundBuilder extends NBTBuilder
     public CompoundBuilder endCompound()
     {
         NBTBuilder parent = end();
-        if (parent instanceof CompoundBuilder compound) {
+        if (parent instanceof CompoundBuilder compound)
+        {
             return compound;
         }
         throw new IllegalStateException("Parent is not a CompoundBuilder");
@@ -319,7 +319,8 @@ public class CompoundBuilder extends NBTBuilder
     public ListBuilder endList()
     {
         NBTBuilder parent = end();
-        if (parent instanceof ListBuilder list) {
+        if (parent instanceof ListBuilder list)
+        {
             return list;
         }
         throw new IllegalStateException("Parent is not a ListBuilder");

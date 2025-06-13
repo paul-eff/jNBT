@@ -34,8 +34,8 @@ public class NBTReader implements INBTReader
             this.stream = new PositionTrackingDataInputStream(baseStream);
         } catch (IOException e)
         {
-            throw new RuntimeException("Failed to initialize NBT reader for file: " + 
-                nbtFile.getAbsolutePath(), e);
+            throw new RuntimeException("Failed to initialize NBT reader for file: " +
+                    nbtFile.getAbsolutePath(), e);
         }
     }
 
@@ -50,23 +50,25 @@ public class NBTReader implements INBTReader
     }
 
     /**
+     * Converts a byte array into a position-tracking DataInputStream for NBT reading.
+     *
+     * @param chunkData The byte array to convert
+     * @return A {@link PositionTrackingDataInputStream} for enhanced error reporting
+     */
+    public static PositionTrackingDataInputStream byteArrayToDataInputStream(byte[] chunkData)
+    {
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(chunkData);
+        return new PositionTrackingDataInputStream(byteArrayInputStream);
+    }
+
+    /**
      * Method to close the reader.
      *
      * @throws IOException When encountering an error whilst closing the reader.
      */
-    public void close() throws IOException {
+    public void close() throws IOException
+    {
         stream.close();
-    }
-
-    /**
-     * Converts a byte array into a position-tracking DataInputStream for NBT reading.
-     * 
-     * @param chunkData The byte array to convert
-     * @return A {@link PositionTrackingDataInputStream} for enhanced error reporting
-     */
-    public static PositionTrackingDataInputStream byteArrayToDataInputStream(byte[] chunkData) {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(chunkData);
-        return new PositionTrackingDataInputStream(byteArrayInputStream);
     }
 
     /**
@@ -114,20 +116,19 @@ public class NBTReader implements INBTReader
                 if (nameLength < 0 || nameLength > 32767) // Reasonable limit for NBT names
                 {
                     throw new IOException(stream.createContextualError(
-                        String.format("Invalid tag name length: %d", nameLength)));
+                            String.format("Invalid tag name length: %d", nameLength)));
                 }
-                
+
                 byte[] byteBuffer = new byte[nameLength];
                 stream.readFully(byteBuffer);
                 name = new String(byteBuffer, StandardCharsets.UTF_8);
             }
-            
+
             stream.setCurrentContext(depth, name, type);
             return readNBTPayload(type, name, depth);
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
-            if (e.getMessage().contains("[Position:")) 
+            if (e.getMessage().contains("[Position:"))
             {
                 throw e; // Already has context
             }
@@ -138,8 +139,8 @@ public class NBTReader implements INBTReader
     /**
      * Method to only read a NBT tag's payload.
      *
-     * @param type The type of the NBT tag, which's payload should be read.
-     * @param name The name of the NBT tag.
+     * @param type  The type of the NBT tag, which's payload should be read.
+     * @param name  The name of the NBT tag.
      * @param depth The current depth at which is beeing read.
      * @return The complete read NBT tag.
      * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
@@ -150,7 +151,7 @@ public class NBTReader implements INBTReader
         if (tagType == null)
         {
             throw new IOException(stream.createContextualError(
-                String.format("Unknown tag type: %d", type)));
+                    String.format("Unknown tag type: %d", type)));
         }
 
         switch (tagType)
@@ -159,7 +160,7 @@ public class NBTReader implements INBTReader
                 if (depth == 0)
                 {
                     throw new IOException(stream.createContextualError(
-                        "Unexpected Tag_End at root level - NBT files must start with a compound tag"));
+                            "Unexpected Tag_End at root level - NBT files must start with a compound tag"));
                 }
                 return new Tag_End();
             case Tag_Byte:
@@ -179,7 +180,7 @@ public class NBTReader implements INBTReader
                 if (arrayLength < 0 || arrayLength > 100_000_000) // 100MB limit
                 {
                     throw new IOException(stream.createContextualError(
-                        String.format("Invalid byte array length: %d", arrayLength)));
+                            String.format("Invalid byte array length: %d", arrayLength)));
                 }
                 byte[] byteBuffer = new byte[arrayLength];
                 stream.readFully(byteBuffer);
@@ -189,7 +190,7 @@ public class NBTReader implements INBTReader
                 if (arrayLength > 65535) // Max string length in NBT
                 {
                     throw new IOException(stream.createContextualError(
-                        String.format("Invalid string length: %d", arrayLength)));
+                            String.format("Invalid string length: %d", arrayLength)));
                 }
                 byteBuffer = new byte[arrayLength];
                 stream.readFully(byteBuffer);
@@ -199,13 +200,13 @@ public class NBTReader implements INBTReader
                 if (NBTTags.getById(listType) == null && listType != 0) // 0 is valid for empty lists
                 {
                     throw new IOException(stream.createContextualError(
-                        String.format("Invalid list element type: %d", listType)));
+                            String.format("Invalid list element type: %d", listType)));
                 }
                 arrayLength = stream.readInt();
                 if (arrayLength < 0 || arrayLength > 10_000_000) // 10M elements max
                 {
                     throw new IOException(stream.createContextualError(
-                        String.format("Invalid list length: %d", arrayLength)));
+                            String.format("Invalid list length: %d", arrayLength)));
                 }
                 ArrayList<Tag<?>> tagList = new ArrayList<>(Math.min(arrayLength, 1000)); // Pre-size reasonably
                 for (int i = 0; i < arrayLength; i++)

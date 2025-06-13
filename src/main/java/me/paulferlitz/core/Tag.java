@@ -1,9 +1,10 @@
 package me.paulferlitz.core;
 
-import java.util.Objects;
-import java.util.function.Consumer;
 import me.paulferlitz.api.ITag;
 import me.paulferlitz.util.NBTTags;
+
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Foundation class for all NBT tags, providing core functionality for data storage,
@@ -17,8 +18,8 @@ import me.paulferlitz.util.NBTTags;
 public abstract class Tag<T> implements ITag<T>
 {
     private final int id;
-    private String name;
     protected T data;
+    private String name;
 
     /**
      * Creates a new tag with the specified NBT type identifier.
@@ -34,7 +35,7 @@ public abstract class Tag<T> implements ITag<T>
     /**
      * Creates a new named tag with the specified NBT type identifier.
      *
-     * @param id the NBT type identifier
+     * @param id   the NBT type identifier
      * @param name the tag name (null or empty becomes "null")
      * @throws IllegalArgumentException if the ID is not a valid NBT tag type
      */
@@ -46,14 +47,15 @@ public abstract class Tag<T> implements ITag<T>
     /**
      * Creates a new tag with complete initialization.
      *
-     * @param id the NBT type identifier
+     * @param id   the NBT type identifier
      * @param name the tag name (null or empty becomes "null")
      * @param data the initial payload for this tag
      * @throws IllegalArgumentException if the ID is not a valid NBT tag type
      */
     public Tag(int id, String name, T data)
     {
-        if (NBTTags.getById(id) == null) {
+        if (NBTTags.getById(id) == null)
+        {
             throw new IllegalArgumentException("Invalid ID: " + id);
         }
         this.id = id;
@@ -112,7 +114,7 @@ public abstract class Tag<T> implements ITag<T>
         if (this.data.getClass() == data.getClass())
         {
             this.data = data;
-        }else
+        } else
         {
             throw new IllegalArgumentException(String.format("Tag type mismatch! Expected %s, got %s", this.data.getClass(), data.getClass()));
         }
@@ -126,7 +128,8 @@ public abstract class Tag<T> implements ITag<T>
      * @see #setData(Object)
      * @see #setName(String)
      */
-    public void editTag(ITag<?> newTag) {
+    public void editTag(ITag<?> newTag)
+    {
         if (this.getId() == newTag.getId())
         {
             this.setName(newTag.getName());
@@ -139,7 +142,7 @@ public abstract class Tag<T> implements ITag<T>
 
     /**
      * Applies a custom transformation or operation to this tag.
-     * 
+     *
      * <p>Enables functional-style tag manipulation and processing.</p>
      *
      * @param operation the operation to execute on this tag

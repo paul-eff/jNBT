@@ -1,8 +1,9 @@
 package me.paulferlitz.core;
 
-import java.util.ArrayList;
 import me.paulferlitz.api.IListTag;
 import me.paulferlitz.util.NBTTags;
+
+import java.util.ArrayList;
 
 /**
  * Represents an NBT list tag - a homogeneous collection containing multiple
@@ -33,7 +34,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * Creates an empty named list with the specified element type.
      *
-     * @param name the tag name
+     * @param name       the tag name
      * @param listTypeID the NBT type ID for all elements in this list
      */
     public Tag_List(String name, int listTypeID)
@@ -45,9 +46,9 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * Creates a list pre-populated with elements of the specified type.
      *
-     * @param name the tag name
+     * @param name       the tag name
      * @param listTypeID the NBT type ID for all elements in this list
-     * @param data the initial collection of elements
+     * @param data       the initial collection of elements
      */
     public Tag_List(String name, int listTypeID, ArrayList<Tag<?>> data)
     {
@@ -57,7 +58,7 @@ public class Tag_List extends Collection_Tag implements IListTag
 
     /**
      * Returns the NBT type identifier for elements in this list.
-     * 
+     *
      * <p>All elements must match this type to maintain list homogeneity.</p>
      *
      * @return the NBT type ID of list elements
@@ -70,13 +71,13 @@ public class Tag_List extends Collection_Tag implements IListTag
     /*
      * ========== FLUENT API METHODS ==========
      */
-    
+
     /**
      * Adds a string element to this list with fluent chaining.
-     * 
+     *
      * <p>Only valid for lists declared as string type.</p>
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the string value
      * @return this list tag for fluent operations
      * @throws IllegalArgumentException if list type is not {@link Tag_String}
@@ -87,13 +88,13 @@ public class Tag_List extends Collection_Tag implements IListTag
         this.addTag(new Tag_String(name, value));
         return this;
     }
-    
+
     /**
      * Adds an integer element to this list with fluent chaining.
-     * 
+     *
      * <p>Only valid for lists declared as integer type.</p>
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the integer value
      * @return this list tag for fluent operations
      * @throws IllegalArgumentException if list type is not {@link Tag_Int}
@@ -104,13 +105,13 @@ public class Tag_List extends Collection_Tag implements IListTag
         this.addTag(new Tag_Int(name, value));
         return this;
     }
-    
+
     /**
      * Adds a double-precision element to this list with fluent chaining.
-     * 
+     *
      * <p>Only valid for lists declared as double type.</p>
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the double value
      * @return this list tag for fluent operations
      * @throws IllegalArgumentException if list type is not {@link Tag_Double}
@@ -121,10 +122,10 @@ public class Tag_List extends Collection_Tag implements IListTag
         this.addTag(new Tag_Double(name, value));
         return this;
     }
-    
+
     /**
      * Adds a compound element to this list with fluent chaining.
-     * 
+     *
      * <p>Only valid for lists declared as compound type.</p>
      *
      * @param name the element name
@@ -142,7 +143,7 @@ public class Tag_List extends Collection_Tag implements IListTag
 
     /**
      * Generates a hierarchical string representation showing list metadata and elements.
-     * 
+     *
      * <p>Output includes tag type, name, element type, size, and formatted child elements.</p>
      *
      * @return formatted multi-line string representation

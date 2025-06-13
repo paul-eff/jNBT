@@ -1,9 +1,10 @@
 package me.paulferlitz.builder;
 
-import java.util.ArrayList;
 import me.paulferlitz.api.IListTag;
 import me.paulferlitz.core.*;
 import me.paulferlitz.util.NBTTags;
+
+import java.util.ArrayList;
 
 /**
  * Fluent builder for creating type-safe NBT lists. All elements must share the same NBT type,
@@ -31,9 +32,9 @@ public class ListBuilder extends NBTBuilder
     /**
      * Creates a new list builder with strict type enforcement.
      *
-     * @param name the list tag name
+     * @param name     the list tag name
      * @param listType the NBT type all elements must match
-     * @param parent the parent builder for nesting support, or null for root lists
+     * @param parent   the parent builder for nesting support, or null for root lists
      * @throws IllegalArgumentException if listType is null
      */
     public ListBuilder(String name, NBTTags listType, NBTBuilder parent)
@@ -55,7 +56,7 @@ public class ListBuilder extends NBTBuilder
     /**
      * Adds a string element to the list.
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the string value
      * @return this builder for chaining
      * @throws IllegalArgumentException if this list doesn't accept strings
@@ -71,7 +72,7 @@ public class ListBuilder extends NBTBuilder
     /**
      * Adds an integer element to the list.
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the integer value
      * @return this builder for chaining
      * @throws IllegalArgumentException if this list doesn't accept integers
@@ -87,7 +88,7 @@ public class ListBuilder extends NBTBuilder
     /**
      * Adds a double element to the list.
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the double value
      * @return this builder for chaining
      * @throws IllegalArgumentException if this list doesn't accept doubles
@@ -103,7 +104,7 @@ public class ListBuilder extends NBTBuilder
     /**
      * Adds a float element to the list.
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the float value
      * @return this builder for chaining
      * @throws IllegalArgumentException if this list doesn't accept floats
@@ -119,7 +120,7 @@ public class ListBuilder extends NBTBuilder
     /**
      * Adds a byte element to the list.
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the byte value
      * @return this builder for chaining
      * @throws IllegalArgumentException if this list doesn't accept bytes
@@ -135,7 +136,7 @@ public class ListBuilder extends NBTBuilder
     /**
      * Adds a short element to the list.
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the short value
      * @return this builder for chaining
      * @throws IllegalArgumentException if this list doesn't accept shorts
@@ -151,7 +152,7 @@ public class ListBuilder extends NBTBuilder
     /**
      * Adds a long element to the list.
      *
-     * @param name the element name
+     * @param name  the element name
      * @param value the long value
      * @return this builder for chaining
      * @throws IllegalArgumentException if this list doesn't accept longs
@@ -181,7 +182,7 @@ public class ListBuilder extends NBTBuilder
     /**
      * Begins building a nested list element within this list.
      *
-     * @param name the nested list element name
+     * @param name           the nested list element name
      * @param nestedListType the NBT type for elements in the nested list
      * @return a new {@link ListBuilder} for defining the nested list's contents
      * @throws IllegalArgumentException if this list doesn't accept nested lists
@@ -205,15 +206,15 @@ public class ListBuilder extends NBTBuilder
         {
             throw new IllegalArgumentException("Tag cannot be null");
         }
-        
+
         NBTTags tagType = NBTTags.getById(tag.getId());
         if (tagType != listType)
         {
             throw new IllegalArgumentException(String.format(
-                "Tag type mismatch! List expects %s but got %s", 
-                listType.getName(), tagType.getName()));
+                    "Tag type mismatch! List expects %s but got %s",
+                    listType.getName(), tagType.getName()));
         }
-        
+
         list.addTag(tag);
     }
 
@@ -272,13 +273,11 @@ public class ListBuilder extends NBTBuilder
         {
             parentCompound.getCompound().addTag(list);
             return parentCompound;
-        }
-        else if (parent instanceof ListBuilder parentList)
+        } else if (parent instanceof ListBuilder parentList)
         {
             parentList.addBuiltTag(list);
             return parentList;
-        }
-        else
+        } else
         {
             throw new IllegalStateException("Unknown parent builder type");
         }
@@ -299,8 +298,8 @@ public class ListBuilder extends NBTBuilder
         if (listType != expectedType)
         {
             throw new IllegalArgumentException(String.format(
-                "List type mismatch! Expected %s but list is of type %s", 
-                expectedType.getName(), listType.getName()));
+                    "List type mismatch! Expected %s but list is of type %s",
+                    expectedType.getName(), listType.getName()));
         }
     }
 
@@ -332,7 +331,8 @@ public class ListBuilder extends NBTBuilder
     public CompoundBuilder endCompound()
     {
         NBTBuilder parent = end();
-        if (parent instanceof CompoundBuilder compound) {
+        if (parent instanceof CompoundBuilder compound)
+        {
             return compound;
         }
         throw new IllegalStateException("Parent is not a CompoundBuilder");
@@ -369,7 +369,8 @@ public class ListBuilder extends NBTBuilder
     public ListBuilder endList()
     {
         NBTBuilder parent = end();
-        if (parent instanceof ListBuilder list) {
+        if (parent instanceof ListBuilder list)
+        {
             return list;
         }
         throw new IllegalStateException("Parent is not a ListBuilder");

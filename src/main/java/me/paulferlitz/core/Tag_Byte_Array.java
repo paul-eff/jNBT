@@ -1,7 +1,8 @@
 package me.paulferlitz.core;
 
-import java.util.Arrays;
 import me.paulferlitz.util.NBTTags;
+
+import java.util.Arrays;
 
 /**
  * Class representing a NBT byte array tag.

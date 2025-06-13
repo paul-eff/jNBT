@@ -1,6 +1,8 @@
 package me.paulferlitz.formats.binary;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Enhanced DataInputStream wrapper that tracks read position for better error reporting.
@@ -126,7 +128,7 @@ public class PositionTrackingDataInputStream
     /**
      * Sets the current tag context for error reporting.
      *
-     * @param depth Current nesting depth
+     * @param depth   Current nesting depth
      * @param tagName Name of the tag being parsed
      * @param tagType Type ID of the tag being parsed
      */
@@ -147,22 +149,22 @@ public class PositionTrackingDataInputStream
     {
         StringBuilder error = new StringBuilder(baseMessage);
         error.append(String.format(" [Position: %d bytes", bytesRead));
-        
+
         if (tagDepth > 0)
         {
             error.append(String.format(", Depth: %d", tagDepth));
         }
-        
+
         if (!currentTagName.isEmpty())
         {
             error.append(String.format(", Tag: '%s'", currentTagName));
         }
-        
+
         if (currentTagType >= 0)
         {
             error.append(String.format(", Type: %d", currentTagType));
         }
-        
+
         error.append("]");
         return error.toString();
     }

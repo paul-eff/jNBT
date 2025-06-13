@@ -24,7 +24,7 @@ public interface ICompoundTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>
     /**
      * Adds a string tag with the given name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The {@link java.lang.String} value to store
      * @return This compound for fluent method chaining
      */
@@ -33,7 +33,7 @@ public interface ICompoundTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>
     /**
      * Adds an integer tag with the given name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The {@link java.lang.Integer} value to store
      * @return This compound for fluent method chaining
      */
@@ -42,7 +42,7 @@ public interface ICompoundTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>
     /**
      * Adds a double-precision floating point tag.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The {@link java.lang.Double} value to store
      * @return This compound for fluent method chaining
      */
@@ -51,7 +51,7 @@ public interface ICompoundTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>
     /**
      * Adds a single-precision floating point tag.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The {@link java.lang.Float} value to store
      * @return This compound for fluent method chaining
      */
@@ -60,7 +60,7 @@ public interface ICompoundTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>
     /**
      * Adds a byte tag with the given name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The {@link java.lang.Byte} value to store
      * @return This compound for fluent method chaining
      */
@@ -69,7 +69,7 @@ public interface ICompoundTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>
     /**
      * Adds a short integer tag.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The {@link java.lang.Short} value to store
      * @return This compound for fluent method chaining
      */
@@ -78,7 +78,7 @@ public interface ICompoundTag extends ITag<ArrayList<me.paulferlitz.core.Tag<?>>
     /**
      * Adds a long integer tag.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The {@link java.lang.Long} value to store
      * @return This compound for fluent method chaining
      */

@@ -1,10 +1,11 @@
 package me.paulferlitz.core;
 
-import java.util.ArrayList;
 import me.paulferlitz.api.ICompoundTag;
-import me.paulferlitz.api.ITag;
 import me.paulferlitz.api.IListTag;
+import me.paulferlitz.api.ITag;
 import me.paulferlitz.util.NBTTags;
+
+import java.util.ArrayList;
 
 /**
  * Represents an NBT compound tag - a named collection of heterogeneous tags
@@ -55,7 +56,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     /**
      * Adds a string tag and returns this compound for method chaining.
      *
-     * @param name the tag name
+     * @param name  the tag name
      * @param value the string value
      * @return this compound tag for fluent operations
      * @see Tag_String
@@ -65,11 +66,11 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         this.addTag(new Tag_String(name, value));
         return this;
     }
-    
+
     /**
      * Adds an integer tag and returns this compound for method chaining.
      *
-     * @param name the tag name
+     * @param name  the tag name
      * @param value the integer value
      * @return this compound tag for fluent operations
      * @see Tag_Int
@@ -79,11 +80,11 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         this.addTag(new Tag_Int(name, value));
         return this;
     }
-    
+
     /**
      * Adds a double-precision tag and returns this compound for method chaining.
      *
-     * @param name the tag name
+     * @param name  the tag name
      * @param value the double value
      * @return this compound tag for fluent operations
      * @see Tag_Double
@@ -93,11 +94,11 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         this.addTag(new Tag_Double(name, value));
         return this;
     }
-    
+
     /**
      * Adds a single-precision float tag and returns this compound for method chaining.
      *
-     * @param name the tag name
+     * @param name  the tag name
      * @param value the float value
      * @return this compound tag for fluent operations
      * @see Tag_Float
@@ -107,11 +108,11 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         this.addTag(new Tag_Float(name, value));
         return this;
     }
-    
+
     /**
      * Adds a byte tag and returns this compound for method chaining.
      *
-     * @param name the tag name
+     * @param name  the tag name
      * @param value the byte value
      * @return this compound tag for fluent operations
      * @see Tag_Byte
@@ -121,11 +122,11 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         this.addTag(new Tag_Byte(name, value));
         return this;
     }
-    
+
     /**
      * Adds a short integer tag and returns this compound for method chaining.
      *
-     * @param name the tag name
+     * @param name  the tag name
      * @param value the short value
      * @return this compound tag for fluent operations
      * @see Tag_Short
@@ -135,11 +136,11 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         this.addTag(new Tag_Short(name, value));
         return this;
     }
-    
+
     /**
      * Adds a long integer tag and returns this compound for method chaining.
      *
-     * @param name the tag name
+     * @param name  the tag name
      * @param value the long value
      * @return this compound tag for fluent operations
      * @see Tag_Long
@@ -153,7 +154,8 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     // Interface methods from ICompoundTag
 
     @Override
-    public boolean hasTag(String tagName) {
+    public boolean hasTag(String tagName)
+    {
         return getTagByName(tagName) != null;
     }
 
@@ -235,7 +237,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
 
     /**
      * Generates a hierarchical string representation showing all nested tags.
-     * 
+     *
      * <p>Output includes tag type, name, size, and recursively formatted child tags.</p>
      *
      * @return formatted multi-line string representation
