@@ -20,15 +20,17 @@ A comprehensive guide to using the jNBT library for reading, editing, and writin
 ### Reading an NBT File
 
 ```java
-import me.paulferlitz.api.*;
+import de.paulferlitz.api.ICompoundTag;
+import de.paulferlitz.api.NBTFileFactory;
+
 import java.io.File;
 
 // Simple one-liner to read any NBT file
 ICompoundTag root = NBTFileFactory.readNBTFile(new File("level.dat"));
 
-// Access data without casting
-String worldName = root.getString("LevelName");
-int spawnX = root.getInt("SpawnX");
+        // Access data without casting
+        String worldName = root.getString("LevelName");
+        int spawnX = root.getInt("SpawnX");
 ```
 
 ### Writing an NBT File
