@@ -1,6 +1,12 @@
 package me.paulferlitz.api;
 
 import me.paulferlitz.core.*;
+import me.paulferlitz.formats.snbt.SNBTException;
+import me.paulferlitz.formats.snbt.SNBTParser;
+import me.paulferlitz.formats.snbt.SNBTSerializer;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -58,7 +64,8 @@ public class NBTFactory
     public static ICompoundTag createCompound(String name, ArrayList<ITag<?>> data)
     {
         ArrayList<Tag<?>> tagData = new ArrayList<>();
-        for (ITag<?> tag : data) {
+        for (ITag<?> tag : data)
+        {
             tagData.add((Tag<?>) tag);
         }
         return new Tag_Compound(name, tagData);
@@ -78,7 +85,7 @@ public class NBTFactory
     /**
      * Creates a named list tag for the specified element type.
      *
-     * @param name The tag name
+     * @param name       The tag name
      * @param listTypeID The NBT type ID of elements this list will contain
      * @return New {@link IListTag} with the specified name and type
      */
@@ -111,7 +118,7 @@ public class NBTFactory
     /**
      * Creates a string tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The string value
      * @return New string {@link ITag} with the specified name and value
      */
@@ -144,7 +151,7 @@ public class NBTFactory
     /**
      * Creates an integer tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The integer value
      * @return New integer {@link ITag} with the specified name and value
      */
@@ -177,7 +184,7 @@ public class NBTFactory
     /**
      * Creates a double tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The double value
      * @return New double {@link ITag} with the specified name and value
      */
@@ -210,7 +217,7 @@ public class NBTFactory
     /**
      * Creates a float tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The float value
      * @return New float {@link ITag} with the specified name and value
      */
@@ -243,7 +250,7 @@ public class NBTFactory
     /**
      * Creates a byte tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The byte value
      * @return New byte {@link ITag} with the specified name and value
      */
@@ -276,7 +283,7 @@ public class NBTFactory
     /**
      * Creates a short tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The short value
      * @return New short {@link ITag} with the specified name and value
      */
@@ -309,7 +316,7 @@ public class NBTFactory
     /**
      * Creates a long tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The long value
      * @return New long {@link ITag} with the specified name and value
      */
@@ -342,7 +349,7 @@ public class NBTFactory
     /**
      * Creates a byte array tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The byte array value
      * @return New byte array {@link ITag} with the specified name and value
      */
@@ -375,7 +382,7 @@ public class NBTFactory
     /**
      * Creates an integer array tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The integer array value
      * @return New integer array {@link ITag} with the specified name and value
      */
@@ -408,7 +415,7 @@ public class NBTFactory
     /**
      * Creates a long array tag with name and value.
      *
-     * @param name The tag name
+     * @param name  The tag name
      * @param value The long array value
      * @return New long array {@link ITag} with the specified name and value
      */
@@ -425,7 +432,7 @@ public class NBTFactory
      * Creates a simple NBT structure with key-value string pairs.
      * Perfect for configuration files or simple data storage.
      *
-     * @param rootName The name of the root compound tag
+     * @param rootName      The name of the root compound tag
      * @param keyValuePairs Alternating keys and values (key1, value1, key2, value2, ...)
      * @return A {@link ICompoundTag} containing the key-value pairs
      * @throws IllegalArgumentException If an odd number of arguments is provided
@@ -443,5 +450,118 @@ public class NBTFactory
             compound.addString(keyValuePairs[i], keyValuePairs[i + 1]);
         }
         return compound;
+    }
+
+    /*
+     * ========== SNBT PARSING METHODS ==========
+     */
+
+    /**
+     * Parses SNBT (Stringified NBT) text into an NBT tag structure.
+     * Supports the complete SNBT syntax used in Minecraft commands.
+     *
+     * <p><strong>Example usage:</strong></p>
+     * <pre>{@code
+     * // Parse a compound from a Minecraft command
+     * ITag<?> tag = NBTFactory.parseFromSNBT("{display:{Name:\"Custom Item\"}}");
+     *
+     * // Parse a simple value
+     * ITag<?> number = NBTFactory.parseFromSNBT("42b");
+     *
+     * // Parse an array
+     * ITag<?> array = NBTFactory.parseFromSNBT("[I; 1, 2, 3]");
+     * }</pre>
+     *
+     * @param snbt The SNBT string to parse
+     * @return The parsed NBT tag structure
+     * @throws SNBTException If the SNBT syntax is invalid
+     */
+    public static ITag<?> parseFromSNBT(String snbt) throws SNBTException
+    {
+        if (snbt == null || snbt.trim().isEmpty())
+        {
+            throw new SNBTException("SNBT string cannot be null or empty");
+        }
+
+        SNBTParser parser = new SNBTParser(snbt.trim());
+        return parser.parse();
+    }
+
+    /**
+     * Parses SNBT text into a compound tag.
+     * Convenience method that ensures the result is a compound tag.
+     *
+     * @param snbt The SNBT string to parse (must represent a compound)
+     * @return The parsed compound tag
+     * @throws SNBTException If the SNBT syntax is invalid or doesn't represent a compound
+     */
+    public static ICompoundTag parseCompoundFromSNBT(String snbt) throws SNBTException
+    {
+        ITag<?> tag = parseFromSNBT(snbt);
+        if (!(tag instanceof ICompoundTag))
+        {
+            throw new SNBTException("SNBT does not represent a compound tag");
+        }
+        return (ICompoundTag) tag;
+    }
+
+    /**
+     * Parses SNBT text into a list tag.
+     * Convenience method that ensures the result is a list tag.
+     *
+     * @param snbt The SNBT string to parse (must represent a list)
+     * @return The parsed list tag
+     * @throws SNBTException If the SNBT syntax is invalid or doesn't represent a list
+     */
+    public static IListTag parseListFromSNBT(String snbt) throws SNBTException
+    {
+        ITag<?> tag = parseFromSNBT(snbt);
+        if (!(tag instanceof IListTag))
+        {
+            throw new SNBTException("SNBT does not represent a list tag");
+        }
+        return (IListTag) tag;
+    }
+
+    /*
+     * ========== SNBT SERIALIZATION METHODS ==========
+     */
+
+    /**
+     * Converts an NBT tag to SNBT (Stringified NBT) format.
+     * Uses compact formatting suitable for Minecraft commands.
+     *
+     * <p><strong>Example usage:</strong></p>
+     * <pre>{@code
+     * ICompoundTag player = NBTFactory.createCompound("Player")
+     *     .addString("name", "Steve")
+     *     .addInt("level", 42);
+     *
+     * String snbt = NBTFactory.toSNBT(player);
+     * // Result: {name:"Steve",level:42}
+     * }</pre>
+     *
+     * @param tag The NBT tag to serialize
+     * @return The SNBT string representation
+     */
+    public static String toSNBT(ITag<?> tag)
+    {
+        SNBTSerializer serializer = new SNBTSerializer();
+        return serializer.serialize(tag);
+    }
+
+
+    /**
+     * Writes an NBT tag to a text file in SNBT format.
+     * Uses Minecraft-compatible formatting and adds a trailing newline.
+     *
+     * @param tag  The NBT tag to write
+     * @param file The output file
+     * @throws IOException If writing to the file fails
+     */
+    public static void writeToSNBTFile(ITag<?> tag, File file) throws IOException
+    {
+        SNBTSerializer serializer = new SNBTSerializer();
+        serializer.writeToFile(tag, file);
     }
 }
