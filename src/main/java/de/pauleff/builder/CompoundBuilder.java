@@ -231,7 +231,7 @@ public class CompoundBuilder extends NBTBuilder
      *
      * @return the parent {@link NBTBuilder} to continue building
      * @throws IllegalStateException if called on a root builder (use {@link #build()} instead)
-     * @since 1.3
+     * @since 1.3.0
      */
     @Override
     public NBTBuilder end()
@@ -278,7 +278,7 @@ public class CompoundBuilder extends NBTBuilder
      *
      * @return the parent as a CompoundBuilder
      * @throws IllegalStateException if parent is not a CompoundBuilder
-     * @since 1.5
+     * @since 1.5.0
      */
     public CompoundBuilder endCompound()
     {
@@ -314,7 +314,7 @@ public class CompoundBuilder extends NBTBuilder
      *
      * @return the parent as a ListBuilder
      * @throws IllegalStateException if parent is not a ListBuilder
-     * @since 1.5
+     * @since 1.5.0
      */
     public ListBuilder endList()
     {
