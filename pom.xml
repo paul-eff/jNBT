@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.pauleff</groupId>
-    <artifactId>jNBT</artifactId>
+    <artifactId>jnbt</artifactId>
     <version>1.6.0</version>
     <packaging>jar</packaging>
 
@@ -133,7 +133,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
-                    <autoPublish>true</autoPublish>
+                    <autoPublish>false</autoPublish>
                 </configuration>
             </plugin>
         </plugins>
