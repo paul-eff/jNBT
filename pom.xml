@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.pauleff</groupId>
+    <groupId>de.pauleff.jnbt</groupId>
     <artifactId>jnbt</artifactId>
     <version>1.6.0</version>
     <packaging>jar</packaging>
@@ -12,7 +12,7 @@
     <name>jNBT</name>
     <description>A modern, efficient Java library for reading, editing, and writing Minecraft NBT files</description>
     <url>https://github.com/paul-eff/jNBT</url>
-    <inceptionYear>2023</inceptionYear>
+    <inceptionYear>2022</inceptionYear>
 
     <licenses>
         <license>
