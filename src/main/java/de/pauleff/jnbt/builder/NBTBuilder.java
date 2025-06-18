@@ -209,6 +209,29 @@ public abstract class NBTBuilder
         return builder;
     }
 
+    /**
+     * Creates a compound builder pre-loaded with data from an existing ICompoundTag.
+     * The builder can then be used to modify the structure before saving.
+     *
+     * @param compoundTag The {@link ICompoundTag} to load data from
+     * @return A {@link CompoundBuilder} containing the loaded data
+     */
+    public static CompoundBuilder fromCompound(ICompoundTag compoundTag)
+    {
+        CompoundBuilder builder = new CompoundBuilder(compoundTag.getName(), null);
+
+        // Copy loaded data into the builder
+        if (compoundTag instanceof Tag_Compound concrete)
+        {
+            for (Tag<?> tag : concrete.getData())
+            {
+                builder.addTag(tag);
+            }
+        }
+
+        return builder;
+    }
+
     /*
      * ========== VALIDATION METHODS ==========
      */
