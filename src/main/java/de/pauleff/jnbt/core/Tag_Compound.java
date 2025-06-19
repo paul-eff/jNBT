@@ -151,6 +151,48 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
+    /**
+     * Adds a byte array tag and returns this compound for method chaining.
+     *
+     * @param name  the tag name
+     * @param value the byte array value
+     * @return this compound tag for fluent operations
+     * @see Tag_Byte_Array
+     */
+    public ICompoundTag addByteArray(String name, byte[] value)
+    {
+        this.addTag(new Tag_Byte_Array(name, value));
+        return this;
+    }
+
+    /**
+     * Adds an integer array tag and returns this compound for method chaining.
+     *
+     * @param name  the tag name
+     * @param value the integer array value
+     * @return this compound tag for fluent operations
+     * @see Tag_Int_Array
+     */
+    public ICompoundTag addIntArray(String name, int[] value)
+    {
+        this.addTag(new Tag_Int_Array(name, value));
+        return this;
+    }
+
+    /**
+     * Adds a long array tag and returns this compound for method chaining.
+     *
+     * @param name  the tag name
+     * @param value the long array value
+     * @return this compound tag for fluent operations
+     * @see Tag_Long_Array
+     */
+    public ICompoundTag addLongArray(String name, long[] value)
+    {
+        this.addTag(new Tag_Long_Array(name, value));
+        return this;
+    }
+
     // Interface methods from ICompoundTag
 
     @Override
@@ -214,6 +256,39 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     }
 
     @Override
+    public float getFloat(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Float)
+        {
+            return (Float) tag.getData();
+        }
+        return 0.0f;
+    }
+
+    @Override
+    public short getShort(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Short)
+        {
+            return (Short) tag.getData();
+        }
+        return 0;
+    }
+
+    @Override
+    public long getLong(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Long)
+        {
+            return (Long) tag.getData();
+        }
+        return 0L;
+    }
+
+    @Override
     public ICompoundTag getCompound(String name)
     {
         Tag<?> tag = getTagByName(name);
@@ -233,6 +308,175 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
             return (IListTag) tag;
         }
         return null;
+    }
+
+    @Override
+    public byte[] getByteArray(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Byte_Array)
+        {
+            return (byte[]) tag.getData();
+        }
+        return null;
+    }
+
+    @Override
+    public int[] getIntArray(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Int_Array)
+        {
+            return (int[]) tag.getData();
+        }
+        return null;
+    }
+
+    @Override
+    public long[] getLongArray(String name)
+    {
+        Tag<?> tag = getTagByName(name);
+        if (tag instanceof Tag_Long_Array)
+        {
+            return (long[]) tag.getData();
+        }
+        return null;
+    }
+
+    /*
+     * ========== UPDATE METHODS (FLUENT API) ==========
+     */
+
+    @Override
+    public ICompoundTag setString(String name, String value)
+    {
+        removeTagByName(name);
+        addString(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setInt(String name, int value)
+    {
+        removeTagByName(name);
+        addInt(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setDouble(String name, double value)
+    {
+        removeTagByName(name);
+        addDouble(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setFloat(String name, float value)
+    {
+        removeTagByName(name);
+        addFloat(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setByte(String name, byte value)
+    {
+        removeTagByName(name);
+        addByte(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setShort(String name, short value)
+    {
+        removeTagByName(name);
+        addShort(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setLong(String name, long value)
+    {
+        removeTagByName(name);
+        addLong(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setByteArray(String name, byte[] value)
+    {
+        removeTagByName(name);
+        addByteArray(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setIntArray(String name, int[] value)
+    {
+        removeTagByName(name);
+        addIntArray(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setLongArray(String name, long[] value)
+    {
+        removeTagByName(name);
+        addLongArray(name, value);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag setTag(ITag<?> tag)
+    {
+        if (tag == null)
+        {
+            throw new IllegalArgumentException("Tag cannot be null");
+        }
+        removeTagByName(tag.getName());
+        addTag(tag);
+        return this;
+    }
+
+    /*
+     * ========== DELETE METHODS (FLUENT API) ==========
+     */
+
+    @Override
+    public ICompoundTag removeTag(String name)
+    {
+        removeTagByName(name);
+        return this;
+    }
+
+    @Override
+    public ICompoundTag removeTags(String... names)
+    {
+        for (String name : names)
+        {
+            removeTagByName(name);
+        }
+        return this;
+    }
+
+    @Override
+    public ICompoundTag clear()
+    {
+        getData().clear();
+        return this;
+    }
+
+    @Override
+    public int size()
+    {
+        return getData().size();
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+        return getData().isEmpty();
     }
 
     /**

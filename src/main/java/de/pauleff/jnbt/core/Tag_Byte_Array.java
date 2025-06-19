@@ -9,7 +9,7 @@ import java.util.Arrays;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Byte_Array extends Basic_Tag<byte[]>
+public class Tag_Byte_Array extends Tag<byte[]>
 {
     /**
      * Create an empty byte array tag.

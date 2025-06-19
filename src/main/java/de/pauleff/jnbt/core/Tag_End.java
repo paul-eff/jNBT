@@ -7,7 +7,7 @@ import de.pauleff.jnbt.util.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_End extends Basic_Tag<Object>
+public class Tag_End extends Tag<Object>
 {
     /**
      * Create an empty end tag.

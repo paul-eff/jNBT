@@ -7,7 +7,7 @@ import de.pauleff.jnbt.util.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Double extends Basic_Tag<Double>
+public class Tag_Double extends Tag<Double>
 {
     /**
      * Create an empty double tag.

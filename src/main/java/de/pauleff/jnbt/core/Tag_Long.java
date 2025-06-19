@@ -7,7 +7,7 @@ import de.pauleff.jnbt.util.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Long extends Basic_Tag<Long>
+public class Tag_Long extends Tag<Long>
 {
     /**
      * Create an empty long tag.

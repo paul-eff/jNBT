@@ -9,7 +9,7 @@ import java.util.Arrays;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Long_Array extends Basic_Tag<long[]>
+public class Tag_Long_Array extends Tag<long[]>
 {
     /**
      * Create an empty long array tag.

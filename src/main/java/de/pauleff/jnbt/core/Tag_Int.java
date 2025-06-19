@@ -7,7 +7,7 @@ import de.pauleff.jnbt.util.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Int extends Basic_Tag<Integer>
+public class Tag_Int extends Tag<Integer>
 {
     /**
      * Create an empty int tag.

@@ -9,7 +9,7 @@ import java.util.Arrays;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Int_Array extends Basic_Tag<int[]>
+public class Tag_Int_Array extends Tag<int[]>
 {
     /**
      * Create an empty int array tag.

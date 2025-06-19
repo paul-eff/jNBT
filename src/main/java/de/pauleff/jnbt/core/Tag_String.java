@@ -7,7 +7,7 @@ import de.pauleff.jnbt.util.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_String extends Basic_Tag<String>
+public class Tag_String extends Tag<String>
 {
     /**
      * Create an empty string tag.

@@ -44,6 +44,24 @@ public class CompoundBuilder extends NBTBuilder
         this.compound = new Tag_Compound(name);
     }
 
+    /**
+     * Creates a compound builder from an existing compound tag for modification.
+     *
+     * @param existingCompound the existing compound to modify
+     * @param parent           the parent builder for nesting support, or null for root compounds
+     */
+    public CompoundBuilder(ICompoundTag existingCompound, NBTBuilder parent)
+    {
+        super(existingCompound.getName(), parent);
+        if (existingCompound instanceof Tag_Compound)
+        {
+            this.compound = (Tag_Compound) existingCompound;
+        } else
+        {
+            throw new IllegalArgumentException("Cannot build from non-Tag_Compound implementation");
+        }
+    }
+
     /*
      * ========== FLUENT API METHODS ==========
      */
@@ -147,6 +165,48 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
+     * Stores a byte array with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the byte array content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder addByteArray(String name, byte[] value)
+    {
+        validateName(name);
+        compound.addByteArray(name, value);
+        return this;
+    }
+
+    /**
+     * Stores an integer array with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the integer array content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder addIntArray(String name, int[] value)
+    {
+        validateName(name);
+        compound.addIntArray(name, value);
+        return this;
+    }
+
+    /**
+     * Stores a long array with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the long array content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder addLongArray(String name, long[] value)
+    {
+        validateName(name);
+        compound.addLongArray(name, value);
+        return this;
+    }
+
+    /**
      * Incorporates an existing tag into this compound.
      *
      * @param tag the pre-built tag to include
@@ -188,6 +248,202 @@ public class CompoundBuilder extends NBTBuilder
     {
         validateName(name);
         return new CompoundBuilder(name, this);
+    }
+
+    /*
+     * ========== UPDATE/DELETE METHODS ==========
+     */
+
+    /**
+     * Updates or creates a string value with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the string content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setString(String name, String value)
+    {
+        validateName(name);
+        compound.setString(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates an integer value with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the numeric content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setInt(String name, int value)
+    {
+        validateName(name);
+        compound.setInt(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates a double-precision value with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the floating-point content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setDouble(String name, double value)
+    {
+        validateName(name);
+        compound.setDouble(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates a float value with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the floating-point content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setFloat(String name, float value)
+    {
+        validateName(name);
+        compound.setFloat(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates a byte value with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the byte content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setByte(String name, byte value)
+    {
+        validateName(name);
+        compound.setByte(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates a short integer with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the numeric content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setShort(String name, short value)
+    {
+        validateName(name);
+        compound.setShort(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates a long integer with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the numeric content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setLong(String name, long value)
+    {
+        validateName(name);
+        compound.setLong(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates a byte array with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the byte array content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setByteArray(String name, byte[] value)
+    {
+        validateName(name);
+        compound.setByteArray(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates an integer array with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the integer array content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setIntArray(String name, int[] value)
+    {
+        validateName(name);
+        compound.setIntArray(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or creates a long array with the specified name.
+     *
+     * @param name  the tag identifier
+     * @param value the long array content
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setLongArray(String name, long[] value)
+    {
+        validateName(name);
+        compound.setLongArray(name, value);
+        return this;
+    }
+
+    /**
+     * Updates or replaces an existing tag.
+     *
+     * @param tag the tag to set
+     * @return this builder for chaining
+     */
+    public CompoundBuilder setTag(Tag<?> tag)
+    {
+        if (tag == null)
+        {
+            throw new IllegalArgumentException("Tag cannot be null");
+        }
+        validateName(tag.getName());
+        compound.setTag(tag);
+        return this;
+    }
+
+    /**
+     * Removes a tag by name.
+     *
+     * @param name the tag name to remove
+     * @return this builder for chaining
+     */
+    public CompoundBuilder removeTag(String name)
+    {
+        compound.removeTag(name);
+        return this;
+    }
+
+    /**
+     * Removes multiple tags by name.
+     *
+     * @param names the tag names to remove
+     * @return this builder for chaining
+     */
+    public CompoundBuilder removeTags(String... names)
+    {
+        compound.removeTags(names);
+        return this;
+    }
+
+    /**
+     * Removes all tags from this compound.
+     *
+     * @return this builder for chaining
+     */
+    public CompoundBuilder clear()
+    {
+        compound.clear();
+        return this;
     }
 
     /*

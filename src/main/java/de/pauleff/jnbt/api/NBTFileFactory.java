@@ -1,5 +1,7 @@
 package de.pauleff.jnbt.api;
 
+import de.pauleff.jnbt.core.Tag;
+import de.pauleff.jnbt.core.Tag_Compound;
 import de.pauleff.jnbt.formats.binary.Compression_Types;
 import de.pauleff.jnbt.formats.binary.NBTFileHandler;
 import de.pauleff.jnbt.formats.binary.NBTReader;
@@ -118,7 +120,6 @@ public class NBTFileFactory
         } catch (FileNotFoundException e)
         {
             // If the file doesn't exist, create a new one with default compression = NONE
-            System.out.println("NBT File could not be found, creating new one and using default compression (NONE).");
             try (INBTWriter writer = createWriter(nbtFile, Compression_Types.NONE))
             {
                 writer.write(root);
@@ -171,6 +172,181 @@ public class NBTFileFactory
         } catch (Exception e)
         {
             return false;
+        }
+    }
+
+    /*
+     * ========== UPDATE OPERATIONS ==========
+     */
+
+    /**
+     * Updates a specific tag in an NBT file without loading the entire structure.
+     * Performs a read-modify-write operation preserving original compression.
+     *
+     * @param nbtFile The {@link java.io.File} to update
+     * @param tagPath The path to the tag (e.g., "Data.Player.Level")
+     * @param newValue The new value to set
+     * @param <T> The type of the new value
+     * @throws IOException If the file operation fails
+     */
+    public static <T> void updateTag(File nbtFile, String tagPath, T newValue) throws IOException
+    {
+        ICompoundTag root = readNBTFile(nbtFile);
+        updateTagInCompound(root, tagPath, newValue);
+        writeNBTFile(nbtFile, root);
+    }
+
+    /**
+     * Removes a specific tag from an NBT file.
+     * Performs a read-modify-write operation preserving original compression.
+     *
+     * @param nbtFile The {@link java.io.File} to update
+     * @param tagPath The path to the tag to remove (e.g., "Data.Player.OldField")
+     * @throws IOException If the file operation fails
+     */
+    public static void removeTag(File nbtFile, String tagPath) throws IOException
+    {
+        ICompoundTag root = readNBTFile(nbtFile);
+        removeTagFromCompound(root, tagPath);
+        writeNBTFile(nbtFile, root);
+    }
+
+    /**
+     * Creates a backup of an NBT file before modification.
+     *
+     * @param original The original {@link java.io.File}
+     * @return The backup {@link java.io.File}
+     * @throws IOException If the backup operation fails
+     */
+    public static File createBackup(File original) throws IOException
+    {
+        File backup = new File(original.getParent(), original.getName() + ".backup");
+        copyNBTFile(original, backup);
+        return backup;
+    }
+
+    /**
+     * Merges two NBT files, with the second file's data overriding the first.
+     *
+     * @param baseFile The base {@link java.io.File}
+     * @param mergeFile The file to merge into the base
+     * @param outputFile The output {@link java.io.File}
+     * @throws IOException If the merge operation fails
+     */
+    public static void mergeNBTFiles(File baseFile, File mergeFile, File outputFile) throws IOException
+    {
+        ICompoundTag base = readNBTFile(baseFile);
+        ICompoundTag merge = readNBTFile(mergeFile);
+        
+        mergeCompounds(base, merge);
+        
+        Compression_Types compression = NBTFileHandler.getCompressionType(baseFile);
+        writeNBTFile(outputFile, base, compression);
+    }
+
+    /*
+     * ========== HELPER METHODS ==========
+     */
+
+    /**
+     * Updates a tag value deep within a compound structure using dot notation.
+     */
+    private static <T> void updateTagInCompound(ICompoundTag compound, String tagPath, T newValue)
+    {
+        String[] pathParts = tagPath.split("\\.");
+        ICompoundTag current = compound;
+        
+        // Navigate to the parent compound
+        for (int i = 0; i < pathParts.length - 1; i++)
+        {
+            ICompoundTag next = current.getCompound(pathParts[i]);
+            if (next == null)
+            {
+                throw new IllegalArgumentException("Tag path not found: " + tagPath);
+            }
+            current = next;
+        }
+        
+        // Update the final tag
+        String finalTagName = pathParts[pathParts.length - 1];
+        if (newValue instanceof String)
+        {
+            current.setString(finalTagName, (String) newValue);
+        } else if (newValue instanceof Integer)
+        {
+            current.setInt(finalTagName, (Integer) newValue);
+        } else if (newValue instanceof Double)
+        {
+            current.setDouble(finalTagName, (Double) newValue);
+        } else if (newValue instanceof Float)
+        {
+            current.setFloat(finalTagName, (Float) newValue);
+        } else if (newValue instanceof Byte)
+        {
+            current.setByte(finalTagName, (Byte) newValue);
+        } else if (newValue instanceof Short)
+        {
+            current.setShort(finalTagName, (Short) newValue);
+        } else if (newValue instanceof Long)
+        {
+            current.setLong(finalTagName, (Long) newValue);
+        } else
+        {
+            throw new IllegalArgumentException("Unsupported value type: " + newValue.getClass());
+        }
+    }
+
+    /**
+     * Removes a tag deep within a compound structure using dot notation.
+     */
+    private static void removeTagFromCompound(ICompoundTag compound, String tagPath)
+    {
+        String[] pathParts = tagPath.split("\\.");
+        ICompoundTag current = compound;
+        
+        // Navigate to the parent compound
+        for (int i = 0; i < pathParts.length - 1; i++)
+        {
+            ICompoundTag next = current.getCompound(pathParts[i]);
+            if (next == null)
+            {
+                throw new IllegalArgumentException("Tag path not found: " + tagPath);
+            }
+            current = next;
+        }
+        
+        // Remove the final tag
+        String finalTagName = pathParts[pathParts.length - 1];
+        current.removeTag(finalTagName);
+    }
+
+    /**
+     * Merges the contents of the source compound into the target compound.
+     * Source values override target values for matching keys.
+     */
+    private static void mergeCompounds(ICompoundTag target, ICompoundTag source)
+    {
+        if (source instanceof Tag_Compound sourceCompound)
+        {
+            for (Tag<?> sourceTag : sourceCompound.getData())
+            {
+                if (sourceTag instanceof Tag_Compound && target.hasTag(sourceTag.getName()))
+                {
+                    // Recursively merge nested compounds
+                    ICompoundTag targetNested = target.getCompound(sourceTag.getName());
+                    if (targetNested != null)
+                    {
+                        mergeCompounds(targetNested, (ICompoundTag) sourceTag);
+                    } else
+                    {
+                        target.setTag(sourceTag);
+                    }
+                } else
+                {
+                    // Replace or add the tag
+                    target.setTag(sourceTag);
+                }
+            }
         }
     }
 }

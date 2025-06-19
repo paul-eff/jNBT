@@ -7,7 +7,7 @@ import de.pauleff.jnbt.util.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Float extends Basic_Tag<Float>
+public class Tag_Float extends Tag<Float>
 {
     /**
      * Create an empty float tag.

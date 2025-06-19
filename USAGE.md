@@ -20,8 +20,8 @@ A comprehensive guide to using the jNBT library for reading, editing, and writin
 ### Reading an NBT File
 
 ```java
-import de.pauleff.api.ICompoundTag;
-import de.pauleff.api.NBTFileFactory;
+import de.pauleff.jnbt.api.ICompoundTag;
+import de.pauleff.jnbt.api.NBTFileFactory;
 
 import java.io.File;
 
@@ -56,19 +56,19 @@ The primary entry point for reading and writing NBT files with automatic compres
 
 ```java
 // Reading
-static ICompoundTag readNBTFile(File nbtFile)
-static INBTReader createReader(File nbtFile)
-static INBTReader createReader(DataInputStream dis)
+static ICompoundTag readNBTFile(File nbtFile);
+static INBTReader createReader(File nbtFile);
+static INBTReader createReader(DataInputStream dis);
 
 // Writing  
-static void writeNBTFile(File nbtFile, ICompoundTag root)
-static void writeNBTFile(File nbtFile, ICompoundTag root, Compression_Types compression)
-static INBTWriter createWriter(File nbtFile)
-static INBTWriter createWriter(File nbtFile, Compression_Types compression)
+static void writeNBTFile(File nbtFile, ICompoundTag root);
+static void writeNBTFile(File nbtFile, ICompoundTag root, Compression_Types compression);
+static INBTWriter createWriter(File nbtFile);
+static INBTWriter createWriter(File nbtFile, Compression_Types compression);
 
 // Utilities
-static void copyNBTFile(File source, File destination)
-static boolean isValidNBTFile(File nbtFile)
+static void copyNBTFile(File source, File destination);
+static boolean isValidNBTFile(File nbtFile);
 ```
 
 #### Usage Examples
@@ -100,73 +100,73 @@ Creates individual NBT tags programmatically without dealing with constructors.
 
 ```java
 // String tags
-ITag<String> createString()
-ITag<String> createString(String name)
-ITag<String> createString(String name, String value)
+ITag<String> createString();
+ITag<String> createString(String name);
+ITag<String> createString(String name, String value);
 
 // Numeric tags
-ITag<Integer> createInt()
-ITag<Integer> createInt(String name)
-ITag<Integer> createInt(String name, int value)
+ITag<Integer> createInt();
+ITag<Integer> createInt(String name);
+ITag<Integer> createInt(String name, int value);
 
-ITag<Double> createDouble()
-ITag<Double> createDouble(String name)
-ITag<Double> createDouble(String name, double value)
+ITag<Double> createDouble();
+ITag<Double> createDouble(String name);
+ITag<Double> createDouble(String name, double value);
 
-ITag<Float> createFloat()
-ITag<Float> createFloat(String name)  
-ITag<Float> createFloat(String name, float value)
+ITag<Float> createFloat();
+ITag<Float> createFloat(String name);
+ITag<Float> createFloat(String name, float value);
 
-ITag<Byte> createByte()
-ITag<Byte> createByte(String name)
-ITag<Byte> createByte(String name, byte value)
+ITag<Byte> createByte();
+ITag<Byte> createByte(String name);
+ITag<Byte> createByte(String name, byte value);
 
-ITag<Short> createShort()
-ITag<Short> createShort(String name)
-ITag<Short> createShort(String name, short value)
+ITag<Short> createShort();
+ITag<Short> createShort(String name);
+ITag<Short> createShort(String name, short value);
 
-ITag<Long> createLong()
-ITag<Long> createLong(String name)
-ITag<Long> createLong(String name, long value)
+ITag<Long> createLong();
+ITag<Long> createLong(String name);
+ITag<Long> createLong(String name, long value);
 ```
 
 #### Array Tags
 
 ```java
 // Byte arrays
-ITag<byte[]> createByteArray()
-ITag<byte[]> createByteArray(String name)
-ITag<byte[]> createByteArray(String name, byte[] value)
+ITag<byte[]> createByteArray();
+ITag<byte[]> createByteArray(String name);
+ITag<byte[]> createByteArray(String name, byte[] value);
 
 // Integer arrays
-ITag<int[]> createIntArray()
-ITag<int[]> createIntArray(String name)
-ITag<int[]> createIntArray(String name, int[] value)
+ITag<int[]> createIntArray();
+ITag<int[]> createIntArray(String name);
+ITag<int[]> createIntArray(String name, int[] value);
 
 // Long arrays
-ITag<long[]> createLongArray()
-ITag<long[]> createLongArray(String name)
-ITag<long[]> createLongArray(String name, long[] value)
+ITag<long[]> createLongArray();
+ITag<long[]> createLongArray(String name);
+ITag<long[]> createLongArray(String name, long[] value);
 ```
 
 #### Container Tags
 
 ```java
 // Compound tags (key-value storage)
-ICompoundTag createCompound()
-ICompoundTag createCompound(String name)
-ICompoundTag createCompound(String name, ArrayList<ITag<?>> data)
+ICompoundTag createCompound();
+ICompoundTag createCompound(String name);
+ICompoundTag createCompound(String name, ArrayList<ITag<?>> data);
 
 // List tags (homogeneous arrays)
-IListTag createList(int listTypeID)
-IListTag createList(String name, int listTypeID)
+IListTag createList(int listTypeID);
+IListTag createList(String name, int listTypeID);
 ```
 
 #### Convenience Methods
 
 ```java
 // Quick key-value compound creation
-ICompoundTag createSimpleCompound(String rootName, String... keyValuePairs)
+ICompoundTag createSimpleCompound(String rootName, String... keyValuePairs);
 
 // Example usage
 ICompoundTag config = NBTFactory.createSimpleCompound("Config",
@@ -184,28 +184,28 @@ Advanced builder pattern for creating complex NBT structures with method chainin
 
 ```java
 // Container builders
-static CompoundBuilder compound(String name)
-static ListBuilder list(String name, NBTTags listType)
+static CompoundBuilder compound(String name);
+static ListBuilder list(String name, NBTTags listType);
 
 // Direct tag creation
-static ITag<String> string(String name, String value)
-static ITag<Integer> integer(String name, int value)
-static ITag<Double> doubleTag(String name, double value)
-static ITag<Float> floatTag(String name, float value)
-static ITag<Byte> byteTag(String name, byte value)
-static ITag<Short> shortTag(String name, short value)
-static ITag<Long> longTag(String name, long value)
+static ITag<String> string(String name, String value);
+static ITag<Integer> integer(String name, int value);
+static ITag<Double> doubleTag(String name, double value);
+static ITag<Float> floatTag(String name, float value);
+static ITag<Byte> byteTag(String name, byte value);
+static ITag<Short> shortTag(String name, short value);
+static ITag<Long> longTag(String name, long value);
 ```
 
 #### File Integration
 
 ```java
 // Load existing file for modification
-static CompoundBuilder fromFile(File file)
+static CompoundBuilder fromFile(File file);
 
 // Build and save directly
-void buildAndSave(File file)
-void buildAndSave(File file, Compression_Types compression)
+void buildAndSave(File file);
+void buildAndSave(File file, Compression_Types compression);
 ```
 
 ## File Operations

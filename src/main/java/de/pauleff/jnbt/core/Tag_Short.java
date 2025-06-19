@@ -7,7 +7,7 @@ import de.pauleff.jnbt.util.NBTTags;
  *
  * @author Paul Ferlitz
  */
-public class Tag_Short extends Basic_Tag<Short>
+public class Tag_Short extends Tag<Short>
 {
     /**
      * Create an empty short tag.
