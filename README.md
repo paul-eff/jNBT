@@ -1,8 +1,8 @@
-# jNBT v1.6.0
+# jNBT v1.7.0
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.6.0-blue)
+![Version](https://img.shields.io/badge/version-1.7.0-blue)
 ![Minecraft](https://img.shields.io/badge/minecraft-1.21.5%20(Java)-green)
 ![Java](https://img.shields.io/badge/java-21-red)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
