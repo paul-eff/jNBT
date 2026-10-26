@@ -11,6 +11,9 @@ import java.util.function.Consumer;
  * identification, and manipulation within the NBT hierarchy.
  * <p>Each tag maintains a unique identifier, optional name, and typed data payload.
  * Tags support fluent operations, equality checking, and custom transformations.</p>
+ * <p>Explicit names, including empty strings and whitespace, are preserved exactly.
+ * For compatibility, null names and constructors without a name use the literal
+ * string {@code "null"}.</p>
  *
  * @param <T> the data type stored within this tag
 
@@ -36,7 +39,7 @@ public abstract class Tag<T> implements ITag<T>
      * Creates a new named tag with the specified NBT type identifier.
      *
      * @param id   the NBT type identifier
-     * @param name the tag name (null or empty becomes "null")
+     * @param name the tag name (null becomes "null"; empty strings are preserved)
      * @throws IllegalArgumentException if the ID is not a valid NBT tag type
      */
     public Tag(int id, String name)
@@ -48,7 +51,7 @@ public abstract class Tag<T> implements ITag<T>
      * Creates a new tag with complete initialization.
      *
      * @param id   the NBT type identifier
-     * @param name the tag name (null or empty becomes "null")
+     * @param name the tag name (null becomes "null"; empty strings are preserved)
      * @param data the initial payload for this tag
      * @throws IllegalArgumentException if the ID is not a valid NBT tag type
      */
@@ -59,7 +62,7 @@ public abstract class Tag<T> implements ITag<T>
             throw new IllegalArgumentException("Invalid ID: " + id);
         }
         this.id = id;
-        this.name = (name == null || name.isEmpty()) ? "null" : name;
+        this.name = name == null ? "null" : name;
         this.data = data;
     }
 
@@ -86,11 +89,11 @@ public abstract class Tag<T> implements ITag<T>
     /**
      * Updates the name assigned to this tag.
      *
-     * @param name the new tag name (null or empty becomes "null")
+     * @param name the new tag name (null becomes "null"; empty strings are preserved)
      */
     public void setName(String name)
     {
-        this.name = (name == null || name.isEmpty()) ? "null" : name;
+        this.name = name == null ? "null" : name;
     }
 
     /**

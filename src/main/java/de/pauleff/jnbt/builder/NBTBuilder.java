@@ -10,6 +10,9 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Fluent factory for creating NBT tag structures with type safety and readable syntax.
  * Provides static factory methods and builder patterns for constructing complex NBT hierarchies.
+ * <p>Names may be empty or contain whitespace and are preserved exactly. Builder
+ * methods reject null names. List element names exist only in memory; binary NBT
+ * list payloads do not store them.</p>
  *
  * <p>Build NBT structures using method chaining and automatic type validation:</p>
  * <pre>{@code
@@ -170,16 +173,16 @@ public abstract class NBTBuilder
      */
 
     /**
-     * Ensures tag names meet NBT requirements.
+     * Rejects null builder names while allowing empty strings and whitespace.
      *
      * @param name candidate tag name
-     * @throws IllegalArgumentException if name is null or empty
+     * @throws IllegalArgumentException if name is null
      */
     protected static void validateName(String name)
     {
-        if (name == null || name.trim().isEmpty())
+        if (name == null)
         {
-            throw new IllegalArgumentException("Tag name cannot be null or empty");
+            throw new IllegalArgumentException("Tag name cannot be null");
         }
     }
 

@@ -23,7 +23,8 @@ public interface ITag<T>
 
     /**
      * Returns the name of this tag.
-     * In NBT format, every tag has a name except the root tag which may have an empty name.
+     * Root names and compound keys may be empty or contain whitespace.
+     * List element names are not stored in binary NBT.
      *
      * @return The tag's name as {@link java.lang.String}
      */
