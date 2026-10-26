@@ -31,7 +31,6 @@ import java.io.IOException;
  *   <li><b>Variable storage</b> - Very complex structures, conditional building</li>
  * </ul>
  *
- * @author Paul Ferlitz
  */
 public class BuilderPatternExample
 {

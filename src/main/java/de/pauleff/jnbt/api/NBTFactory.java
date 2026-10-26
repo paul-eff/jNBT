@@ -26,7 +26,6 @@ import java.util.ArrayList;
  * IListTag inventory = NBTFactory.createList("Inventory", NBTTags.Tag_Compound.getId());
  * }</pre>
  *
- * @author Paul Ferlitz
  * @see ITag
  * @see ICompoundTag
  * @see IListTag

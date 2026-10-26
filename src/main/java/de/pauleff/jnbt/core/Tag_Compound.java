@@ -16,7 +16,6 @@ import java.util.ArrayList;
  * <p>Extends {@link Collection_Tag} with compound-specific operations and
  * implements {@link ICompoundTag} for standardized access.</p>
  *
- * @author Paul Ferlitz
  */
 public class Tag_Compound extends Collection_Tag implements ICompoundTag
 {

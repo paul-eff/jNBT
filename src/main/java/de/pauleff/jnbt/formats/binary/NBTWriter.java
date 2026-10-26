@@ -17,7 +17,6 @@ import java.util.ArrayList;
 /**
  * Class for handling the writing of Java NBT to file.
  *
- * @author Paul Ferlitz
  */
 public class NBTWriter implements INBTWriter
 {

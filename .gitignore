@@ -3,8 +3,12 @@
 *.mca
 *.mcr
 
-# Created by https://www.toptal.com/developers/gitignore/api/windows,macos,linux,jetbrains+all,java,maven,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,linux,jetbrains+all,java,maven,visualstudiocode
+# Gradle build output and local caches
+.gradle/
+build/
+
+# Created by https://www.toptal.com/developers/gitignore/api/java,linux,macos,maven,windows,jetbrains+all,visualstudiocode,gradle
+# Edit at https://www.toptal.com/developers/gitignore?templates=java,linux,macos,maven,windows,jetbrains+all,visualstudiocode,gradle
 
 ### Java ###
 # Compiled class file
@@ -232,4 +236,29 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,jetbrains+all,java,maven,visualstudiocode
+### Gradle ###
+.gradle
+**/build/
+!src/**/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Cache of project
+.gradletasknamecache
+
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+# JDT-specific (Eclipse Java Development Tools)
+
+### Gradle Patch ###
+# Java heap dump
+*.hprof
+
+# End of https://www.toptal.com/developers/gitignore/api/java,linux,macos,maven,windows,jetbrains+all,visualstudiocode,gradle

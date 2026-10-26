@@ -19,7 +19,6 @@ import java.io.IOException;
  * Always check hasTag() before accessing optional data.
  * Use type-safe getters to avoid ClassCastException.
  *
- * @author Paul Ferlitz
  */
 public class TypeSafetyAndValidationExample
 {

@@ -15,7 +15,6 @@ import java.io.IOException;
  * - Type-safe getters: Access data without casting
  * - Fluent API: Method chaining for readable code
  *
- * @author Paul Ferlitz
  */
 public class BasicOperationsExample
 {

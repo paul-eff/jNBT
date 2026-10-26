@@ -8,7 +8,6 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Simple demonstration of CRUD (Create, Read, Update, Delete) operations in jNBT.
  *
- * @author Paul Ferlitz
  */
 public class CRUDExample
 {

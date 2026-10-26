@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * Tags support fluent operations, equality checking, and custom transformations.</p>
  *
  * @param <T> the data type stored within this tag
- * @author Paul Ferlitz
+
  */
 public abstract class Tag<T> implements ITag<T>
 {

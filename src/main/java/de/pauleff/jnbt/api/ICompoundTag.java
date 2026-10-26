@@ -9,7 +9,6 @@ import java.util.ArrayList;
  * Compounds function like dictionaries or maps, storing named child tags in key-value pairs.
  * They're essential for organizing complex data like player inventories, world chunks, and entity properties.
  *
- * @author Paul Ferlitz
  * @see ITag
  * @see IListTag
  */

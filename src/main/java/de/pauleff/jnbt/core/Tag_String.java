@@ -5,7 +5,6 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Class representing a NBT string tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_String extends Tag<String>
 {

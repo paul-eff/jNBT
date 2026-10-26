@@ -8,7 +8,6 @@ import java.io.IOException;
  * Interface for reading NBT data from files with automatic format detection.
  * Automatically detects and handles compression (GZIP, ZLIB, or uncompressed) and properly decodes the binary NBT format.
  *
- * @author Paul Ferlitz
  * @see ICompoundTag
  * @see Compression_Types
  */

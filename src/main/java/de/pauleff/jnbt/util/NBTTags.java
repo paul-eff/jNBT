@@ -5,7 +5,6 @@ package de.pauleff.jnbt.util;
  * Each enum represents a specific data type with its official ID and name as defined by Minecraft.
  * This enum serves as the authoritative mapping between numeric tag IDs and their corresponding types.
  *
- * @author Paul Ferlitz
  * @see <a href="https://minecraft.wiki/w/NBT_format">NBT Format Specification</a>
  */
 public enum NBTTags

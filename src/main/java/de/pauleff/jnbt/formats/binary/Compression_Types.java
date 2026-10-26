@@ -5,7 +5,6 @@ package de.pauleff.jnbt.formats.binary;
  * NBT files can be stored with different compression schemes depending on their usage context.
  * Minecraft primarily uses GZIP compression, though other formats are supported for compatibility.
  *
- * @author Paul Ferlitz
  * @see NBTFileHandler
  */
 public enum Compression_Types

@@ -17,7 +17,6 @@ import java.io.IOException;
  * Most operations use NBTFileFactory convenience methods.
  * Use manual readers/writers for custom error handling.
  *
- * @author Paul Ferlitz
  */
 public class CompressionAndIOExample
 {

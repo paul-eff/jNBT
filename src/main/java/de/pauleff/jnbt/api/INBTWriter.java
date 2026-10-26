@@ -8,7 +8,6 @@ import java.io.IOException;
  * Interface for writing NBT data to files with automatic compression handling.
  * Handles the complexities of NBT file format including compression detection and proper binary encoding.
  *
- * @author Paul Ferlitz
  * @see ICompoundTag
  * @see Compression_Types
  */

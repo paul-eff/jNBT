@@ -5,7 +5,6 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Class representing a NBT long tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_Long extends Tag<Long>
 {

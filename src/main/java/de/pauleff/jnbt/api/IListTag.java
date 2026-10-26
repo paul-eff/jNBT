@@ -9,7 +9,6 @@ import java.util.ArrayList;
  * Lists enforce type homogeneity, meaning all elements must be of the same NBT type.
  * They're perfect for storing arrays of data like inventory items, coordinates, or any sequential information.
  *
- * @author Paul Ferlitz
  * @see ITag
  * @see ICompoundTag
  */

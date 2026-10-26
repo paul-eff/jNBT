@@ -32,7 +32,6 @@ import java.io.IOException;
  *   <li><b>Arrays</b> - Typed array notation compatible with Minecraft</li>
  * </ul>
  *
- * @author Paul Ferlitz
  */
 public class SNBTExample
 {

@@ -10,7 +10,6 @@ import java.util.zip.InflaterInputStream;
 /**
  * Class for managing the loading and conversion of a given NBT file to the desired stream.
  *
- * @author Paul Ferlitz
  */
 public class NBTFileHandler
 {

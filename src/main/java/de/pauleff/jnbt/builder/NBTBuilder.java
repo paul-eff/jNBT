@@ -27,7 +27,6 @@ import de.pauleff.jnbt.util.NBTTags;
  *
  * <p>Remember to call {@link #build()} on root builders and {@link #end()} on nested ones.</p>
  *
- * @author Paul Ferlitz
  * @see CompoundBuilder
  * @see ListBuilder
  */

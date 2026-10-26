@@ -2,9 +2,9 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.7.0-blue)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![Minecraft](https://img.shields.io/badge/minecraft-1.21.11%20(Java)-green)
-![Java](https://img.shields.io/badge/java-21-red)
+![Java](https://img.shields.io/badge/java-26-red)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 
 *A modern, efficient Java library for reading, editing, and writing Minecraft NBT files*
@@ -22,9 +22,20 @@
 
 ## Installation
 
-You can either import the [latest relase](https://github.com/paul-eff/jNBT/releases/latest) `.jar` file directly as a dependency via your IDE.
+You can import the [latest release](https://github.com/paul-eff/jNBT/releases/latest) `.jar` file directly as a dependency via your IDE, or use a build system:
 
-Or use a build system of your choosing (e.g. Maven):
+**Gradle:**
+```kotlin
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("de.pauleff:jnbt:1.7.0")
+}
+```
+
+**Maven:**
 ```xml
 <dependencies>
     <dependency>
@@ -32,8 +43,11 @@ Or use a build system of your choosing (e.g. Maven):
         <artifactId>jnbt</artifactId>
         <version>1.7.0</version>
     </dependency>
-<dependencies>
+</dependencies>
 ```
+
+To use the development version, build and publish it to your local Maven repository as described below,
+then use `de.pauleff:jnbt:2.0.0-SNAPSHOT` with `mavenLocal()` in your consuming Gradle project.
 
 ## Quick Start
 
@@ -84,8 +98,20 @@ String snbt = serializer.serialize(tag);
 Explore the `examples/` folder for comprehensive usage patterns.
 
 ## Building
+
+Install JDK 26 and use the included Gradle wrapper:
 ```bash
-mvn clean install
+./gradlew clean build
+```
+
+Run only the tests:
+```bash
+./gradlew test
+```
+
+Install the development version into your local Maven repository:
+```bash
+./gradlew publishToMavenLocal
 ```
 
 ## Important Notice
@@ -103,4 +129,7 @@ This library powers:
 - [Official NBT Format Specification](https://minecraft.wiki/w/NBT_format)
 
 ## Remark
+
+Licensed under the [MIT License](LICENSE).
+
 Minecraft is a registered trademark of Mojang AB.

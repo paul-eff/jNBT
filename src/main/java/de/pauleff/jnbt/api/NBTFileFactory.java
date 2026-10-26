@@ -29,7 +29,6 @@ import java.io.IOException;
  * writer.write(levelData);
  * }</pre>
  *
- * @author Paul Ferlitz
  * @see INBTReader
  * @see INBTWriter
  * @see Compression_Types

@@ -7,7 +7,6 @@ import java.util.Arrays;
 /**
  * Class representing a NBT byte array tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_Byte_Array extends Tag<byte[]>
 {

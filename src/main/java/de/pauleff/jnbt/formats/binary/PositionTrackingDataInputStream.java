@@ -8,7 +8,6 @@ import java.io.InputStream;
  * Enhanced DataInputStream wrapper that tracks read position for better error reporting.
  * Provides detailed context about where in the stream parsing errors occur.
  *
- * @author Paul Ferlitz
  */
 public class PositionTrackingDataInputStream
 {

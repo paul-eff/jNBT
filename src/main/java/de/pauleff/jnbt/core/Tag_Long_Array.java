@@ -7,7 +7,6 @@ import java.util.Arrays;
 /**
  * Class representing a NBT long array tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_Long_Array extends Tag<long[]>
 {

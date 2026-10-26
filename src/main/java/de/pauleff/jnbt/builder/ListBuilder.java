@@ -20,7 +20,6 @@ import java.util.ArrayList;
  *     .build();
  * }</pre>
  *
- * @author Paul Ferlitz
  * @see NBTBuilder
  * @see CompoundBuilder
  */

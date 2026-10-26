@@ -15,7 +15,6 @@ import java.util.ArrayList;
  * <p>Extends {@link Collection_Tag} with list-specific type validation and
  * implements {@link IListTag} for standardized access.</p>
  *
- * @author Paul Ferlitz
  */
 public class Tag_List extends Collection_Tag implements IListTag
 {

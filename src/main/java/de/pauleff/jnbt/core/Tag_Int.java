@@ -5,7 +5,6 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Class representing a NBT int tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_Int extends Tag<Integer>
 {

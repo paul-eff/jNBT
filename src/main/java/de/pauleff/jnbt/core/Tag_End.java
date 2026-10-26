@@ -5,7 +5,6 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Class representing a NBT end tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_End extends Tag<Object>
 {

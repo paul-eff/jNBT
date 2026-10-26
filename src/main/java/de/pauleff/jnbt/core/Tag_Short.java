@@ -5,7 +5,6 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Class representing a NBT short tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_Short extends Tag<Short>
 {

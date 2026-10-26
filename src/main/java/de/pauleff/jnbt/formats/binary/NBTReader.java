@@ -15,7 +15,6 @@ import java.util.ArrayList;
 /**
  * Class for handling the parsing and formatting of a Java NBT file.
  *
- * @author Paul Ferlitz
  */
 public class NBTReader implements INBTReader
 {

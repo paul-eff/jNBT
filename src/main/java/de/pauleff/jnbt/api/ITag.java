@@ -8,7 +8,7 @@ import java.util.function.Consumer;
  * each carrying a name, type, and payload according to the NBT specification.
  *
  * @param <T> The {@link java.lang.Object} type this tag stores
- * @author Paul Ferlitz
+
  * @see <a href="https://minecraft.wiki/w/NBT_format">NBT Format Specification</a>
  */
 public interface ITag<T>

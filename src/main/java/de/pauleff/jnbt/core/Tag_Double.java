@@ -5,7 +5,6 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Class representing a NBT double tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_Double extends Tag<Double>
 {

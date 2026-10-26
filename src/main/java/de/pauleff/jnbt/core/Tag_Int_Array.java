@@ -7,7 +7,6 @@ import java.util.Arrays;
 /**
  * Class representing a NBT int array tag.
  *
- * @author Paul Ferlitz
  */
 public class Tag_Int_Array extends Tag<int[]>
 {

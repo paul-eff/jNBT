@@ -22,7 +22,6 @@ import de.pauleff.jnbt.util.NBTTags;
  *     .build();
  * }</pre>
  *
- * @author Paul Ferlitz
  * @see NBTBuilder
  * @see ListBuilder
  * @see Tag_Compound
