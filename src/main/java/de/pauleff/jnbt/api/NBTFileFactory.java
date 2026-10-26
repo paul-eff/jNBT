@@ -72,7 +72,7 @@ public class NBTFileFactory
 
     /**
      * Creates a writer with explicit compression settings.
-     * Creates or overwrites the target file with the specified compression.
+     * The target file is opened when writing, after encoded string lengths pass validation.
      *
      * @param nbtFile     The {@link java.io.File} to write NBT data to
      * @param compression The {@link Compression_Types} to apply

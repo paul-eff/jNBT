@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UTFDataFormatException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
@@ -19,12 +20,16 @@ import java.util.ArrayList;
  */
 public class NBTWriter implements INBTWriter
 {
-    private final DataOutputStream stream;
+    private DataOutputStream stream;
+    private final File file;
+    private final Compression_Types compression;
+    private boolean closed;
 
     /**
      * Create a writer by passing it the target NBT file.
      * Target file must already exist to determine the compression type.
-     * A backup of the target file will be made before overwriting it.
+     * The destination is opened and backed up by {@link #write(ICompoundTag)}
+     * after encoded string lengths have been validated.
      *
      * @param nbtFile The target NBT file.
      */
@@ -34,31 +39,22 @@ public class NBTWriter implements INBTWriter
         {
             throw new FileNotFoundException(String.format("The file %s doesn't exist. It's needed to determine the compression type!", nbtFile.getPath()));
         }
-        try
-        {
-            this.stream = NBTFileHandler.loadNBTToWriter(nbtFile, NBTFileHandler.getCompressionType(nbtFile));
-        } catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        this.file = nbtFile;
+        this.compression = NBTFileHandler.getCompressionType(nbtFile);
     }
 
     /**
      * Create a writer by passing it the target NBT file and how to compress it.
-     * A backup of the target file will be made before overwriting it, if it exists.
+     * The destination is opened and, if it exists, backed up by
+     * {@link #write(ICompoundTag)} after encoded string lengths have been validated.
      *
      * @param nbtFile     The target NBT file.
      * @param compression The compression type of the file.
      */
     public NBTWriter(File nbtFile, Compression_Types compression)
     {
-        try
-        {
-            this.stream = NBTFileHandler.loadNBTToWriter(nbtFile, compression);
-        } catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        this.file = nbtFile;
+        this.compression = compression;
     }
 
     /**
@@ -69,6 +65,8 @@ public class NBTWriter implements INBTWriter
     public NBTWriter(DataOutputStream dos)
     {
         this.stream = dos;
+        this.file = null;
+        this.compression = null;
     }
 
     /**
@@ -78,12 +76,19 @@ public class NBTWriter implements INBTWriter
      */
     public void close() throws IOException
     {
-        stream.close();
+        closed = true;
+        if (stream != null)
+        {
+            stream.close();
+        }
     }
 
     /**
      * Writes the compound tag structure to file and closes the writer.
      * The NBT specification requires compound tags as file roots, so this method enforces that constraint.
+     * All stored names and string values are checked against the 65,535-byte
+     * modified UTF-8 limit before output starts. The tree must not be mutated
+     * during this operation.
      *
      * @param root The root {@link ICompoundTag} containing the complete NBT structure to write
      * @throws IOException              If an error occurs during file writing or if the data is invalid
@@ -97,6 +102,15 @@ public class NBTWriter implements INBTWriter
         }
         try
         {
+            if (closed)
+            {
+                throw new IOException("NBT writer is closed");
+            }
+            validateUTFLengths(root, true);
+            if (stream == null)
+            {
+                stream = NBTFileHandler.loadNBTToWriter(file, compression);
+            }
             writeNBTTag(root);
         } catch (IOException e)
         {
@@ -107,6 +121,40 @@ public class NBTWriter implements INBTWriter
         } finally
         {
             this.close();
+        }
+    }
+
+    private void validateUTFLengths(ITag<?> tag, boolean named) throws IOException
+    {
+        if (named)
+        {
+            validateUTFLength(tag.getName(), "Tag name");
+        }
+        NBTTags type = NBTTags.getById(tag.getId());
+        if (type == NBTTags.Tag_String)
+        {
+            validateUTFLength((String) tag.getData(), "String payload");
+        } else if (type == NBTTags.Tag_Compound || type == NBTTags.Tag_List)
+        {
+            for (ITag<?> child : (Iterable<ITag<?>>) tag.getData())
+            {
+                validateUTFLengths(child, type == NBTTags.Tag_Compound);
+            }
+        }
+    }
+
+    private void validateUTFLength(String value, String field) throws UTFDataFormatException
+    {
+        int length = 0;
+        for (int i = 0; i < value.length(); i++)
+        {
+            char c = value.charAt(i);
+            // Modified UTF-8 encodes NUL in two bytes and each surrogate in three.
+            length += c >= 1 && c <= 0x7f ? 1 : c <= 0x7ff ? 2 : 3;
+            if (length > 65535)
+            {
+                throw new UTFDataFormatException(field + " exceeds the modified UTF-8 limit of 65535 bytes");
+            }
         }
     }
 
