@@ -423,10 +423,6 @@ public class NBTFactory
         return new Tag_Long_Array(name, value);
     }
 
-    /*
-     * ========== CONVENIENCE METHODS FOR QUICK CREATION ==========
-     */
-
     /**
      * Creates a simple NBT structure with key-value string pairs.
      * Perfect for configuration files or simple data storage.
@@ -450,10 +446,6 @@ public class NBTFactory
         }
         return compound;
     }
-
-    /*
-     * ========== SNBT PARSING METHODS ==========
-     */
 
     /**
      * Parses SNBT (Stringified NBT) text into an NBT tag structure.
@@ -521,10 +513,6 @@ public class NBTFactory
         }
         return (IListTag) tag;
     }
-
-    /*
-     * ========== SNBT SERIALIZATION METHODS ==========
-     */
 
     /**
      * Converts an NBT tag to SNBT (Stringified NBT) format.

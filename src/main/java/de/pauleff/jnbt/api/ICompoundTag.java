@@ -112,10 +112,6 @@ public interface ICompoundTag extends ITag<ArrayList<Tag<?>>>
      */
     ICompoundTag addLongArray(String name, long[] value);
 
-    /*
-     * ========== CONVENIENCE GETTERS (REDUCE CASTING) ==========
-     */
-
     /**
      * Retrieves a child tag by name without requiring casts.
      *
@@ -220,10 +216,6 @@ public interface ICompoundTag extends ITag<ArrayList<Tag<?>>>
      */
     long[] getLongArray(String name);
 
-    /*
-     * ========== UPDATE METHODS (FLUENT API) ==========
-     */
-
     /**
      * Updates or creates a string tag with the given name and value.
      *
@@ -321,10 +313,6 @@ public interface ICompoundTag extends ITag<ArrayList<Tag<?>>>
      * @return This compound for fluent method chaining
      */
     ICompoundTag setTag(ITag<?> tag);
-
-    /*
-     * ========== DELETE METHODS (FLUENT API) ==========
-     */
 
     /**
      * Removes a tag by name and returns this compound for chaining.

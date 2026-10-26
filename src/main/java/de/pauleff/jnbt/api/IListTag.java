@@ -109,10 +109,6 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      */
     IListTag addLong(String name, long value);
 
-    /*
-     * ========== UPDATE METHODS (INDEX-BASED) ==========
-     */
-
     /**
      * Updates an element at the specified index with a new string value.
      * Only works if this list stores string tags.
@@ -227,10 +223,6 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      */
     IListTag setTag(int index, ITag<?> tag);
 
-    /*
-     * ========== DELETE METHODS ==========
-     */
-
     /**
      * Removes an element at the specified index.
      *
@@ -254,10 +246,6 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @return This list for fluent method chaining
      */
     IListTag clear();
-
-    /*
-     * ========== UTILITY METHODS ==========
-     */
 
     /**
      * Gets the element at the specified index.

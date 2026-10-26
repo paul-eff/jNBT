@@ -48,10 +48,6 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         super(NBTTags.Tag_Compound.getId(), name, data);
     }
 
-    /*
-     * ========== FLUENT API METHODS ==========
-     */
-
     /**
      * Adds a string tag and returns this compound for method chaining.
      *
@@ -200,10 +196,6 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return getTagByName(tagName) != null;
     }
 
-    /*
-     * ========== CONVENIENCE GETTERS (REDUCE CASTING) ==========
-     */
-
     @Override
     public ITag<?> getTag(String name)
     {
@@ -342,10 +334,6 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
-    /*
-     * ========== UPDATE METHODS (FLUENT API) ==========
-     */
-
     @Override
     public ICompoundTag setString(String name, String value)
     {
@@ -429,18 +417,11 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setTag(ITag<?> tag)
     {
-        if (tag == null)
-        {
-            throw new IllegalArgumentException("Tag cannot be null");
-        }
+        validateChildTag(tag);
         removeTagByName(tag.getName());
         addTag(tag);
         return this;
     }
-
-    /*
-     * ========== DELETE METHODS (FLUENT API) ==========
-     */
 
     @Override
     public ICompoundTag removeTag(String name)

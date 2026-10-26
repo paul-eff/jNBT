@@ -83,10 +83,6 @@ public class NBTFileFactory
         return new NBTWriter(nbtFile, compression);
     }
 
-    /*
-     * ========== CONVENIENCE METHODS FOR COMMON OPERATIONS ==========
-     */
-
     /**
      * Reads an NBT file completely and returns the root compound tag.
      * Automatically handles compression detection and resource cleanup.
@@ -174,10 +170,6 @@ public class NBTFileFactory
         }
     }
 
-    /*
-     * ========== UPDATE OPERATIONS ==========
-     */
-
     /**
      * Updates a specific tag in an NBT file without loading the entire structure.
      * Performs a read-modify-write operation preserving original compression.
@@ -242,10 +234,6 @@ public class NBTFileFactory
         Compression_Types compression = NBTFileHandler.getCompressionType(baseFile);
         writeNBTFile(outputFile, base, compression);
     }
-
-    /*
-     * ========== HELPER METHODS ==========
-     */
 
     /**
      * Updates a tag value deep within a compound structure using dot notation.

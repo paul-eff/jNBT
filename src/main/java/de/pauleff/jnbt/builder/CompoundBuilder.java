@@ -61,10 +61,6 @@ public class CompoundBuilder extends NBTBuilder
         }
     }
 
-    /*
-     * ========== FLUENT API METHODS ==========
-     */
-
     /**
      * Stores a string value with the specified name.
      *
@@ -248,10 +244,6 @@ public class CompoundBuilder extends NBTBuilder
         validateName(name);
         return new CompoundBuilder(name, this);
     }
-
-    /*
-     * ========== UPDATE/DELETE METHODS ==========
-     */
 
     /**
      * Updates or creates a string value with the specified name.
@@ -444,10 +436,6 @@ public class CompoundBuilder extends NBTBuilder
         compound.clear();
         return this;
     }
-
-    /*
-     * ========== BUILDER COMPLETION METHODS ==========
-     */
 
     /**
      * Finalizes construction and returns the completed compound tag.

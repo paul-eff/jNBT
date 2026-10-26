@@ -50,10 +50,6 @@ public abstract class NBTBuilder
         this.parent = parent;
     }
 
-    /*
-     * ========== STATIC FACTORY METHODS ==========
-     */
-
     /**
      * Creates a fluent builder for compound tags containing key-value pairs.
      *
@@ -168,10 +164,6 @@ public abstract class NBTBuilder
         return new Tag_Long(name, value);
     }
 
-    /*
-     * ========== ABSTRACT METHODS ==========
-     */
-
     /**
      * Rejects null builder names while allowing empty strings and whitespace.
      *
@@ -234,10 +226,6 @@ public abstract class NBTBuilder
         return builder;
     }
 
-    /*
-     * ========== VALIDATION METHODS ==========
-     */
-
     /**
      * Finalizes construction and returns the completed NBT tag.
      *
@@ -262,10 +250,6 @@ public abstract class NBTBuilder
     {
         return name;
     }
-
-    /*
-     * ========== I/O INTEGRATION METHODS ==========
-     */
 
     /**
      * Returns the parent builder in the construction hierarchy.
@@ -301,10 +285,6 @@ public abstract class NBTBuilder
             throw new IllegalStateException("Root NBT structure must be a compound tag");
         }
     }
-
-    /*
-     * ========== FACTORY METHODS WITH I/O INTEGRATION ==========
-     */
 
     /**
      * Builds the NBT structure and writes it to a file with specified compression.

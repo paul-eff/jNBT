@@ -48,10 +48,6 @@ public class ListBuilder extends NBTBuilder
         this.list = new Tag_List(name, listType.getId(), new ArrayList<>());
     }
 
-    /*
-     * ========== TYPE-SAFE FLUENT API METHODS ==========
-     */
-
     /**
      * Adds a string element to the list.
      *
@@ -217,10 +213,6 @@ public class ListBuilder extends NBTBuilder
         list.addTag(tag);
     }
 
-    /*
-     * ========== BUILDER COMPLETION METHODS ==========
-     */
-
     /**
      * Completes construction and returns the built list.
      *
@@ -281,10 +273,6 @@ public class ListBuilder extends NBTBuilder
             throw new IllegalStateException("Unknown parent builder type");
         }
     }
-
-    /*
-     * ========== VALIDATION METHODS ==========
-     */
 
     /**
      * Ensures the operation matches this list's required element type.
