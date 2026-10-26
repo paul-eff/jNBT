@@ -10,7 +10,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
@@ -113,13 +112,8 @@ public class NBTWriter implements INBTWriter
 
     private void writeNBTTag(ITag<?> tag) throws IOException
     {
-        String name = tag.getName();
-        // TODO: Extract charsets to main location
-        byte[] nameBytes = name.getBytes(StandardCharsets.UTF_8);
-
         stream.writeByte(tag.getId());
-        stream.writeShort(nameBytes.length);
-        stream.write(nameBytes);
+        stream.writeUTF(tag.getName());
 
         writeNBTPayload(tag);
     }
@@ -155,9 +149,7 @@ public class NBTWriter implements INBTWriter
                 stream.write(bytes);
                 break;
             case NBTTags.Tag_String:
-                bytes = ((String) tag.getData()).getBytes(StandardCharsets.UTF_8);
-                stream.writeShort(bytes.length);
-                stream.write(bytes);
+                stream.writeUTF((String) tag.getData());
                 break;
             case NBTTags.Tag_List:
                 ArrayList<ITag<?>> listTags = (ArrayList<ITag<?>>) tag.getData();

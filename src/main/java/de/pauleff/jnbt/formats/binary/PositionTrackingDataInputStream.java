@@ -1,5 +1,6 @@
 package de.pauleff.jnbt.formats.binary;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,6 +70,23 @@ public class PositionTrackingDataInputStream
         int result = dataStream.readUnsignedShort();
         bytesRead += 2;
         return result;
+    }
+
+    /**
+     * Reads a Java modified UTF-8 string with its unsigned 16-bit byte length.
+     *
+     * @return the decoded string
+     * @throws IOException if the field is truncated or its encoding is malformed
+     */
+    public String readUTF() throws IOException
+    {
+        int length = readUnsignedShort();
+        // Retain the length prefix so Java's UTF decoder can validate the field.
+        byte[] encoded = new byte[length + 2];
+        encoded[0] = (byte) (length >>> 8);
+        encoded[1] = (byte) length;
+        readFully(encoded, 2, length);
+        return new DataInputStream(new ByteArrayInputStream(encoded)).readUTF();
     }
 
     public int readInt() throws IOException

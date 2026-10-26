@@ -9,7 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -108,26 +107,18 @@ public class NBTReader implements INBTReader
         {
             int type = stream.readByte();
             String name = "";
+            stream.setCurrentContext(depth, name, type);
 
             if (type != NBTTags.Tag_End.getId())
             {
-                int nameLength = stream.readUnsignedShort();
-                if (nameLength < 0 || nameLength > 32767) // Reasonable limit for NBT names
-                {
-                    throw new IOException(stream.createContextualError(
-                            String.format("Invalid tag name length: %d", nameLength)));
-                }
-
-                byte[] byteBuffer = new byte[nameLength];
-                stream.readFully(byteBuffer);
-                name = new String(byteBuffer, StandardCharsets.UTF_8);
+                name = stream.readUTF();
             }
 
             stream.setCurrentContext(depth, name, type);
             return readNBTPayload(type, name, depth);
         } catch (IOException e)
         {
-            if (e.getMessage().contains("[Position:"))
+            if (e.getMessage() != null && e.getMessage().contains("[Position:"))
             {
                 throw e; // Already has context
             }
@@ -185,15 +176,7 @@ public class NBTReader implements INBTReader
                 stream.readFully(byteBuffer);
                 return new Tag_Byte_Array(name, byteBuffer);
             case Tag_String:
-                arrayLength = stream.readUnsignedShort();
-                if (arrayLength > 65535) // Max string length in NBT
-                {
-                    throw new IOException(stream.createContextualError(
-                            String.format("Invalid string length: %d", arrayLength)));
-                }
-                byteBuffer = new byte[arrayLength];
-                stream.readFully(byteBuffer);
-                return new Tag_String(name, new String(byteBuffer, StandardCharsets.UTF_8));
+                return new Tag_String(name, stream.readUTF());
             case Tag_List:
                 int listType = stream.readByte();
                 if (NBTTags.getById(listType) == null && listType != 0) // 0 is valid for empty lists
