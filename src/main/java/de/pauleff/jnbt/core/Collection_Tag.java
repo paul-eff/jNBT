@@ -8,7 +8,9 @@ import java.util.List;
 
 /**
  * Base class for collections of child tags. Name and tag searches and removals include nested
- * collections. Null children and END markers are rejected.
+ * collections in depth-first child order, excluding the collection itself. Removing a matching
+ * collection detaches its subtree without changing its children. Null children and END markers
+ * are rejected.
  *
  * @since 1.0
  */
@@ -146,9 +148,11 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
             {
                 tags.add(tag);
                 if (!global) return tags;
-            } else if (tag instanceof Collection_Tag collectionTag)
+            }
+            if (tag instanceof Collection_Tag collectionTag)
             {
                 tags.addAll(collectionTag.getTagsByName(name, global));
+                if (!global && !tags.isEmpty()) return tags;
             }
         }
         return tags;
@@ -192,9 +196,11 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
             {
                 tags.add(tag);
                 if (!global) return tags;
-            } else if (tag instanceof Collection_Tag collectionTag)
+            }
+            if (tag instanceof Collection_Tag collectionTag)
             {
                 tags.addAll(collectionTag.getTags(targetTag, global));
+                if (!global && !tags.isEmpty()) return tags;
             }
         }
         return tags;
@@ -211,7 +217,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Removes a matching tag by name from this collection and nested collections.
+     * Removes the first matching tag by name from this collection and nested collections.
      *
      * @param name the tag name to remove
      * @return this collection tag
@@ -227,9 +233,11 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      *
      * @param name   the tag name to remove
      * @param global true to remove all matches, false to stop at first removal
+     * @return true if a tag was removed
      */
-    private void removeTagsByName(String name, boolean global)
+    private boolean removeTagsByName(String name, boolean global)
     {
+        boolean removed = false;
         Iterator<Tag<?>> iterator = this.data.iterator();
         while (iterator.hasNext())
         {
@@ -237,12 +245,18 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
             if (tag.getName().equals(name))
             {
                 iterator.remove();
-                if (!global) return;
+                removed = true;
+                if (!global) return true;
             } else if (tag instanceof Collection_Tag collectionTag)
             {
-                collectionTag.removeTagsByName(name, global);
+                if (collectionTag.removeTagsByName(name, global))
+                {
+                    removed = true;
+                    if (!global) return true;
+                }
             }
         }
+        return removed;
     }
 
     /**
@@ -256,7 +270,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Removes a matching tag from this collection and nested collections.
+     * Removes the first equal tag from this collection and nested collections.
      *
      * @param targetTag the tag to remove
      * @return this collection tag
@@ -272,9 +286,11 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      *
      * @param targetTag the tag to remove
      * @param global    true to remove all matches, false to stop at first removal
+     * @return true if a tag was removed
      */
-    private void removeTags(Tag<?> targetTag, boolean global)
+    private boolean removeTags(Tag<?> targetTag, boolean global)
     {
+        boolean removed = false;
         Iterator<Tag<?>> iterator = this.data.iterator();
         while (iterator.hasNext())
         {
@@ -282,11 +298,17 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
             if (tag.equals(targetTag))
             {
                 iterator.remove();
-                if (!global) return;
+                removed = true;
+                if (!global) return true;
             } else if (tag instanceof Collection_Tag collectionTag)
             {
-                collectionTag.removeTags(targetTag, global);
+                if (collectionTag.removeTags(targetTag, global))
+                {
+                    removed = true;
+                    if (!global) return true;
+                }
             }
         }
+        return removed;
     }
 }
