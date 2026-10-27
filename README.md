@@ -3,8 +3,8 @@
 <div align="center">
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
-![Minecraft](https://img.shields.io/badge/minecraft-1.21.11%20(Java)-green)
-![Java](https://img.shields.io/badge/java-26-red)
+![Minecraft](https://img.shields.io/badge/minecraft-26.2%20(Java)-green)
+![Java](https://img.shields.io/badge/java-25-red)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 
 *A modern, efficient Java library for reading, editing, and writing Minecraft NBT files*
@@ -100,7 +100,7 @@ Explore the `examples/` folder for comprehensive usage patterns.
 
 ## Building
 
-Install JDK 26 and use the included Gradle wrapper:
+Install JDK 25 and use the included Gradle wrapper:
 ```bash
 ./gradlew clean build
 ```
