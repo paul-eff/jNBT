@@ -15,6 +15,15 @@ import java.util.ArrayList;
 public interface IListTag extends ITag<ArrayList<Tag<?>>>
 {
     /**
+     * Returns a shallow snapshot of the elements. Use add, set, and remove methods
+     * to change membership; the element objects remain shared.
+     *
+     * @return a copy of the element collection
+     */
+    @Override
+    ArrayList<Tag<?>> getData();
+
+    /**
      * Returns the NBT type ID that all elements in this list must have.
      * Once set, this cannot be changed and all added elements must match this type.
      *

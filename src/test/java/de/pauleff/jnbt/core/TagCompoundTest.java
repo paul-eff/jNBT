@@ -1,5 +1,6 @@
 package de.pauleff.jnbt.core;
 
+import de.pauleff.jnbt.api.ICompoundTag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -71,7 +72,7 @@ class TagCompoundTest
     void testFluentChaining()
     {
         // Test fluent method chaining
-        var result = compound.addString("name", "Alice")
+        ICompoundTag result = compound.addString("name", "Alice")
                 .addInt("age", 25);
 
         assertSame(compound, result);
@@ -87,7 +88,7 @@ class TagCompoundTest
         nested.addString("inner", "value");
         compound.addTag(nested);
 
-        var retrieved = compound.getCompound("nested");
+        ICompoundTag retrieved = compound.getCompound("nested");
         assertNotNull(retrieved);
         assertEquals("value", retrieved.getString("inner"));
     }

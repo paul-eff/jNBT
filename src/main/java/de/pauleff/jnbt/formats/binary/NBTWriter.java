@@ -142,13 +142,25 @@ public class NBTWriter implements INBTWriter
             validateUTFLength((String) tag.getData(), "String payload");
         } else if (type == NBTTags.Tag_Compound || type == NBTTags.Tag_List)
         {
-            if (type == NBTTags.Tag_List && ((IListTag) tag).getListTypeID() == 0
-                    && !((Collection<?>) tag.getData()).isEmpty())
+            int listType = type == NBTTags.Tag_List ? ((IListTag) tag).getListTypeID() : -1;
+            if (type == NBTTags.Tag_List && NBTTags.getById(listType) == null)
+            {
+                throw new IOException("Invalid list element type: " + listType);
+            }
+            if (listType == 0 && !((Collection<?>) tag.getData()).isEmpty())
             {
                 throw new IOException("TAG_End list type is only valid for empty lists");
             }
             for (ITag<?> child : (Iterable<ITag<?>>) tag.getData())
             {
+                if (child != null && child.getId() == 0)
+                {
+                    throw new IOException("TAG_End is a structural marker, not a value");
+                }
+                if (child == null || (type == NBTTags.Tag_List && child.getId() != listType))
+                {
+                    throw new IOException("Invalid collection child or list element type mismatch");
+                }
                 validateForWrite(child, type == NBTTags.Tag_Compound);
             }
         }

@@ -73,10 +73,10 @@ class EndTagTest
         assertThrows(IllegalArgumentException.class,
                 () -> new Tag_List("list", 0, new ArrayList<>(List.of(new Tag_Int("", 1)))));
         assertTrue(list.getData().isEmpty());
-        // Even a corrupted list cannot accept an END through the setter.
-        list.getData().add(new Tag_Int("", 1));
-        assertThrows(IllegalArgumentException.class, () -> list.setTag(0, new Tag_End()));
-        assertInstanceOf(Tag_Int.class, list.getData().getFirst());
+        Tag_List integers = new Tag_List("ints", 3);
+        integers.addInt("", 1);
+        assertThrows(IllegalArgumentException.class, () -> integers.setTag(0, new Tag_End()));
+        assertInstanceOf(Tag_Int.class, integers.getData().getFirst());
     }
 
     private static Stream<Collection_Tag> invalidContainers()
@@ -92,6 +92,14 @@ class EndTagTest
 
     private static Collection_Tag withUncheckedChild(Collection_Tag parent, Tag<?> child)
     {
+        if (parent instanceof Tag_List list)
+        {
+            // Deliberately corrupt subclass storage to exercise the writer's final checks.
+            return new Tag_List(list.getName(), list.getListTypeID())
+            {
+                { data.add(child); }
+            };
+        }
         parent.getData().add(child);
         return parent;
     }

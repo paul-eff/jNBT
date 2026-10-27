@@ -91,7 +91,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
         {
             throw new IllegalArgumentException(String.format("Mixed datatypes! Expected %d but got %d", list.getListTypeID(), tag.getId()));
         }
-        this.getData().add((Tag<?>) tag);
+        this.data.add((Tag<?>) tag);
         return this;
     }
 
@@ -119,7 +119,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
                 }
             }
         }
-        this.getData().addAll(tags);
+        this.data.addAll(tags);
         return this;
     }
 
@@ -161,7 +161,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     private List<Tag<?>> getTagsByName(String name, boolean global)
     {
         List<Tag<?>> tags = new ArrayList<>();
-        for (Tag<?> tag : this.getData())
+        for (Tag<?> tag : this.data)
         {
             if (tag.getName().equals(name))
             {
@@ -213,7 +213,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     private List<Tag<?>> getTags(Tag<?> targetTag, boolean global)
     {
         List<Tag<?>> tags = new ArrayList<>();
-        for (Tag<?> tag : this.getData())
+        for (Tag<?> tag : this.data)
         {
             if (tag.equals(targetTag))
             {
@@ -263,7 +263,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      */
     private void removeTagsByName(String name, boolean global)
     {
-        Iterator<Tag<?>> iterator = this.getData().iterator();
+        Iterator<Tag<?>> iterator = this.data.iterator();
         while (iterator.hasNext())
         {
             Tag<?> tag = iterator.next();
@@ -314,7 +314,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      */
     private void removeTags(Tag<?> targetTag, boolean global)
     {
-        Iterator<Tag<?>> iterator = this.getData().iterator();
+        Iterator<Tag<?>> iterator = this.data.iterator();
         while (iterator.hasNext())
         {
             Tag<?> tag = iterator.next();

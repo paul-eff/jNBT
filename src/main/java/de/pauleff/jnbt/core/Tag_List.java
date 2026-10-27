@@ -14,6 +14,9 @@ import java.util.ArrayList;
  * builder methods for type-safe element addition.</p>
  * <p>Extends {@link Collection_Tag} with list-specific type validation and
  * implements {@link IListTag} for standardized access.</p>
+ * <p>Collection inputs are copied, and {@link #getData()} returns a shallow
+ * snapshot. Use list operations to change membership. Type 0 (END) is valid
+ * only for empty lists.</p>
  *
  */
 public class Tag_List extends Collection_Tag implements IListTag
@@ -24,11 +27,11 @@ public class Tag_List extends Collection_Tag implements IListTag
      * Creates an empty list with the specified element type.
      *
      * @param listTypeID the NBT type ID for all elements in this list
+     * @throws IllegalArgumentException if the element type ID is invalid
      */
     public Tag_List(int listTypeID)
     {
-        super(NBTTags.Tag_List.getId());
-        this.listTypeID = listTypeID;
+        this(null, listTypeID);
     }
 
     /**
@@ -39,8 +42,7 @@ public class Tag_List extends Collection_Tag implements IListTag
      */
     public Tag_List(String name, int listTypeID)
     {
-        super(NBTTags.Tag_List.getId(), name);
-        this.listTypeID = listTypeID;
+        this(name, listTypeID, new ArrayList<>());
     }
 
     /**
@@ -49,15 +51,72 @@ public class Tag_List extends Collection_Tag implements IListTag
      * @param name       the tag name
      * @param listTypeID the NBT type ID for all elements in this list
      * @param data       the initial collection of elements
+     * @throws IllegalArgumentException if the type ID is invalid, data is null,
+     *                                  or an element is null, END, or of the wrong type
      */
     public Tag_List(String name, int listTypeID, ArrayList<Tag<?>> data)
     {
-        super(NBTTags.Tag_List.getId(), name, data);
-        if (listTypeID == 0 && !data.isEmpty())
-        {
-            throw new IllegalArgumentException("TAG_End list type is only valid for empty lists");
-        }
+        super(NBTTags.Tag_List.getId(), name, validatedCopy(listTypeID, data));
         this.listTypeID = listTypeID;
+    }
+
+    private static ArrayList<Tag<?>> validatedCopy(int type, ArrayList<Tag<?>> values)
+    {
+        if (NBTTags.getById(type) == null || values == null)
+        {
+            throw new IllegalArgumentException("List requires a valid element type and non-null data");
+        }
+        ArrayList<Tag<?>> copy = new ArrayList<>(values);
+        for (Tag<?> child : copy)
+        {
+            validateChildTag(child);
+            if (child.getId() != type)
+            {
+                throw new IllegalArgumentException("List element type mismatch: expected " + type + ", got " + child.getId());
+            }
+        }
+        return copy;
+    }
+
+    /**
+     * Returns a shallow snapshot of the elements. Use list methods to change membership.
+     * The element objects themselves remain shared.
+     *
+     * @return a copy of the element collection
+     */
+    @Override
+    public ArrayList<Tag<?>> getData()
+    {
+        return new ArrayList<>(data);
+    }
+
+    /**
+     * Replaces the elements with a validated copy, preserving the declared type.
+     *
+     * @param data the replacement elements
+     * @throws IllegalArgumentException if data is null or contains incompatible elements
+     */
+    @Override
+    public void setData(ArrayList<Tag<?>> data)
+    {
+        this.data = validatedCopy(listTypeID, data);
+    }
+
+    /**
+     * Copies the name and elements from a list with the same declared element type.
+     *
+     * @param newTag the source list
+     * @throws IllegalArgumentException if the source is not a list of the same element type
+     */
+    @Override
+    public void editTag(ITag<?> newTag)
+    {
+        if (!(newTag instanceof IListTag list) || list.getListTypeID() != listTypeID)
+        {
+            throw new IllegalArgumentException("Source must be a list with element type " + listTypeID);
+        }
+        setData(list.getData());
+        setName(list.getName());
     }
 
     /**
@@ -210,65 +269,49 @@ public class Tag_List extends Collection_Tag implements IListTag
     @Override
     public IListTag setString(int index, String name, String value)
     {
-        validateIndex(index);
-        getData().set(index, new Tag_String(name, value));
-        return this;
+        return setTag(index, new Tag_String(name, value));
     }
 
     @Override
     public IListTag setInt(int index, String name, int value)
     {
-        validateIndex(index);
-        getData().set(index, new Tag_Int(name, value));
-        return this;
+        return setTag(index, new Tag_Int(name, value));
     }
 
     @Override
     public IListTag setDouble(int index, String name, double value)
     {
-        validateIndex(index);
-        getData().set(index, new Tag_Double(name, value));
-        return this;
+        return setTag(index, new Tag_Double(name, value));
     }
 
     @Override
     public IListTag setCompound(int index, String name)
     {
-        validateIndex(index);
-        getData().set(index, new Tag_Compound(name));
-        return this;
+        return setTag(index, new Tag_Compound(name));
     }
 
     @Override
     public IListTag setFloat(int index, String name, float value)
     {
-        validateIndex(index);
-        getData().set(index, new Tag_Float(name, value));
-        return this;
+        return setTag(index, new Tag_Float(name, value));
     }
 
     @Override
     public IListTag setByte(int index, String name, byte value)
     {
-        validateIndex(index);
-        getData().set(index, new Tag_Byte(name, value));
-        return this;
+        return setTag(index, new Tag_Byte(name, value));
     }
 
     @Override
     public IListTag setShort(int index, String name, short value)
     {
-        validateIndex(index);
-        getData().set(index, new Tag_Short(name, value));
-        return this;
+        return setTag(index, new Tag_Short(name, value));
     }
 
     @Override
     public IListTag setLong(int index, String name, long value)
     {
-        validateIndex(index);
-        getData().set(index, new Tag_Long(name, value));
-        return this;
+        return setTag(index, new Tag_Long(name, value));
     }
 
     @Override
@@ -280,7 +323,7 @@ public class Tag_List extends Collection_Tag implements IListTag
         {
             throw new IllegalArgumentException(String.format("Tag type mismatch! Expected %d but got %d", this.listTypeID, tag.getId()));
         }
-        getData().set(index, (Tag<?>) tag);
+        data.set(index, (Tag<?>) tag);
         return this;
     }
 
@@ -288,21 +331,21 @@ public class Tag_List extends Collection_Tag implements IListTag
     public IListTag removeAt(int index)
     {
         validateIndex(index);
-        getData().remove(index);
+        data.remove(index);
         return this;
     }
 
     @Override
     public IListTag remove(ITag<?> tag)
     {
-        getData().remove(tag);
+        data.remove(tag);
         return this;
     }
 
     @Override
     public IListTag clear()
     {
-        getData().clear();
+        data.clear();
         return this;
     }
 
@@ -310,19 +353,19 @@ public class Tag_List extends Collection_Tag implements IListTag
     public ITag<?> get(int index)
     {
         validateIndex(index);
-        return getData().get(index);
+        return data.get(index);
     }
 
     @Override
     public int size()
     {
-        return getData().size();
+        return data.size();
     }
 
     @Override
     public boolean isEmpty()
     {
-        return getData().isEmpty();
+        return data.isEmpty();
     }
 
     /**
@@ -333,9 +376,9 @@ public class Tag_List extends Collection_Tag implements IListTag
      */
     private void validateIndex(int index)
     {
-        if (index < 0 || index >= getData().size())
+        if (index < 0 || index >= data.size())
         {
-            throw new IndexOutOfBoundsException(String.format("Index %d out of bounds for list size %d", index, getData().size()));
+            throw new IndexOutOfBoundsException(String.format("Index %d out of bounds for list size %d", index, data.size()));
         }
     }
 
@@ -353,8 +396,8 @@ public class Tag_List extends Collection_Tag implements IListTag
     {
         StringBuilder sb = new StringBuilder();
         sb.append(NBTTags.Tag_List.getName());
-        sb.append("(name=").append(getName()).append(", type=").append(getListTypeID()).append(", size=").append(getData().size()).append("):");
-        for (Tag<?> tag : getData())
+        sb.append("(name=").append(getName()).append(", type=").append(getListTypeID()).append(", size=").append(data.size()).append("):");
+        for (Tag<?> tag : data)
         {
             sb.append("\n  ").append(tag.toString().replace("\n", "\n  "));
         }
