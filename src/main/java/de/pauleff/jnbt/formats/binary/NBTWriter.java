@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Class for handling the writing of Java NBT to file.
@@ -87,8 +88,9 @@ public class NBTWriter implements INBTWriter
      * Writes the compound tag structure to file and closes the writer.
      * The NBT specification requires compound tags as file roots, so this method enforces that constraint.
      * All stored names and string values are checked against the 65,535-byte
-     * modified UTF-8 limit before output starts. The tree must not be mutated
-     * during this operation.
+     * modified UTF-8 limit before output starts. Explicit TAG_End values and
+     * nonempty END-typed lists are also rejected before output starts.
+     * The tree must not be mutated during this operation.
      *
      * @param root The root {@link ICompoundTag} containing the complete NBT structure to write
      * @throws IOException              If an error occurs during file writing or if the data is invalid
@@ -106,7 +108,7 @@ public class NBTWriter implements INBTWriter
             {
                 throw new IOException("NBT writer is closed");
             }
-            validateUTFLengths(root, true);
+            validateForWrite(root, true);
             if (stream == null)
             {
                 stream = NBTFileHandler.loadNBTToWriter(file, compression);
@@ -124,21 +126,30 @@ public class NBTWriter implements INBTWriter
         }
     }
 
-    private void validateUTFLengths(ITag<?> tag, boolean named) throws IOException
+    private void validateForWrite(ITag<?> tag, boolean named) throws IOException
     {
+        NBTTags type = NBTTags.getById(tag.getId());
+        if (type == NBTTags.Tag_End)
+        {
+            throw new IOException("TAG_End is a structural marker, not a value");
+        }
         if (named)
         {
             validateUTFLength(tag.getName(), "Tag name");
         }
-        NBTTags type = NBTTags.getById(tag.getId());
         if (type == NBTTags.Tag_String)
         {
             validateUTFLength((String) tag.getData(), "String payload");
         } else if (type == NBTTags.Tag_Compound || type == NBTTags.Tag_List)
         {
+            if (type == NBTTags.Tag_List && ((IListTag) tag).getListTypeID() == 0
+                    && !((Collection<?>) tag.getData()).isEmpty())
+            {
+                throw new IOException("TAG_End list type is only valid for empty lists");
+            }
             for (ITag<?> child : (Iterable<ITag<?>>) tag.getData())
             {
-                validateUTFLengths(child, type == NBTTags.Tag_Compound);
+                validateForWrite(child, type == NBTTags.Tag_Compound);
             }
         }
     }
@@ -160,6 +171,10 @@ public class NBTWriter implements INBTWriter
 
     private void writeNBTTag(ITag<?> tag) throws IOException
     {
+        if (tag.getId() == 0)
+        {
+            throw new IOException("TAG_End cannot be written as a named value");
+        }
         stream.writeByte(tag.getId());
         stream.writeUTF(tag.getName());
 
@@ -171,8 +186,7 @@ public class NBTWriter implements INBTWriter
         switch (NBTTags.getById(tag.getId()))
         {
             case NBTTags.Tag_End:
-                // Do nothing! Handled by compound.
-                break;
+                throw new IOException("TAG_End cannot be written as a value");
             case NBTTags.Tag_Byte:
                 stream.writeByte((byte) tag.getData());
                 break;

@@ -190,6 +190,11 @@ public class NBTReader implements INBTReader
                     throw new IOException(stream.createContextualError(
                             String.format("Invalid list length: %d", arrayLength)));
                 }
+                if (listType == 0 && arrayLength > 0)
+                {
+                    throw new IOException(stream.createContextualError(
+                            "TAG_End list type is only valid for empty lists"));
+                }
                 ArrayList<Tag<?>> tagList = new ArrayList<>(Math.min(arrayLength, 1000)); // Pre-size reasonably
                 for (int i = 0; i < arrayLength; i++)
                 {

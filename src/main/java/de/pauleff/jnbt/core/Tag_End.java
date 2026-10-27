@@ -3,7 +3,7 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- * Class representing a NBT end tag.
+ * Structural marker terminating a binary NBT compound.
  *
  */
 public class Tag_End extends Tag<Object>
@@ -17,8 +17,8 @@ public class Tag_End extends Tag<Object>
     }
 
     /**
-     * Create an end tag with name and data set to null.
-     * WARNING: This constructor is here only for future proofing. As per NBT spec this tag should not have a name.
+     * Creates an END marker retaining a legacy name in memory.
+     * Binary END markers have no name or payload and cannot be collection values.
      *
      * @param name Name of the tag.
      */
@@ -28,15 +28,15 @@ public class Tag_End extends Tag<Object>
     }
 
     /**
-     * Create an end tag with name and data.
-     * WARNING: This constructor is here only for future proofing. As per NBT spec this tag should not have a name nor data.
+     * Creates an END marker retaining legacy metadata in memory.
+     * Binary END markers have no name or payload and cannot be collection values.
      *
      * @param name Name of the tag.
      * @param data The initial data of the tag.
      */
     public Tag_End(String name, Object data)
     {
-        super(NBTTags.Tag_Double.getId(), name, data);
+        super(NBTTags.Tag_End.getId(), name, data);
     }
 
     /**

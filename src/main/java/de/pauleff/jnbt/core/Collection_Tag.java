@@ -46,31 +46,47 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      * Creates a collection tag pre-populated with child tags.
      *
      * @param id   the NBT type identifier
-     * @param name the tag name (null or empty becomes "null")
+     * @param name the tag name (null becomes "null", empty strings are preserved)
      * @param data the initial collection of child tags
      */
     public Collection_Tag(int id, String name, ArrayList<Tag<?>> data)
     {
         super(id, name, data);
+        for (Tag<?> tag : data)
+        {
+            validateChildTag(tag);
+        }
     }
 
-    /*
-     * ========== ADDERS ==========
+    /**
+     * Rejects structural termination markers and null child values.
+     *
+     * @param tag the proposed child
+     * @throws IllegalArgumentException if the child is null or a TAG_End
      */
+    protected static void validateChildTag(ITag<?> tag)
+    {
+        if (tag == null || tag.getId() == 0)
+        {
+            throw new IllegalArgumentException("Collection children cannot be null or TAG_End");
+        }
+    }
 
     /**
      * Adds a child tag to this collection with type validation.
      *
      * <p>For lists, validates that the new tag matches the declared list type.
-     * Compounds accept any tag type.</p>
+     * Compounds accept any value tag type. TAG_End is a structural marker,
+     * so neither collection accepts it as a child.</p>
      *
      * @param tag the tag to add
      * @return this collection tag for method chaining
-     * @throws IllegalArgumentException if adding incompatible type to a list
+     * @throws IllegalArgumentException if the child is null, is TAG_End, or has an incompatible list type
      * @see Tag_List#getListTypeID()
      */
     public Collection_Tag addTag(ITag<?> tag)
     {
+        validateChildTag(tag);
         if (this instanceof Tag_List list && tag.getId() != list.getListTypeID())
         {
             throw new IllegalArgumentException(String.format("Mixed datatypes! Expected %d but got %d", list.getListTypeID(), tag.getId()));
@@ -87,14 +103,15 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      *
      * @param tags the collection of tags to add
      * @return this collection tag for method chaining
-     * @throws IllegalArgumentException if any tag is incompatible with list type
+     * @throws IllegalArgumentException if any child is null, is TAG_End, or has an incompatible list type
      * @see #addTag(ITag)
      */
     public Collection_Tag addAllTags(List<Tag<?>> tags)
     {
-        if (this instanceof Tag_List list)
+        for (Tag<?> tag : tags)
         {
-            for (Tag<?> tag : tags)
+            validateChildTag(tag);
+            if (this instanceof Tag_List list)
             {
                 if (tag.getId() != list.getListTypeID())
                 {
@@ -105,10 +122,6 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
         this.getData().addAll(tags);
         return this;
     }
-
-    /*
-     * ========== GETTERS VIA NAME ==========
-     */
 
     /**
      * Finds all tags with the specified name, including nested matches.
@@ -162,10 +175,6 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
         return tags;
     }
 
-    /*
-     * ========== GETTERS VIA TAG ==========
-     */
-
     /**
      * Finds all tags that are equal to the specified target tag.
      *
@@ -218,10 +227,6 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
         return tags;
     }
 
-    /*
-     * ========== REMOVERS VIA NAME ==========
-     */
-
     /**
      * Removes all tags with the specified name from this collection and descendants.
      *
@@ -272,10 +277,6 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
             }
         }
     }
-
-    /*
-     * ========== REMOVERS VIA TAG ==========
-     */
 
     /**
      * Removes all tags equal to the specified target from this collection and descendants.

@@ -53,6 +53,10 @@ public class Tag_List extends Collection_Tag implements IListTag
     public Tag_List(String name, int listTypeID, ArrayList<Tag<?>> data)
     {
         super(NBTTags.Tag_List.getId(), name, data);
+        if (listTypeID == 0 && !data.isEmpty())
+        {
+            throw new IllegalArgumentException("TAG_End list type is only valid for empty lists");
+        }
         this.listTypeID = listTypeID;
     }
 
@@ -67,10 +71,6 @@ public class Tag_List extends Collection_Tag implements IListTag
     {
         return listTypeID;
     }
-
-    /*
-     * ========== FLUENT API METHODS ==========
-     */
 
     /**
      * Adds a string element to this list with fluent chaining.
@@ -207,10 +207,6 @@ public class Tag_List extends Collection_Tag implements IListTag
         return this;
     }
 
-    /*
-     * ========== UPDATE METHODS (INDEX-BASED) ==========
-     */
-
     @Override
     public IListTag setString(int index, String name, String value)
     {
@@ -279,6 +275,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     public IListTag setTag(int index, ITag<?> tag)
     {
         validateIndex(index);
+        validateChildTag(tag);
         if (tag.getId() != this.listTypeID)
         {
             throw new IllegalArgumentException(String.format("Tag type mismatch! Expected %d but got %d", this.listTypeID, tag.getId()));
@@ -286,10 +283,6 @@ public class Tag_List extends Collection_Tag implements IListTag
         getData().set(index, (Tag<?>) tag);
         return this;
     }
-
-    /*
-     * ========== DELETE METHODS ==========
-     */
 
     @Override
     public IListTag removeAt(int index)
@@ -312,10 +305,6 @@ public class Tag_List extends Collection_Tag implements IListTag
         getData().clear();
         return this;
     }
-
-    /*
-     * ========== UTILITY METHODS ==========
-     */
 
     @Override
     public ITag<?> get(int index)
