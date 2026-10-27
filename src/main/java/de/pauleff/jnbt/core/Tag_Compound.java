@@ -11,8 +11,9 @@ import java.util.ArrayList;
  * Represents an NBT compound tag - a named collection of heterogeneous tags
  * that forms the backbone of NBT data structures.
  * <p>Compound tags store multiple child tags of different types, accessed by name.
- * They provide both direct tag manipulation and fluent builder methods for
- * common data types.</p>
+ * Lookup, replacement, and removal by name operate on direct children only.
+ * Explicit recursive operations such as {@link #getTagByName(String)} remain
+ * available separately.</p>
  * <p>Extends {@link Collection_Tag} with compound-specific operations and
  * implements {@link ICompoundTag} for standardized access.</p>
  *
@@ -46,6 +47,41 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public Tag_Compound(String name, ArrayList<Tag<?>> data)
     {
         super(NBTTags.Tag_Compound.getId(), name, data);
+    }
+
+    /**
+     * Finds the first matching direct child without descending into containers.
+     *
+     * @param name the child name
+     * @return the matching child, or null if absent
+     */
+    private Tag<?> findDirectChild(String name)
+    {
+        for (Tag<?> child : data)
+        {
+            if (child.getName().equals(name))
+            {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Removes the first matching direct child, leaving descendants untouched.
+     *
+     * @param name the child name
+     */
+    private void removeDirectChild(String name)
+    {
+        for (int i = 0; i < data.size(); i++)
+        {
+            if (data.get(i).getName().equals(name))
+            {
+                data.remove(i);
+                return;
+            }
+        }
     }
 
     /**
@@ -193,19 +229,19 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public boolean hasTag(String tagName)
     {
-        return getTagByName(tagName) != null;
+        return findDirectChild(tagName) != null;
     }
 
     @Override
     public ITag<?> getTag(String name)
     {
-        return getTagByName(name);
+        return findDirectChild(name);
     }
 
     @Override
     public String getString(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_String)
         {
             return (String) tag.getData();
@@ -216,7 +252,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public int getInt(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Int)
         {
             return (Integer) tag.getData();
@@ -227,7 +263,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public double getDouble(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Double)
         {
             return (Double) tag.getData();
@@ -238,7 +274,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public byte getByte(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Byte)
         {
             return (Byte) tag.getData();
@@ -249,7 +285,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public float getFloat(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Float)
         {
             return (Float) tag.getData();
@@ -260,7 +296,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public short getShort(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Short)
         {
             return (Short) tag.getData();
@@ -271,7 +307,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public long getLong(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Long)
         {
             return (Long) tag.getData();
@@ -282,7 +318,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag getCompound(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Compound)
         {
             return (ICompoundTag) tag;
@@ -293,7 +329,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public IListTag getList(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_List)
         {
             return (IListTag) tag;
@@ -304,7 +340,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public byte[] getByteArray(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Byte_Array)
         {
             return (byte[]) tag.getData();
@@ -315,7 +351,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public int[] getIntArray(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Int_Array)
         {
             return (int[]) tag.getData();
@@ -326,7 +362,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public long[] getLongArray(String name)
     {
-        Tag<?> tag = getTagByName(name);
+        Tag<?> tag = findDirectChild(name);
         if (tag instanceof Tag_Long_Array)
         {
             return (long[]) tag.getData();
@@ -337,7 +373,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setString(String name, String value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addString(name, value);
         return this;
     }
@@ -345,7 +381,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setInt(String name, int value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addInt(name, value);
         return this;
     }
@@ -353,7 +389,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setDouble(String name, double value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addDouble(name, value);
         return this;
     }
@@ -361,7 +397,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setFloat(String name, float value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addFloat(name, value);
         return this;
     }
@@ -369,7 +405,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setByte(String name, byte value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addByte(name, value);
         return this;
     }
@@ -377,7 +413,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setShort(String name, short value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addShort(name, value);
         return this;
     }
@@ -385,7 +421,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setLong(String name, long value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addLong(name, value);
         return this;
     }
@@ -393,7 +429,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setByteArray(String name, byte[] value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addByteArray(name, value);
         return this;
     }
@@ -401,7 +437,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setIntArray(String name, int[] value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addIntArray(name, value);
         return this;
     }
@@ -409,7 +445,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setLongArray(String name, long[] value)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         addLongArray(name, value);
         return this;
     }
@@ -418,7 +454,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public ICompoundTag setTag(ITag<?> tag)
     {
         validateChildTag(tag);
-        removeTagByName(tag.getName());
+        removeDirectChild(tag.getName());
         addTag(tag);
         return this;
     }
@@ -426,7 +462,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag removeTag(String name)
     {
-        removeTagByName(name);
+        removeDirectChild(name);
         return this;
     }
 
@@ -435,7 +471,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     {
         for (String name : names)
         {
-            removeTagByName(name);
+            removeDirectChild(name);
         }
         return this;
     }

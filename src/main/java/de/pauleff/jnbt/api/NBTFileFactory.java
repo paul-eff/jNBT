@@ -171,8 +171,9 @@ public class NBTFileFactory
     }
 
     /**
-     * Updates a specific tag in an NBT file without loading the entire structure.
+     * Updates a specific tag in an NBT file using a dot-separated path.
      * Performs a read-modify-write operation preserving original compression.
+     * Each parent path component must name a direct compound child.
      *
      * @param nbtFile The {@link java.io.File} to update
      * @param tagPath The path to the tag (e.g., "Data.Player.Level")
@@ -190,6 +191,8 @@ public class NBTFileFactory
     /**
      * Removes a specific tag from an NBT file.
      * Performs a read-modify-write operation preserving original compression.
+     * Each parent path component must name a direct compound child; a missing
+     * final child leaves the parent unchanged.
      *
      * @param nbtFile The {@link java.io.File} to update
      * @param tagPath The path to the tag to remove (e.g., "Data.Player.OldField")
@@ -218,6 +221,8 @@ public class NBTFileFactory
 
     /**
      * Merges two NBT files, with the second file's data overriding the first.
+     * Matching direct compound children are merged recursively; other matching
+     * direct children are replaced. Unrelated descendants are preserved.
      *
      * @param baseFile The base {@link java.io.File}
      * @param mergeFile The file to merge into the base

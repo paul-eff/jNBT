@@ -54,7 +54,8 @@ then use `de.pauleff:jnbt:2.0.0-SNAPSHOT` with `mavenLocal()` in your consuming 
 **Read NBT file:**
 ```java
 ICompoundTag root = NBTFileFactory.readNBTFile(new File("level.dat"));
-String worldName = root.getString("LevelName");
+ICompoundTag data = root.getCompound("Data");
+String worldName = data.getString("LevelName");
 ```
 
 **Create with Builder:**

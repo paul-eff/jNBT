@@ -8,6 +8,9 @@ import java.util.ArrayList;
  * Interface for NBT compound tags - the workhorse of NBT data structures.
  * Compounds function like dictionaries or maps, storing named child tags in key-value pairs.
  * They're essential for organizing complex data like player inventories, world chunks, and entity properties.
+ * <p>Lookup, updates, and removal by name apply to direct children only.
+ * Descendants must be accessed through their parent compounds. Missing or
+ * incorrectly typed values retain the defaults documented by each getter.</p>
  *
  * @see ITag
  * @see IListTag
