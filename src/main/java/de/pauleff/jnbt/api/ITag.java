@@ -34,6 +34,7 @@ public interface ITag<T>
      * Updates the name of this tag.
      *
      * @param name The new tag name
+     * @throws IllegalArgumentException if the name duplicates a sibling key in a containing compound
      */
     void setName(String name);
 

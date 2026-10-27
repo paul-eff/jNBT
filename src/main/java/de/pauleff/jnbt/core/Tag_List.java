@@ -115,6 +115,7 @@ public class Tag_List extends Collection_Tag implements IListTag
         {
             throw new IllegalArgumentException("Source must be a list with element type " + listTypeID);
         }
+        validateNameChange(list.getName());
         setData(list.getData());
         setName(list.getName());
     }

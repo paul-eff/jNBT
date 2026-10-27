@@ -53,7 +53,9 @@ class CompoundBoundaryTest
     {
         Tag_Compound root = values("", 3);
         Tag_Compound nested = values("nested", 1);
-        root.getData().add(directFirst ? root.size() : 0, nested);
+        var children = root.getData();
+        children.add(directFirst ? root.size() : 0, nested);
+        root.setData(children);
         assertValues(root, 3);
         assertValues(nested, 1);
         assertTrue(root.hasTag("integer"));

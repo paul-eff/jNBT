@@ -14,6 +14,8 @@ import java.io.UTFDataFormatException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class for handling the writing of Java NBT to file.
@@ -89,7 +91,7 @@ public class NBTWriter implements INBTWriter
      * The NBT specification requires compound tags as file roots, so this method enforces that constraint.
      * All stored names and string values are checked against the 65,535-byte
      * modified UTF-8 limit before output starts. Explicit TAG_End values and
-     * nonempty END-typed lists are also rejected before output starts.
+     * nonempty END-typed lists and duplicate compound keys are also rejected before output starts.
      * The tree must not be mutated during this operation.
      *
      * @param root The root {@link ICompoundTag} containing the complete NBT structure to write
@@ -151,6 +153,7 @@ public class NBTWriter implements INBTWriter
             {
                 throw new IOException("TAG_End list type is only valid for empty lists");
             }
+            Set<String> names = new HashSet<>();
             for (ITag<?> child : (Iterable<ITag<?>>) tag.getData())
             {
                 if (child != null && child.getId() == 0)
@@ -160,6 +163,10 @@ public class NBTWriter implements INBTWriter
                 if (child == null || (type == NBTTags.Tag_List && child.getId() != listType))
                 {
                     throw new IOException("Invalid collection child or list element type mismatch");
+                }
+                if (type == NBTTags.Tag_Compound && !names.add(child.getName()))
+                {
+                    throw new IOException("Duplicate compound key: " + child.getName());
                 }
                 validateForWrite(child, type == NBTTags.Tag_Compound);
             }

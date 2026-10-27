@@ -42,6 +42,7 @@ public class SNBTParser
     /**
      * Parses the complete SNBT string into an NBT tag.
      * The root element can be a compound, list, or primitive value.
+     * Duplicate keys within any compound are rejected.
      *
      * @return the parsed NBT tag
      * @throws SNBTException if parsing fails due to syntax errors
@@ -111,6 +112,11 @@ public class SNBTParser
                         currentToken.getPosition(), tokenizer.getInput());
             }
             String key = currentToken.getValue();
+            if (compound.hasTag(key))
+            {
+                throw new SNBTException("Duplicate compound key: " + key,
+                        currentToken.getPosition(), tokenizer.getInput());
+            }
             advance();
 
             // Expect colon

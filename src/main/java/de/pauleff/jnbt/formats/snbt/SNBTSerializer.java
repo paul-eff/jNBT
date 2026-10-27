@@ -8,7 +8,9 @@ import de.pauleff.jnbt.core.Tag;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Serializer for converting NBT tags into SNBT (Stringified NBT) format.
@@ -40,6 +42,7 @@ public class SNBTSerializer
      *
      * @param tag the NBT tag to serialize
      * @return the SNBT string representation
+     * @throws IllegalArgumentException if a compound contains duplicate child names
      */
     public String serialize(ITag<?> tag)
     {
@@ -513,6 +516,14 @@ public class SNBTSerializer
     private void serializeCompound(ICompoundTag compound, StringBuilder sb, int depth)
     {
         List<Tag<?>> tags = compound.getData();
+        Set<String> names = new HashSet<>();
+        for (Tag<?> child : tags)
+        {
+            if (!names.add(child.getName()))
+            {
+                throw new IllegalArgumentException("Duplicate compound key: " + child.getName());
+            }
+        }
 
         sb.append('{');
 

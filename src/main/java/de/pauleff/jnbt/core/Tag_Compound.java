@@ -6,12 +6,18 @@ import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Represents an NBT compound tag - a named collection of heterogeneous tags
  * that forms the backbone of NBT data structures.
  * <p>Compound tags store multiple child tags of different types, accessed by name.
  * Lookup, replacement, and removal by name operate on direct children only.
+ * Child names must be unique within each compound. Additions and bulk replacements
+ * reject duplicate keys; setters explicitly replace the direct child with that name.
+ * Collection membership is copied on input and returned as a shallow snapshot.
  * Explicit recursive operations such as {@link #getTagByName(String)} remain
  * available separately.</p>
  * <p>Extends {@link Collection_Tag} with compound-specific operations and
@@ -42,11 +48,138 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
      * Creates a compound tag pre-populated with child tags.
      *
      * @param name the tag name
-     * @param data the initial collection of child tags
+     * @param data the initial collection of child tags (membership is copied)
+     * @throws IllegalArgumentException if data is null or contains null, END, or duplicate keys
      */
     public Tag_Compound(String name, ArrayList<Tag<?>> data)
     {
-        super(NBTTags.Tag_Compound.getId(), name, data);
+        super(NBTTags.Tag_Compound.getId(), name, validatedCopy(data));
+        registerChildren();
+    }
+
+    private static ArrayList<Tag<?>> validatedCopy(List<Tag<?>> values)
+    {
+        if (values == null) throw new IllegalArgumentException("Compound data cannot be null");
+        ArrayList<Tag<?>> copy = new ArrayList<>(values);
+        Set<String> names = new HashSet<>();
+        for (Tag<?> child : copy)
+        {
+            validateChildTag(child);
+            if (!names.add(child.getName()))
+            {
+                throw new IllegalArgumentException("Duplicate compound key: " + child.getName());
+            }
+        }
+        return copy;
+    }
+
+    private void registerChildren()
+    {
+        for (Tag<?> child : data) child.registerCompoundParent(this);
+    }
+
+    // Removed children may still hold a weak parent reference; ignore those by identity.
+    final void validateChildRename(Tag<?> child, String name)
+    {
+        boolean present = false;
+        for (Tag<?> member : data)
+        {
+            if (member == child)
+            {
+                present = true;
+                break;
+            }
+        }
+        if (!present) return;
+        for (Tag<?> member : data)
+        {
+            if (member != child && member.getName().equals(name))
+            {
+                throw new IllegalArgumentException("Duplicate compound key: " + name);
+            }
+        }
+    }
+
+    /**
+     * Returns a shallow snapshot of the children; use compound methods to change membership.
+     * Child objects remain shared, with renames checked against their containing compounds.
+     *
+     * @return a copy of the child collection
+     */
+    @Override
+    public ArrayList<Tag<?>> getData()
+    {
+        return new ArrayList<>(data);
+    }
+
+    /**
+     * Replaces membership with a validated copy, preserving the old children on failure.
+     *
+     * @param data replacement children
+     * @throws IllegalArgumentException if data is null or contains null, END, or duplicate keys
+     */
+    @Override
+    public void setData(ArrayList<Tag<?>> data)
+    {
+        this.data = validatedCopy(data);
+        registerChildren();
+    }
+
+    /**
+     * Copies the name and membership from another compound after validating both.
+     *
+     * @param newTag the source compound
+     * @throws IllegalArgumentException if the source or proposed name is invalid
+     */
+    @Override
+    public void editTag(ITag<?> newTag)
+    {
+        if (!(newTag instanceof ICompoundTag compound))
+        {
+            throw new IllegalArgumentException("Source must be a compound");
+        }
+        ArrayList<Tag<?>> copy = validatedCopy(compound.getData());
+        setName(compound.getName());
+        this.data = copy;
+        registerChildren();
+    }
+
+    /**
+     * Adds a child, rejecting a name already present in this compound.
+     * Use {@link #setTag(ITag)} for explicit replacement.
+     *
+     * @param tag the child to add
+     * @return this compound
+     * @throws IllegalArgumentException if the child is null, END, or has a duplicate name
+     */
+    @Override
+    public Tag_Compound addTag(ITag<?> tag)
+    {
+        validateChildTag(tag);
+        if (findDirectChild(tag.getName()) != null)
+        {
+            throw new IllegalArgumentException("Duplicate compound key: " + tag.getName());
+        }
+        super.addTag(tag);
+        ((Tag<?>) tag).registerCompoundParent(this);
+        return this;
+    }
+
+    /**
+     * Adds children atomically, rejecting duplicate names in the existing or new membership.
+     *
+     * @param tags the children to add
+     * @return this compound
+     * @throws IllegalArgumentException if the combined membership is invalid
+     */
+    @Override
+    public Tag_Compound addAllTags(List<Tag<?>> tags)
+    {
+        if (tags == null) throw new IllegalArgumentException("Compound children cannot be null");
+        ArrayList<Tag<?>> combined = new ArrayList<>(data);
+        combined.addAll(tags);
+        setData(combined);
+        return this;
     }
 
     /**
@@ -373,81 +506,61 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag setString(String name, String value)
     {
-        removeDirectChild(name);
-        addString(name, value);
-        return this;
+        return setTag(new Tag_String(name, value));
     }
 
     @Override
     public ICompoundTag setInt(String name, int value)
     {
-        removeDirectChild(name);
-        addInt(name, value);
-        return this;
+        return setTag(new Tag_Int(name, value));
     }
 
     @Override
     public ICompoundTag setDouble(String name, double value)
     {
-        removeDirectChild(name);
-        addDouble(name, value);
-        return this;
+        return setTag(new Tag_Double(name, value));
     }
 
     @Override
     public ICompoundTag setFloat(String name, float value)
     {
-        removeDirectChild(name);
-        addFloat(name, value);
-        return this;
+        return setTag(new Tag_Float(name, value));
     }
 
     @Override
     public ICompoundTag setByte(String name, byte value)
     {
-        removeDirectChild(name);
-        addByte(name, value);
-        return this;
+        return setTag(new Tag_Byte(name, value));
     }
 
     @Override
     public ICompoundTag setShort(String name, short value)
     {
-        removeDirectChild(name);
-        addShort(name, value);
-        return this;
+        return setTag(new Tag_Short(name, value));
     }
 
     @Override
     public ICompoundTag setLong(String name, long value)
     {
-        removeDirectChild(name);
-        addLong(name, value);
-        return this;
+        return setTag(new Tag_Long(name, value));
     }
 
     @Override
     public ICompoundTag setByteArray(String name, byte[] value)
     {
-        removeDirectChild(name);
-        addByteArray(name, value);
-        return this;
+        return setTag(new Tag_Byte_Array(name, value));
     }
 
     @Override
     public ICompoundTag setIntArray(String name, int[] value)
     {
-        removeDirectChild(name);
-        addIntArray(name, value);
-        return this;
+        return setTag(new Tag_Int_Array(name, value));
     }
 
     @Override
     public ICompoundTag setLongArray(String name, long[] value)
     {
-        removeDirectChild(name);
-        addLongArray(name, value);
-        return this;
+        return setTag(new Tag_Long_Array(name, value));
     }
 
     @Override
@@ -479,20 +592,20 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public ICompoundTag clear()
     {
-        getData().clear();
+        data.clear();
         return this;
     }
 
     @Override
     public int size()
     {
-        return getData().size();
+        return data.size();
     }
 
     @Override
     public boolean isEmpty()
     {
-        return getData().isEmpty();
+        return data.isEmpty();
     }
 
     /**

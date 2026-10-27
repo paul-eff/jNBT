@@ -100,8 +100,10 @@ class EndTagTest
                 { data.add(child); }
             };
         }
-        parent.getData().add(child);
-        return parent;
+        return new Tag_Compound(parent.getName())
+        {
+            { data.add(child); }
+        };
     }
 
     @ParameterizedTest

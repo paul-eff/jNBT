@@ -3,6 +3,8 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.util.NBTTags;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -23,6 +25,8 @@ public abstract class Tag<T> implements ITag<T>
     private final int id;
     protected T data;
     private String name;
+    // Weak references let shared children validate renames without retaining old trees.
+    private ArrayList<WeakReference<Tag_Compound>> compoundParents;
 
     /**
      * Creates a new tag with the specified NBT type identifier.
@@ -90,10 +94,41 @@ public abstract class Tag<T> implements ITag<T>
      * Updates the name assigned to this tag.
      *
      * @param name the new tag name (null becomes "null"; empty strings are preserved)
+     * @throws IllegalArgumentException if the name duplicates a key in a containing compound
      */
     public void setName(String name)
     {
+        validateNameChange(name);
         this.name = name == null ? "null" : name;
+    }
+
+    /**
+     * Checks a proposed name against every compound currently containing this tag.
+     *
+     * @param name the proposed name (null becomes "null")
+     * @throws IllegalArgumentException if the name would duplicate a sibling key
+     */
+    protected final void validateNameChange(String name)
+    {
+        if (compoundParents == null) return;
+        String normalized = name == null ? "null" : name;
+        compoundParents.removeIf(reference -> reference.get() == null);
+        for (WeakReference<Tag_Compound> reference : compoundParents)
+        {
+            Tag_Compound parent = reference.get();
+            if (parent != null) parent.validateChildRename(this, normalized);
+        }
+    }
+
+    final void registerCompoundParent(Tag_Compound parent)
+    {
+        if (compoundParents == null) compoundParents = new ArrayList<>();
+        compoundParents.removeIf(reference -> reference.get() == null);
+        for (WeakReference<Tag_Compound> reference : compoundParents)
+        {
+            if (reference.get() == parent) return;
+        }
+        compoundParents.add(new WeakReference<>(parent));
     }
 
     /**

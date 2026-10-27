@@ -7,6 +7,10 @@ import java.util.ArrayList;
 /**
  * Interface for NBT compound tags - the workhorse of NBT data structures.
  * Compounds function like dictionaries or maps, storing named child tags in key-value pairs.
+ * Child names are unique within each compound. Additions, construction, bulk updates,
+ * and parsing reject duplicate keys; set methods explicitly replace a direct child.
+ * Renaming a shared child must preserve uniqueness in every containing compound.
+ * {@code getData()} returns a shallow snapshot; use mutation methods to change membership.
  * They're essential for organizing complex data like player inventories, world chunks, and entity properties.
  * <p>Lookup, updates, and removal by name apply to direct children only.
  * Descendants must be accessed through their parent compounds. Missing or

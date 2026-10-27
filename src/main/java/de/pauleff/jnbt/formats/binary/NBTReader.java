@@ -10,6 +10,8 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class for handling the parsing and formatting of a Java NBT file.
@@ -203,10 +205,16 @@ public class NBTReader implements INBTReader
                 return new Tag_List(name, listType, tagList);
             case Tag_Compound:
                 tagList = new ArrayList<>(16);
+                Set<String> names = new HashSet<>();
                 while (true)
                 {
                     Tag tag = readNBTTag(depth + 1);
                     if (tag.getId() == NBTTags.Tag_End.getId()) break;
+                    if (!names.add(tag.getName()))
+                    {
+                        throw new IOException(stream.createContextualError(
+                                "Duplicate compound key: " + tag.getName()));
+                    }
                     tagList.add(tag);
                 }
                 return new Tag_Compound(name, tagList);
