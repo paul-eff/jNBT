@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Enhanced DataInputStream wrapper that tracks read position for better error reporting.
- * Provides detailed context about where in the stream parsing errors occur.
+ *  Wraps a data input stream and counts bytes from completed reads for error messages.
  *
+ * @since 1.5
  */
 public class PositionTrackingDataInputStream
 {
@@ -21,7 +21,7 @@ public class PositionTrackingDataInputStream
     /**
      * Creates a position tracking input stream.
      *
-     * @param in The underlying input stream to wrap
+     * @param in the input stream to wrap
      */
     public PositionTrackingDataInputStream(InputStream in)
     {
@@ -32,18 +32,38 @@ public class PositionTrackingDataInputStream
         this.currentTagType = -1;
     }
 
+    /**
+     * Fills the requested byte range and updates the byte count.
+     *
+     * @param b the destination array
+     * @throws IOException if the stream cannot be read
+     */
     public void readFully(byte[] b) throws IOException
     {
         dataStream.readFully(b);
         bytesRead += b.length;
     }
 
+    /**
+     * Fills the requested byte range and updates the byte count.
+     *
+     * @param b the destination array
+     * @param off the starting index
+     * @param len the number of bytes to read
+     * @throws IOException if the stream cannot be read
+     */
     public void readFully(byte[] b, int off, int len) throws IOException
     {
         dataStream.readFully(b, off, len);
         bytesRead += len;
     }
 
+    /**
+     * Reads a byte and updates the byte count.
+     *
+     * @return the value read
+     * @throws IOException if the stream cannot be read
+     */
     public byte readByte() throws IOException
     {
         byte result = dataStream.readByte();
@@ -51,6 +71,12 @@ public class PositionTrackingDataInputStream
         return result;
     }
 
+    /**
+     * Reads an unsigned byte and updates the byte count.
+     *
+     * @return the value read
+     * @throws IOException if the stream cannot be read
+     */
     public int readUnsignedByte() throws IOException
     {
         int result = dataStream.readUnsignedByte();
@@ -58,6 +84,12 @@ public class PositionTrackingDataInputStream
         return result;
     }
 
+    /**
+     * Reads a short and updates the byte count.
+     *
+     * @return the value read
+     * @throws IOException if the stream cannot be read
+     */
     public short readShort() throws IOException
     {
         short result = dataStream.readShort();
@@ -65,6 +97,12 @@ public class PositionTrackingDataInputStream
         return result;
     }
 
+    /**
+     * Reads an unsigned short and updates the byte count.
+     *
+     * @return the value read
+     * @throws IOException if the stream cannot be read
+     */
     public int readUnsignedShort() throws IOException
     {
         int result = dataStream.readUnsignedShort();
@@ -89,6 +127,12 @@ public class PositionTrackingDataInputStream
         return new DataInputStream(new ByteArrayInputStream(encoded)).readUTF();
     }
 
+    /**
+     * Reads an int and updates the byte count.
+     *
+     * @return the value read
+     * @throws IOException if the stream cannot be read
+     */
     public int readInt() throws IOException
     {
         int result = dataStream.readInt();
@@ -96,6 +140,12 @@ public class PositionTrackingDataInputStream
         return result;
     }
 
+    /**
+     * Reads a long and updates the byte count.
+     *
+     * @return the value read
+     * @throws IOException if the stream cannot be read
+     */
     public long readLong() throws IOException
     {
         long result = dataStream.readLong();
@@ -103,6 +153,12 @@ public class PositionTrackingDataInputStream
         return result;
     }
 
+    /**
+     * Reads a float and updates the byte count.
+     *
+     * @return the value read
+     * @throws IOException if the stream cannot be read
+     */
     public float readFloat() throws IOException
     {
         float result = dataStream.readFloat();
@@ -110,6 +166,12 @@ public class PositionTrackingDataInputStream
         return result;
     }
 
+    /**
+     * Reads a double and updates the byte count.
+     *
+     * @return the value read
+     * @throws IOException if the stream cannot be read
+     */
     public double readDouble() throws IOException
     {
         double result = dataStream.readDouble();
@@ -117,6 +179,11 @@ public class PositionTrackingDataInputStream
         return result;
     }
 
+    /**
+     * Closes the wrapped input stream.
+     *
+     * @throws IOException if closing the stream fails
+     */
     public void close() throws IOException
     {
         dataStream.close();
@@ -145,9 +212,9 @@ public class PositionTrackingDataInputStream
     /**
      * Sets the current tag context for error reporting.
      *
-     * @param depth   Current nesting depth
-     * @param tagName Name of the tag being parsed
-     * @param tagType Type ID of the tag being parsed
+     * @param depth   the current nesting depth
+     * @param tagName the tag name
+     * @param tagType the NBT type ID
      */
     public void setCurrentContext(int depth, String tagName, int tagType)
     {
@@ -159,8 +226,8 @@ public class PositionTrackingDataInputStream
     /**
      * Creates a detailed error message with current parsing context.
      *
-     * @param baseMessage The base error message
-     * @return Enhanced error message with position and context
+     * @param baseMessage the base error message
+     * @return the message with stream position and tag context
      */
     public String createContextualError(String baseMessage)
     {

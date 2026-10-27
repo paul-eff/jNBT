@@ -18,8 +18,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Class for handling the writing of Java NBT to file.
+ *  Writes binary NBT after validating the tag tree.
  *
+ * @since 0.1
  */
 public class NBTWriter implements INBTWriter
 {
@@ -29,12 +30,12 @@ public class NBTWriter implements INBTWriter
     private boolean closed;
 
     /**
-     * Create a writer by passing it the target NBT file.
-     * Target file must already exist to determine the compression type.
-     * The destination is opened and backed up by {@link #write(ICompoundTag)}
-     * after encoded string lengths have been validated.
+     * Creates a writer by passing it the target NBT file. Target file must already exist to determine the
+     * compression type.
      *
-     * @param nbtFile The target NBT file.
+     * @param nbtFile the target NBT file.
+     *
+     * @throws FileNotFoundException if the file does not exist
      */
     public NBTWriter(File nbtFile) throws FileNotFoundException
     {
@@ -47,12 +48,10 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Create a writer by passing it the target NBT file and how to compress it.
-     * The destination is opened and, if it exists, backed up by
-     * {@link #write(ICompoundTag)} after encoded string lengths have been validated.
+     * Creates a writer by passing it the target NBT file and how to compress it.
      *
-     * @param nbtFile     The target NBT file.
-     * @param compression The compression type of the file.
+     * @param nbtFile     the target NBT file.
+     * @param compression the compression type of the file.
      */
     public NBTWriter(File nbtFile, Compression_Types compression)
     {
@@ -61,9 +60,9 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Create a writer by passing it the target NBT file as a {@link DataOutputStream}.
+     * Creates a writer by passing it the target NBT file as a {@link DataOutputStream}.
      *
-     * @param dos A {@link DataOutputStream} containing a NBT file.
+     * @param dos a {@link DataOutputStream} containing a NBT file.
      */
     public NBTWriter(DataOutputStream dos)
     {
@@ -73,9 +72,9 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Method to close the writer.
+     * {@inheritDoc}
      *
-     * @throws IOException When encountering an error whilst closing the writer.
+     * <p>Closing an unused file writer does not create a file.</p>
      */
     public void close() throws IOException
     {
@@ -87,16 +86,15 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Writes the compound tag structure to file and closes the writer.
-     * The NBT specification requires compound tags as file roots, so this method enforces that constraint.
-     * All stored names and string values are checked against the 65,535-byte
-     * modified UTF-8 limit before output starts. Explicit TAG_End values and
-     * nonempty END-typed lists and duplicate compound keys are also rejected before output starts.
-     * The tree must not be mutated during this operation.
+     * {@inheritDoc}
      *
-     * @param root The root {@link ICompoundTag} containing the complete NBT structure to write
-     * @throws IOException              If an error occurs during file writing or if the data is invalid
-     * @throws IllegalArgumentException If root is null
+     * <p>Validates names and strings against the 65,535-byte modified UTF-8 limit
+     * before opening the file. Rejects END values, invalid lists, and duplicate keys.
+     * Do not change the tree during writing. Closes the writer after validation
+     * or writing fails, and after a successful write.</p>
+     *
+     * @throws IOException if writing fails or the data is invalid
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public void write(ICompoundTag root) throws IOException
     {
@@ -118,7 +116,7 @@ public class NBTWriter implements INBTWriter
             writeNBTTag(root);
         } catch (IOException e)
         {
-            throw e; // Re-throw IOException directly
+            throw e;
         } catch (Exception e)
         {
             throw new IOException("Failed to write NBT data: " + e.getMessage(), e);
@@ -128,6 +126,7 @@ public class NBTWriter implements INBTWriter
         }
     }
 
+    /** Checks the whole tree before output. List element names are skipped. */
     private void validateForWrite(ITag<?> tag, boolean named) throws IOException
     {
         NBTTags type = NBTTags.getById(tag.getId());
@@ -173,6 +172,7 @@ public class NBTWriter implements INBTWriter
         }
     }
 
+    /** Rejects strings longer than 65,535 bytes in modified UTF-8. */
     private void validateUTFLength(String value, String field) throws UTFDataFormatException
     {
         int length = 0;
@@ -188,6 +188,7 @@ public class NBTWriter implements INBTWriter
         }
     }
 
+    /** Writes a tag with its type ID, name, and payload. */
     private void writeNBTTag(ITag<?> tag) throws IOException
     {
         if (tag.getId() == 0)
@@ -200,6 +201,7 @@ public class NBTWriter implements INBTWriter
         writeNBTPayload(tag);
     }
 
+    /** Writes a tag payload without a type or name header. */
     private void writeNBTPayload(ITag<?> tag) throws IOException
     {
         switch (NBTTags.getById(tag.getId()))
@@ -248,7 +250,8 @@ public class NBTWriter implements INBTWriter
                 {
                     writeNBTTag(compTag);
                 }
-                // Simulate Tag_End
+
+                // A zero type ID ends the compound.
                 stream.writeByte((byte) 0);
                 break;
             case NBTTags.Tag_Int_Array:

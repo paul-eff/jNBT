@@ -17,14 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SimpleFunctionalTest
 {
-
     @TempDir
     Path tempDir;
 
     @Test
     void testBasicCompoundOperations()
     {
-        // Test compound creation and getters
         ICompoundTag compound = NBTBuilder.compound("test")
                 .addString("name", "value")
                 .addInt("number", 42)
@@ -42,7 +40,6 @@ class SimpleFunctionalTest
     @Test
     void testNestedCompounds()
     {
-        // Test nested compound structure
         ICompoundTag root = NBTBuilder.compound("root")
                 .addString("rootField", "rootValue")
                 .addCompound("nested")
@@ -59,7 +56,6 @@ class SimpleFunctionalTest
     @Test
     void testFactoryMethods()
     {
-        // Test NBTFactory methods
         ICompoundTag compound = NBTFactory.createCompound("factory");
         compound.addString("test", "value");
         assertEquals("value", compound.getString("test"));
@@ -76,7 +72,6 @@ class SimpleFunctionalTest
     @Test
     void testFileIOBasic() throws IOException
     {
-        // Test file read/write operations
         ICompoundTag original = NBTBuilder.compound("FileTest")
                 .addString("name", "TestFile")
                 .addInt("version", 1)
@@ -85,7 +80,6 @@ class SimpleFunctionalTest
 
         File testFile = tempDir.resolve("test.dat").toFile();
 
-        // Test uncompressed
         NBTFileFactory.writeNBTFile(testFile, original, Compression_Types.NONE);
         assertTrue(testFile.exists());
 
@@ -99,7 +93,6 @@ class SimpleFunctionalTest
     @Test
     void testCompressionTypes()
     {
-        // Test compression enum values
         assertNotNull(Compression_Types.NONE);
         assertNotNull(Compression_Types.GZIP);
         assertNotNull(Compression_Types.ZLIB);
@@ -114,7 +107,6 @@ class SimpleFunctionalTest
     @Test
     void testArrayTypes()
     {
-        // Test byte/int/long array creation
         byte[] byteArray = {1, 2, 3, 4};
         int[] intArray = {10, 20, 30};
         long[] longArray = {100L, 200L, 300L};
@@ -131,10 +123,8 @@ class SimpleFunctionalTest
     @Test
     void testErrorHandling()
     {
-        // Test null/default values for missing tags
         ICompoundTag compound = NBTBuilder.compound("test").build();
 
-        // Non-existent tags should return null/default values
         assertNull(compound.getString("missing"));
         assertEquals(0, compound.getInt("missing"));
         assertEquals(0.0, compound.getDouble("missing"));
@@ -146,7 +136,6 @@ class SimpleFunctionalTest
     @Test
     void testFluentAPI()
     {
-        // Test builder pattern chaining
         ICompoundTag result = NBTBuilder.compound("fluent")
                 .addString("first", "value1")
                 .addInt("second", 10)

@@ -10,35 +10,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * Factory for creating NBT tags through the public API.
- * Provides convenient static methods for building NBT structures without dealing with constructors directly.
- * Use this when you need to create individual tags programmatically.
- * <p>Factories without a value initialize numbers to zero, strings to empty,
- * and arrays/collections to new empty instances. Explicit null payloads are
- * rejected during construction and updates.</p>
+ * Creates NBT tags and converts tags to and from SNBT. Null names become the string {@code "null"}.
+ * Empty names and whitespace are kept.
  *
- * <p><strong>Example usage:</strong></p>
- * <pre>{@code
- * // Create a player data structure
- * ICompoundTag player = NBTFactory.createCompound("Player");
- * player.addString("Name", "Steve")
- *       .addInt("Level", 42)
- *       .addDouble("Health", 20.0);
- *
- * // Create inventory items
- * IListTag inventory = NBTFactory.createList("Inventory", NBTTags.Tag_Compound.getId());
- * }</pre>
- *
- * @see ITag
- * @see ICompoundTag
- * @see IListTag
+ * @since 1.3
  */
 public class NBTFactory
 {
     /**
      * Creates an empty compound tag.
      *
-     * @return New {@link ICompoundTag} instance
+     * @return the new tag
      */
     public static ICompoundTag createCompound()
     {
@@ -48,8 +30,8 @@ public class NBTFactory
     /**
      * Creates a named compound tag.
      *
-     * @param name The tag name
-     * @return New {@link ICompoundTag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ICompoundTag createCompound(String name)
     {
@@ -59,9 +41,9 @@ public class NBTFactory
     /**
      * Creates a compound tag with initial child tags.
      *
-     * @param name The tag name
+     * @param name the tag name
      * @param data Initial child tags to add
-     * @return New {@link ICompoundTag} containing the provided children
+     * @return the new tag
      */
     public static ICompoundTag createCompound(String name, ArrayList<ITag<?>> data)
     {
@@ -75,10 +57,10 @@ public class NBTFactory
     }
 
     /**
-     * Creates an empty list tag for the specified element type.
+     * Creates an empty list tag with the given element type.
      *
-     * @param listTypeID The NBT type ID of elements this list will contain
-     * @return New {@link IListTag} instance
+     * @param listTypeID the NBT type ID of elements this list will contain
+     * @return the new tag
      */
     public static IListTag createList(int listTypeID)
     {
@@ -86,11 +68,11 @@ public class NBTFactory
     }
 
     /**
-     * Creates a named list tag for the specified element type.
+     * Creates a named list tag with the given element type.
      *
-     * @param name       The tag name
-     * @param listTypeID The NBT type ID of elements this list will contain
-     * @return New {@link IListTag} with the specified name and type
+     * @param name       the tag name
+     * @param listTypeID the NBT type ID of elements this list will contain
+     * @return the new tag
      */
     public static IListTag createList(String name, int listTypeID)
     {
@@ -100,7 +82,7 @@ public class NBTFactory
     /**
      * Creates an empty string tag.
      *
-     * @return New string {@link ITag}
+     * @return the new tag
      */
     public static ITag<String> createString()
     {
@@ -110,8 +92,8 @@ public class NBTFactory
     /**
      * Creates a named string tag.
      *
-     * @param name The tag name
-     * @return New string {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<String> createString(String name)
     {
@@ -121,9 +103,9 @@ public class NBTFactory
     /**
      * Creates a string tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The string value
-     * @return New string {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the string value
+     * @return the new tag
      */
     public static ITag<String> createString(String name, String value)
     {
@@ -133,7 +115,7 @@ public class NBTFactory
     /**
      * Creates an empty integer tag.
      *
-     * @return New integer {@link ITag}
+     * @return the new tag
      */
     public static ITag<Integer> createInt()
     {
@@ -143,8 +125,8 @@ public class NBTFactory
     /**
      * Creates a named integer tag.
      *
-     * @param name The tag name
-     * @return New integer {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<Integer> createInt(String name)
     {
@@ -154,9 +136,9 @@ public class NBTFactory
     /**
      * Creates an integer tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The integer value
-     * @return New integer {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the integer value
+     * @return the new tag
      */
     public static ITag<Integer> createInt(String name, int value)
     {
@@ -166,7 +148,7 @@ public class NBTFactory
     /**
      * Creates an empty double tag.
      *
-     * @return New double {@link ITag}
+     * @return the new tag
      */
     public static ITag<Double> createDouble()
     {
@@ -176,8 +158,8 @@ public class NBTFactory
     /**
      * Creates a named double tag.
      *
-     * @param name The tag name
-     * @return New double {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<Double> createDouble(String name)
     {
@@ -187,9 +169,9 @@ public class NBTFactory
     /**
      * Creates a double tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The double value
-     * @return New double {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the double value
+     * @return the new tag
      */
     public static ITag<Double> createDouble(String name, double value)
     {
@@ -199,7 +181,7 @@ public class NBTFactory
     /**
      * Creates an empty float tag.
      *
-     * @return New float {@link ITag}
+     * @return the new tag
      */
     public static ITag<Float> createFloat()
     {
@@ -209,8 +191,8 @@ public class NBTFactory
     /**
      * Creates a named float tag.
      *
-     * @param name The tag name
-     * @return New float {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<Float> createFloat(String name)
     {
@@ -220,9 +202,9 @@ public class NBTFactory
     /**
      * Creates a float tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The float value
-     * @return New float {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the float value
+     * @return the new tag
      */
     public static ITag<Float> createFloat(String name, float value)
     {
@@ -232,7 +214,7 @@ public class NBTFactory
     /**
      * Creates an empty byte tag.
      *
-     * @return New byte {@link ITag}
+     * @return the new tag
      */
     public static ITag<Byte> createByte()
     {
@@ -242,8 +224,8 @@ public class NBTFactory
     /**
      * Creates a named byte tag.
      *
-     * @param name The tag name
-     * @return New byte {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<Byte> createByte(String name)
     {
@@ -253,9 +235,9 @@ public class NBTFactory
     /**
      * Creates a byte tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The byte value
-     * @return New byte {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the byte value
+     * @return the new tag
      */
     public static ITag<Byte> createByte(String name, byte value)
     {
@@ -265,7 +247,7 @@ public class NBTFactory
     /**
      * Creates an empty short tag.
      *
-     * @return New short {@link ITag}
+     * @return the new tag
      */
     public static ITag<Short> createShort()
     {
@@ -275,8 +257,8 @@ public class NBTFactory
     /**
      * Creates a named short tag.
      *
-     * @param name The tag name
-     * @return New short {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<Short> createShort(String name)
     {
@@ -286,9 +268,9 @@ public class NBTFactory
     /**
      * Creates a short tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The short value
-     * @return New short {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the short value
+     * @return the new tag
      */
     public static ITag<Short> createShort(String name, short value)
     {
@@ -298,7 +280,7 @@ public class NBTFactory
     /**
      * Creates an empty long tag.
      *
-     * @return New long {@link ITag}
+     * @return the new tag
      */
     public static ITag<Long> createLong()
     {
@@ -308,8 +290,8 @@ public class NBTFactory
     /**
      * Creates a named long tag.
      *
-     * @param name The tag name
-     * @return New long {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<Long> createLong(String name)
     {
@@ -319,9 +301,9 @@ public class NBTFactory
     /**
      * Creates a long tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The long value
-     * @return New long {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the long value
+     * @return the new tag
      */
     public static ITag<Long> createLong(String name, long value)
     {
@@ -331,7 +313,7 @@ public class NBTFactory
     /**
      * Creates an empty byte array tag.
      *
-     * @return New byte array {@link ITag}
+     * @return the new tag
      */
     public static ITag<byte[]> createByteArray()
     {
@@ -341,8 +323,8 @@ public class NBTFactory
     /**
      * Creates a named byte array tag.
      *
-     * @param name The tag name
-     * @return New byte array {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<byte[]> createByteArray(String name)
     {
@@ -352,9 +334,9 @@ public class NBTFactory
     /**
      * Creates a byte array tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The byte array value
-     * @return New byte array {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the byte array value
+     * @return the new tag
      */
     public static ITag<byte[]> createByteArray(String name, byte[] value)
     {
@@ -364,7 +346,7 @@ public class NBTFactory
     /**
      * Creates an empty integer array tag.
      *
-     * @return New integer array {@link ITag}
+     * @return the new tag
      */
     public static ITag<int[]> createIntArray()
     {
@@ -374,8 +356,8 @@ public class NBTFactory
     /**
      * Creates a named integer array tag.
      *
-     * @param name The tag name
-     * @return New integer array {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<int[]> createIntArray(String name)
     {
@@ -385,9 +367,9 @@ public class NBTFactory
     /**
      * Creates an integer array tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The integer array value
-     * @return New integer array {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the integer array value
+     * @return the new tag
      */
     public static ITag<int[]> createIntArray(String name, int[] value)
     {
@@ -397,7 +379,7 @@ public class NBTFactory
     /**
      * Creates an empty long array tag.
      *
-     * @return New long array {@link ITag}
+     * @return the new tag
      */
     public static ITag<long[]> createLongArray()
     {
@@ -407,8 +389,8 @@ public class NBTFactory
     /**
      * Creates a named long array tag.
      *
-     * @param name The tag name
-     * @return New long array {@link ITag} with the specified name
+     * @param name the tag name
+     * @return the new tag
      */
     public static ITag<long[]> createLongArray(String name)
     {
@@ -418,9 +400,9 @@ public class NBTFactory
     /**
      * Creates a long array tag with name and value.
      *
-     * @param name  The tag name
-     * @param value The long array value
-     * @return New long array {@link ITag} with the specified name and value
+     * @param name  the tag name
+     * @param value the long array value
+     * @return the new tag
      */
     public static ITag<long[]> createLongArray(String name, long[] value)
     {
@@ -429,12 +411,11 @@ public class NBTFactory
 
     /**
      * Creates a simple NBT structure with key-value string pairs.
-     * Perfect for configuration files or simple data storage.
      *
-     * @param rootName      The name of the root compound tag
-     * @param keyValuePairs Alternating keys and values (key1, value1, key2, value2, ...)
-     * @return A {@link ICompoundTag} containing the key-value pairs
-     * @throws IllegalArgumentException If an odd number of arguments is provided
+     * @param rootName      the name of the root compound tag
+     * @param keyValuePairs Alternating keys and values (key1, value1, key2, value2,...)
+     * @return the new tag
+     * @throws IllegalArgumentException if an odd number of arguments is provided
      */
     public static ICompoundTag createSimpleCompound(String rootName, String... keyValuePairs)
     {
@@ -453,23 +434,10 @@ public class NBTFactory
 
     /**
      * Parses SNBT (Stringified NBT) text into an NBT tag structure.
-     * Supports the complete SNBT syntax used in Minecraft commands.
      *
-     * <p><strong>Example usage:</strong></p>
-     * <pre>{@code
-     * // Parse a compound from a Minecraft command
-     * ITag<?> tag = NBTFactory.parseFromSNBT("{display:{Name:\"Custom Item\"}}");
-     *
-     * // Parse a simple value
-     * ITag<?> number = NBTFactory.parseFromSNBT("42b");
-     *
-     * // Parse an array
-     * ITag<?> array = NBTFactory.parseFromSNBT("[I; 1, 2, 3]");
-     * }</pre>
-     *
-     * @param snbt The SNBT string to parse
-     * @return The parsed NBT tag structure
-     * @throws SNBTException If the SNBT syntax is invalid
+     * @param snbt the SNBT string to parse
+     * @return the parsed NBT tag structure
+     * @throws SNBTException if the SNBT syntax is invalid
      */
     public static ITag<?> parseFromSNBT(String snbt) throws SNBTException
     {
@@ -484,11 +452,10 @@ public class NBTFactory
 
     /**
      * Parses SNBT text into a compound tag.
-     * Convenience method that ensures the result is a compound tag.
      *
-     * @param snbt The SNBT string to parse (must represent a compound)
-     * @return The parsed compound tag
-     * @throws SNBTException If the SNBT syntax is invalid or doesn't represent a compound
+     * @param snbt the SNBT string to parse (must represent a compound)
+     * @return the parsed compound tag
+     * @throws SNBTException if the SNBT syntax is invalid or doesn't represent a compound
      */
     public static ICompoundTag parseCompoundFromSNBT(String snbt) throws SNBTException
     {
@@ -502,11 +469,10 @@ public class NBTFactory
 
     /**
      * Parses SNBT text into a list tag.
-     * Convenience method that ensures the result is a list tag.
      *
-     * @param snbt The SNBT string to parse (must represent a list)
-     * @return The parsed list tag
-     * @throws SNBTException If the SNBT syntax is invalid or doesn't represent a list
+     * @param snbt the SNBT string to parse (must represent a list)
+     * @return the parsed list tag
+     * @throws SNBTException if the SNBT syntax is invalid or doesn't represent a list
      */
     public static IListTag parseListFromSNBT(String snbt) throws SNBTException
     {
@@ -520,20 +486,9 @@ public class NBTFactory
 
     /**
      * Converts an NBT tag to SNBT (Stringified NBT) format.
-     * Uses compact formatting suitable for Minecraft commands.
      *
-     * <p><strong>Example usage:</strong></p>
-     * <pre>{@code
-     * ICompoundTag player = NBTFactory.createCompound("Player")
-     *     .addString("name", "Steve")
-     *     .addInt("level", 42);
-     *
-     * String snbt = NBTFactory.toSNBT(player);
-     * // Result: {name:"Steve",level:42}
-     * }</pre>
-     *
-     * @param tag The NBT tag to serialize
-     * @return The SNBT string representation
+     * @param tag the NBT tag to serialize
+     * @return the SNBT string representation
      */
     public static String toSNBT(ITag<?> tag)
     {
@@ -541,14 +496,12 @@ public class NBTFactory
         return serializer.serialize(tag);
     }
 
-
     /**
      * Writes an NBT tag to a text file in SNBT format.
-     * Uses Minecraft-compatible formatting and adds a trailing newline.
      *
-     * @param tag  The NBT tag to write
-     * @param file The output file
-     * @throws IOException If writing to the file fails
+     * @param tag  the NBT tag to write
+     * @param file the output file
+     * @throws IOException if writing to the file fails
      */
     public static void writeToSNBTFile(ITag<?> tag, File file) throws IOException
     {

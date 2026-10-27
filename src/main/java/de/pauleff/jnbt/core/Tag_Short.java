@@ -3,14 +3,13 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- * Class representing a NBT short tag.
+ *  An NBT short tag.
  *
+ * @since 0.1
  */
 public class Tag_Short extends Tag<Short>
 {
-    /**
-     * Creates a tag initialized to zero.
-     */
+    /** Creates a tag initialized to zero. */
     public Tag_Short()
     {
         super(NBTTags.Tag_Short.getId());
@@ -19,7 +18,7 @@ public class Tag_Short extends Tag<Short>
     /**
      * Creates a named tag initialized to zero.
      *
-     * @param name Name of the tag.
+     * @param name the tag name
      */
     public Tag_Short(String name)
     {
@@ -27,10 +26,10 @@ public class Tag_Short extends Tag<Short>
     }
 
     /**
-     * Create a short tag with name and data.
+     * Creates a short tag with name and data.
      *
-     * @param name Name of the tag.
-     * @param data The initial data of the tag.
+     * @param name the tag name
+     * @param data the initial value
      */
     public Tag_Short(String name, short data)
     {

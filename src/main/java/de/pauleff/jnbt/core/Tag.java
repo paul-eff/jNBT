@@ -9,20 +9,13 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Foundation class for all NBT tags, providing core functionality for data storage,
- * identification, and manipulation within the NBT hierarchy.
- * <p>Each tag maintains a unique identifier, optional name, and typed data payload.
- * Tags support fluent operations, equality checking, and custom transformations.</p>
- * <p>Explicit names, including empty strings and whitespace, are preserved exactly.
- * For compatibility, null names and constructors without a name use the literal
- * string {@code "null"}.</p>
- * <p>Constructors without a payload initialize numbers to zero, strings to empty,
- * and arrays/collections to new empty instances. Constructors and updates reject
- * explicit null payloads. TAG_End is a structural marker and has no payload when
- * created without legacy metadata.</p>
+ * Base class for NBT tags. Null names become the string {@code "null"}. Empty names and whitespace are
+ * kept. Default payloads are zero, an empty string, or a new empty array or collection. Explicit null
+ * payloads are rejected. END markers have no default payload.
  *
  * @param <T> the data type stored within this tag
-
+ *
+ * @since 0.1
  */
 public abstract class Tag<T> implements ITag<T>
 {
@@ -33,9 +26,9 @@ public abstract class Tag<T> implements ITag<T>
     private ArrayList<WeakReference<Tag_Compound>> compoundParents;
 
     /**
-     * Creates a new tag with the specified NBT type identifier and its default payload.
+     * Creates a tag with the NBT type ID and its default payload.
      *
-     * @param id the NBT type identifier
+     * @param id the NBT type ID
      * @throws IllegalArgumentException if the ID is not a valid NBT tag type
      */
     public Tag(int id)
@@ -45,10 +38,9 @@ public abstract class Tag<T> implements ITag<T>
 
     /**
      * Creates a named tag with zero, an empty string, or a new empty array/collection.
-     * END markers have no payload.
      *
-     * @param id   the NBT type identifier
-     * @param name the tag name (null becomes "null"; empty strings are preserved)
+     * @param id   the NBT type ID
+     * @param name the tag name, with null stored as "null"
      * @throws IllegalArgumentException if the ID is not a valid NBT tag type
      */
     public Tag(int id, String name)
@@ -59,10 +51,10 @@ public abstract class Tag<T> implements ITag<T>
     }
 
     /**
-     * Creates a new tag with complete initialization.
+     * Creates a tag with the given type, name, and payload.
      *
-     * @param id   the NBT type identifier
-     * @param name the tag name (null becomes "null"; empty strings are preserved)
+     * @param id   the NBT type ID
+     * @param name the tag name, with null stored as "null"
      * @param data the non-null initial payload
      * @throws IllegalArgumentException if the ID is invalid or data is null or incompatible
      */
@@ -78,6 +70,7 @@ public abstract class Tag<T> implements ITag<T>
         this.data = data;
     }
 
+    /** Returns the default payload for an NBT type ID. */
     private static Object defaultPayload(int id)
     {
         return switch (id)
@@ -98,20 +91,16 @@ public abstract class Tag<T> implements ITag<T>
         };
     }
 
-    /**
-     * Returns the NBT type identifier for this tag.
-     *
-     * @return the NBT type ID
-     */
+    /** {@inheritDoc} */
     public int getId()
     {
         return id;
     }
 
     /**
-     * Returns the name assigned to this tag.
+     * {@inheritDoc}
      *
-     * @return the tag name (never null)
+     * @return the tag name, never null
      */
     public String getName()
     {
@@ -119,10 +108,10 @@ public abstract class Tag<T> implements ITag<T>
     }
 
     /**
-     * Updates the name assigned to this tag.
+     * {@inheritDoc}
      *
-     * @param name the new tag name (null becomes "null"; empty strings are preserved)
-     * @throws IllegalArgumentException if the name duplicates a key in a containing compound
+     * @param name the new name, with null stored as "null"
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public void setName(String name)
     {
@@ -148,6 +137,7 @@ public abstract class Tag<T> implements ITag<T>
         }
     }
 
+    /** Tracks a containing compound so renames can check for duplicate names. */
     final void registerCompoundParent(Tag_Compound parent)
     {
         if (compoundParents == null) compoundParents = new ArrayList<>();
@@ -159,22 +149,18 @@ public abstract class Tag<T> implements ITag<T>
         compoundParents.add(new WeakReference<>(parent));
     }
 
-    /**
-     * Returns the data payload stored within this tag.
-     *
-     * @return the tag's data content
-     */
+    /** {@inheritDoc} */
     public T getData()
     {
         return data;
     }
 
     /**
-     * Initializes or replaces the payload using the type declared by the NBT ID.
-     * A null or incompatible update leaves the existing payload unchanged.
+     * {@inheritDoc}
      *
-     * @param data the non-null replacement payload
-     * @throws IllegalArgumentException if data is null or has an incompatible type
+     * <p>Invalid input leaves the payload unchanged.</p>
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public void setData(T data)
     {
@@ -182,11 +168,12 @@ public abstract class Tag<T> implements ITag<T>
         this.data = data;
     }
 
+    /** Rejects null payloads and values that do not match the NBT type ID. */
     private void validatePayload(Object value)
     {
         Class<?> expected = switch (id)
         {
-            // END retains its legacy in-memory metadata API; it is never a stored value.
+            // END accepts legacy metadata in memory but cannot be stored as a value.
             case 0 -> Object.class;
             case 1 -> Byte.class;
             case 2 -> Short.class;
@@ -210,14 +197,9 @@ public abstract class Tag<T> implements ITag<T>
     }
 
     /**
-     * Copies a compatible tag's name and non-null payload.
-     * Validation failures leave both the existing name and payload unchanged.
+     * {@inheritDoc}
      *
-     * @param newTag the source tag to copy from
-     * @throws IllegalArgumentException if the source is null, has another tag type,
-     *                                  has an invalid payload, or has a conflicting name
-     * @see #setData(Object)
-     * @see #setName(String)
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public void editTag(ITag<?> newTag)
     {
@@ -232,23 +214,17 @@ public abstract class Tag<T> implements ITag<T>
         this.setName(newTag.getName());
     }
 
-    /**
-     * Applies a custom transformation or operation to this tag.
-     *
-     * <p>Enables functional-style tag manipulation and processing.</p>
-     *
-     * @param operation the operation to execute on this tag
-     */
+    /** {@inheritDoc} */
     public void applyOperation(Consumer<ITag<T>> operation)
     {
         operation.accept(this);
     }
 
     /**
-     * Determines equality based on tag ID, name, and data content.
+     * Compares the tag class, type ID, name, and data.
      *
      * @param obj the object to compare against
-     * @return true if tags are equivalent in all aspects
+     * @return true if the tags match
      */
     @Override
     public boolean equals(Object obj)
@@ -262,17 +238,14 @@ public abstract class Tag<T> implements ITag<T>
                 Objects.equals(data, tag.data);
     }
 
+    /** Returns a hash of the tag type, name, and data. */
     @Override
     public int hashCode()
     {
         return Objects.hash(id, name, data);
     }
 
-    /**
-     * Generates a human-readable representation showing tag type, name, and data.
-     *
-     * @return formatted string representation
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString()
     {

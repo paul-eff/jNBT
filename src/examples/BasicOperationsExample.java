@@ -1,21 +1,9 @@
-package de.pauleff.jnbt.examples;
-
 import de.pauleff.jnbt.api.*;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Demonstrates basic NBT operations using jNBT library.
- * Shows fundamental tag creation, compound operations, and file I/O.
- * Core concepts:
- * - NBTFactory: Primary API for creating tags
- * - NBTFileFactory: File operations with automatic compression
- * - Type-safe getters: Access data without casting
- * - Fluent API: Method chaining for readable code
- *
- */
 public class BasicOperationsExample
 {
     public static void main(String[] args) throws IOException
@@ -32,7 +20,7 @@ public class BasicOperationsExample
         System.out.println("\t" + level);
         System.out.println("\t" + health);
 
-        // Create compound tag with fluent API
+        // Add methods can be chained. Each child name must be unique.
         ICompoundTag player = NBTFactory.createCompound("Player")
                 .addString("name", "Steve")
                 .addInt("level", 42)
@@ -48,13 +36,13 @@ public class BasicOperationsExample
 
         System.out.println("Player: " + playerName + " (Level " + playerLevel + ", Health " + playerHealth + ")");
 
-        // Demonstrate type safety - wrong type returns default
-        int nameAsInt = player.getInt("name"); // String accessed as int
-        String missingField = player.getString("missing"); // Non-existent field
+        // Missing fields and wrong types return defaults instead of throwing.
+        int nameAsInt = player.getInt("name"); // Returns 0 because the stored value is a string.
+        String missingField = player.getString("missing"); // Returns null because the field is missing.
 
         System.out.println("Type safety: name as int = " + nameAsInt + ", missing field = " + missingField);
 
-        // Create and use list
+        // All elements must match the list type. Element names are not stored in binary NBT.
         IListTag inventory = NBTFactory.createList("inventory", NBTTags.Tag_String.getId());
         inventory.addString("item1", "sword")
                 .addString("item2", "shield");

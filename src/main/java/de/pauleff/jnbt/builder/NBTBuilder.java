@@ -8,30 +8,11 @@ import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- * Fluent factory for creating NBT tag structures with type safety and readable syntax.
- * Provides static factory methods and builder patterns for constructing complex NBT hierarchies.
- * <p>Names may be empty or contain whitespace and are preserved exactly. Builder
- * methods reject null names. List element names exist only in memory; binary NBT
- * list payloads do not store them.</p>
+ * Builds NBT tags with chained method calls. Names cannot be null. Empty names and whitespace are
+ * kept. Call {@link #build()} on root builders and {@link #end()} on nested builders. Binary NBT does
+ * not store list element names.
  *
- * <p>Build NBT structures using method chaining and automatic type validation:</p>
- * <pre>{@code
- * Tag_Compound player = NBTBuilder.compound("Player")
- *     .addString("Name", "Steve")
- *     .addInt("Level", 50)
- *     .addList("Inventory", NBTTags.Tag_Compound)
- *         .addCompound("sword")
- *             .addString("id", "minecraft:diamond_sword")
- *             .addInt("Count", 1)
- *         .end()
- *     .end()
- *     .build();
- * }</pre>
- *
- * <p>Remember to call {@link #build()} on root builders and {@link #end()} on nested ones.</p>
- *
- * @see CompoundBuilder
- * @see ListBuilder
+ * @since 1.3
  */
 public abstract class NBTBuilder
 {
@@ -39,7 +20,7 @@ public abstract class NBTBuilder
     protected NBTBuilder parent;
 
     /**
-     * Constructs a builder with parent-child relationship for nested structures.
+     * Creates a builder with an optional parent.
      *
      * @param name   tag name
      * @param parent parent builder, null for root builders
@@ -51,7 +32,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a fluent builder for compound tags containing key-value pairs.
+     * Creates a compound builder.
      *
      * @param name compound tag name
      * @return new {@link CompoundBuilder}
@@ -62,7 +43,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a fluent builder for homogeneous list tags.
+     * Creates a list builder with a fixed element type.
      *
      * @param name     list tag name
      * @param listType type constraint for all list elements
@@ -74,7 +55,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a string tag with immediate value assignment.
+     * Creates a string tag.
      *
      * @param name  tag name
      * @param value string content
@@ -87,7 +68,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates an integer tag with immediate value assignment.
+     * Creates an integer tag.
      *
      * @param name  tag name
      * @param value integer content
@@ -100,7 +81,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a double-precision tag with immediate value assignment.
+     * Creates a double tag.
      *
      * @param name  tag name
      * @param value double content
@@ -113,7 +94,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a single-precision tag with immediate value assignment.
+     * Creates a float tag.
      *
      * @param name  tag name
      * @param value float content
@@ -126,7 +107,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a byte tag with immediate value assignment.
+     * Creates a byte tag.
      *
      * @param name  tag name
      * @param value byte content
@@ -139,7 +120,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a short integer tag with immediate value assignment.
+     * Creates a short integer tag.
      *
      * @param name  tag name
      * @param value short content
@@ -152,7 +133,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a long integer tag with immediate value assignment.
+     * Creates a long integer tag.
      *
      * @param name  tag name
      * @param value long content
@@ -179,19 +160,17 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a compound builder pre-loaded with data from an existing NBT file.
-     * The builder can then be used to modify the structure before saving.
+     * Reads a file into a compound builder.
      *
-     * @param file The {@link java.io.File} to load NBT data from
-     * @return A {@link CompoundBuilder} containing the loaded data
-     * @throws java.io.IOException If the file cannot be read
+     * @param file the file to read
+     * @return a {@link CompoundBuilder} containing the loaded data
+     * @throws java.io.IOException if the file cannot be read
      */
     public static CompoundBuilder fromFile(java.io.File file) throws java.io.IOException
     {
         ICompoundTag loadedData = NBTFileFactory.readNBTFile(file);
         CompoundBuilder builder = new CompoundBuilder(loadedData.getName(), null);
 
-        // Copy loaded data into the builder
         if (loadedData instanceof Tag_Compound concrete)
         {
             for (Tag<?> tag : concrete.getData())
@@ -204,17 +183,15 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Creates a compound builder pre-loaded with data from an existing ICompoundTag.
-     * The builder can then be used to modify the structure before saving.
+     * Creates a builder with the compound's children. Child objects are shared.
      *
-     * @param compoundTag The {@link ICompoundTag} to load data from
-     * @return A {@link CompoundBuilder} containing the loaded data
+     * @param compoundTag the {@link ICompoundTag} to load data from
+     * @return a {@link CompoundBuilder} containing the loaded data
      */
     public static CompoundBuilder fromCompound(ICompoundTag compoundTag)
     {
         CompoundBuilder builder = new CompoundBuilder(compoundTag.getName(), null);
 
-        // Copy loaded data into the builder
         if (compoundTag instanceof Tag_Compound concrete)
         {
             for (Tag<?> tag : concrete.getData())
@@ -227,17 +204,18 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Finalizes construction and returns the completed NBT tag.
+     * Returns the built tag. Only root builders can call this method.
      *
-     * @return immutable tag structure
+     * @return the built tag
+     * @throws IllegalStateException if called on a nested builder. Call {@link #end()} first.
      */
     public abstract ITag<?> build();
 
     /**
-     * Closes this nested builder and returns control to its parent.
+     * Adds this tag to its parent and returns the parent builder.
      *
      * @return parent builder for continued chaining
-     * @throws IllegalStateException if called on root builder
+     * @throws IllegalStateException if called on a root builder. Call {@link #build()} instead.
      */
     public abstract NBTBuilder end();
 
@@ -252,7 +230,7 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Returns the parent builder in the construction hierarchy.
+     * Returns the parent builder, or null for a root builder.
      *
      * @return parent builder, null for root builders
      */
@@ -262,12 +240,11 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Builds the NBT structure and writes it directly to a file.
-     * Only available for root builders (builders without parents).
+     * Builds and saves a root compound. Nested builders and root lists are rejected.
      *
-     * @param file The {@link java.io.File} to write to
-     * @throws java.io.IOException   If writing fails
-     * @throws IllegalStateException If this is not a root builder
+     * @param file the file to write to
+     * @throws java.io.IOException   if writing fails
+     * @throws IllegalStateException if this is not a root builder
      */
     public void buildAndSave(java.io.File file) throws java.io.IOException
     {
@@ -287,13 +264,12 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Builds the NBT structure and writes it to a file with specified compression.
-     * Only available for root builders (builders without parents).
+     * Builds and saves a root compound. Nested builders and root lists are rejected.
      *
-     * @param file        The {@link java.io.File} to write to
-     * @param compression The {@link Compression_Types} to use
-     * @throws java.io.IOException   If writing fails
-     * @throws IllegalStateException If this is not a root builder
+     * @param file        the file to write to
+     * @param compression the {@link Compression_Types} to use
+     * @throws java.io.IOException   if writing fails
+     * @throws IllegalStateException if this is not a root builder
      */
     public void buildAndSave(java.io.File file, Compression_Types compression) throws java.io.IOException
     {

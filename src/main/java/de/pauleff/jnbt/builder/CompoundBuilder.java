@@ -6,35 +6,20 @@ import de.pauleff.jnbt.core.Tag_Compound;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- * Fluent builder for creating structured NBT compound tags with seamless nesting support.
- * Chain method calls to build complex hierarchical data structures effortlessly.
+ * Builds compound tags with named children. Add methods reject duplicate names. Set methods replace
+ * direct children with the same name.
  *
- * <p>Build player data with nested inventory:</p>
- * <pre>{@code
- * Tag_Compound player = NBTBuilder.compound("Player")
- *     .addString("Name", "Steve")
- *     .addInt("Level", 50)
- *     .addList("Inventory", NBTTags.Tag_Compound)
- *         .addCompound("item1")
- *             .addString("id", "minecraft:diamond_sword")
- *         .end()
- *     .end()
- *     .build();
- * }</pre>
- *
- * @see NBTBuilder
- * @see ListBuilder
- * @see Tag_Compound
+ * @since 1.3
  */
 public class CompoundBuilder extends NBTBuilder
 {
     private final Tag_Compound compound;
 
     /**
-     * Creates a new compound builder ready for tag assembly.
+     * Creates a compound builder ready for use.
      *
-     * @param name   the compound's identifier
-     * @param parent the parent builder for nesting support, or null for root compounds
+     * @param name   the compound name
+     * @param parent the parent builder, or null for a root compound
      */
     public CompoundBuilder(String name, NBTBuilder parent)
     {
@@ -47,7 +32,7 @@ public class CompoundBuilder extends NBTBuilder
      * Creates a compound builder from an existing compound tag for modification.
      *
      * @param existingCompound the existing compound to modify
-     * @param parent           the parent builder for nesting support, or null for root compounds
+     * @param parent           the parent builder, or null for a root compound
      */
     public CompoundBuilder(ICompoundTag existingCompound, NBTBuilder parent)
     {
@@ -62,11 +47,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores a string value with the specified name.
+     * Stores a string value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the string content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addString(String name, String value)
     {
@@ -76,11 +61,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores an integer value with the specified name.
+     * Stores an integer value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the numeric content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addInt(String name, int value)
     {
@@ -90,11 +75,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores a double-precision value with the specified name.
+     * Stores a double value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the floating-point content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addDouble(String name, double value)
     {
@@ -104,11 +89,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores a single-precision float with the specified name.
+     * Stores a float.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the floating-point content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addFloat(String name, float value)
     {
@@ -118,11 +103,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores a byte value with the specified name.
+     * Stores a byte value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the byte content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addByte(String name, byte value)
     {
@@ -132,11 +117,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores a short integer with the specified name.
+     * Stores a short integer.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the numeric content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addShort(String name, short value)
     {
@@ -146,11 +131,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores a long integer with the specified name.
+     * Stores a long integer.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the numeric content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addLong(String name, long value)
     {
@@ -160,11 +145,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores a byte array with the specified name.
+     * Stores a byte array.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the byte array content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addByteArray(String name, byte[] value)
     {
@@ -174,11 +159,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores an integer array with the specified name.
+     * Stores an integer array.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the integer array content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addIntArray(String name, int[] value)
     {
@@ -188,11 +173,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Stores a long array with the specified name.
+     * Stores a long array.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the long array content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder addLongArray(String name, long[] value)
     {
@@ -202,10 +187,10 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Incorporates an existing tag into this compound.
+     * Adds an existing tag into this compound.
      *
-     * @param tag the pre-built tag to include
-     * @return this builder for chaining
+     * @param tag the existing tag to include
+     * @return this builder
      * @throws IllegalArgumentException if tag is null
      */
     public CompoundBuilder addTag(Tag<?> tag)
@@ -220,12 +205,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Creates a new list within this compound and switches to list-building mode.
+     * Starts a nested list builder.
      *
-     * @param name     the list identifier
+     * @param name     the tag name
      * @param listType the element type this list will contain
      * @return a {@link ListBuilder} for adding list elements
-     * @see NBTTags
      */
     public ListBuilder addList(String name, NBTTags listType)
     {
@@ -234,9 +218,9 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Creates a nested compound within this one and switches to nested-building mode.
+     * Starts a nested compound builder.
      *
-     * @param name the nested compound identifier
+     * @param name the tag name
      * @return a new {@code CompoundBuilder} for the nested structure
      */
     public CompoundBuilder addCompound(String name)
@@ -246,11 +230,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates a string value with the specified name.
+     * Updates or creates a string value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the string content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setString(String name, String value)
     {
@@ -260,11 +244,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates an integer value with the specified name.
+     * Updates or creates an integer value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the numeric content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setInt(String name, int value)
     {
@@ -274,11 +258,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates a double-precision value with the specified name.
+     * Updates or creates a double value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the floating-point content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setDouble(String name, double value)
     {
@@ -288,11 +272,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates a float value with the specified name.
+     * Updates or creates a float value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the floating-point content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setFloat(String name, float value)
     {
@@ -302,11 +286,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates a byte value with the specified name.
+     * Updates or creates a byte value.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the byte content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setByte(String name, byte value)
     {
@@ -316,11 +300,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates a short integer with the specified name.
+     * Updates or creates a short integer.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the numeric content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setShort(String name, short value)
     {
@@ -330,11 +314,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates a long integer with the specified name.
+     * Updates or creates a long integer.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the numeric content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setLong(String name, long value)
     {
@@ -344,11 +328,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates a byte array with the specified name.
+     * Updates or creates a byte array.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the byte array content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setByteArray(String name, byte[] value)
     {
@@ -358,11 +342,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates an integer array with the specified name.
+     * Updates or creates an integer array.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the integer array content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setIntArray(String name, int[] value)
     {
@@ -372,11 +356,11 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Updates or creates a long array with the specified name.
+     * Updates or creates a long array.
      *
-     * @param name  the tag identifier
+     * @param name  the tag name
      * @param value the long array content
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setLongArray(String name, long[] value)
     {
@@ -389,7 +373,7 @@ public class CompoundBuilder extends NBTBuilder
      * Updates or replaces an existing tag.
      *
      * @param tag the tag to set
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder setTag(Tag<?> tag)
     {
@@ -406,7 +390,7 @@ public class CompoundBuilder extends NBTBuilder
      * Removes a tag by name.
      *
      * @param name the tag name to remove
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder removeTag(String name)
     {
@@ -418,7 +402,7 @@ public class CompoundBuilder extends NBTBuilder
      * Removes multiple tags by name.
      *
      * @param names the tag names to remove
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder removeTags(String... names)
     {
@@ -429,7 +413,7 @@ public class CompoundBuilder extends NBTBuilder
     /**
      * Removes all tags from this compound.
      *
-     * @return this builder for chaining
+     * @return this builder
      */
     public CompoundBuilder clear()
     {
@@ -438,11 +422,9 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Finalizes construction and returns the completed compound tag.
-     * Only available for root-level compounds.
+     * {@inheritDoc}
      *
-     * @return the fully constructed {@link ICompoundTag}
-     * @throws IllegalStateException if called on a nested builder (use {@link #end()} first)
+     * @throws IllegalStateException {@inheritDoc}
      */
     @Override
     public ICompoundTag build()
@@ -455,25 +437,9 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Completes this nested compound and returns control to the parent builder.
-     * Automatically integrates the completed compound into its parent structure.
+     * {@inheritDoc}
      *
-     * <p><b>When to use {@code end()}:</b></p>
-     * <ul>
-     *   <li>Terminal operations - when finishing the current branch without further chaining</li>
-     *   <li>Simple single-level nesting where parent type is obvious</li>
-     *   <li>Variable storage patterns where builders are stored in variables</li>
-     *   <li>Legacy code compatibility</li>
-     * </ul>
-     *
-     * <p><b>Consider using type-safe alternatives:</b></p>
-     * <ul>
-     *   <li>{@link #endCompound()} - when continuing to build on a compound parent</li>
-     *   <li>{@link #endList()} - when continuing to build on a list parent</li>
-     * </ul>
-     *
-     * @return the parent {@link NBTBuilder} to continue building
-     * @throws IllegalStateException if called on a root builder (use {@link #build()} instead)
+     * @throws IllegalStateException {@inheritDoc}
      * @since 1.3.0
      */
     @Override
@@ -484,7 +450,6 @@ public class CompoundBuilder extends NBTBuilder
             throw new IllegalStateException("Cannot end root builder - call build() instead");
         }
 
-        // Add this compound to the parent
         if (parent instanceof CompoundBuilder parentCompound)
         {
             parentCompound.compound.addTag(compound);
@@ -500,24 +465,7 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Type-safe method to return to a CompoundBuilder parent.
-     * Provides compile-time safety for fluent method chaining when you know the parent is a compound.
-     *
-     * <p><b>When to use {@code endCompound()}:</b></p>
-     * <ul>
-     *   <li>Complex fluent chaining where you need to continue adding to a compound parent</li>
-     *   <li>When you want compile-time type safety instead of runtime casting</li>
-     *   <li>Building deeply nested structures with multiple compound levels</li>
-     * </ul>
-     *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * NBTBuilder.compound("Player")
-     *     .addCompound("Stats")
-     *         .addInt("level", 50)
-     *     .endCompound()  // ← Type-safe return to Player compound
-     *     .addString("name", "Steve");  // ← Can continue building Player
-     * }</pre>
+     * Adds this tag to its parent and returns the compound parent builder.
      *
      * @return the parent as a CompoundBuilder
      * @throws IllegalStateException if parent is not a CompoundBuilder
@@ -534,26 +482,7 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Type-safe method to return to a ListBuilder parent.
-     * Provides compile-time safety for fluent method chaining when you know the parent is a list.
-     *
-     * <p><b>When to use {@code endList()}:</b></p>
-     * <ul>
-     *   <li>Adding multiple compound elements to a list with continued chaining</li>
-     *   <li>When you want compile-time type safety for list operations</li>
-     *   <li>Building arrays of complex objects</li>
-     * </ul>
-     *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * NBTBuilder.list("inventory", NBTTags.Tag_Compound)
-     *     .addCompound("item1")
-     *         .addString("type", "sword")
-     *     .endList()  // ← Type-safe return to inventory list
-     *     .addCompound("item2")  // ← Can continue adding to list
-     *         .addString("type", "potion")
-     *     .endList();
-     * }</pre>
+     * Adds this tag to its parent and returns the list parent builder.
      *
      * @return the parent as a ListBuilder
      * @throws IllegalStateException if parent is not a ListBuilder
@@ -570,7 +499,7 @@ public class CompoundBuilder extends NBTBuilder
     }
 
     /**
-     * Provides access to the underlying compound for framework integration.
+     * Returns the compound being built.
      *
      * @return the compound tag under construction
      */

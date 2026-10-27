@@ -7,21 +7,9 @@ import de.pauleff.jnbt.util.NBTTags;
 import java.util.ArrayList;
 
 /**
- * Fluent builder for creating type-safe NBT lists. All elements must share the same NBT type,
- * preventing common structural errors when building Minecraft NBT data.
+ * Builds lists whose elements all have the declared NBT type.
  *
- * <p>Build complex inventory structures with confidence:</p>
- * <pre>{@code
- * Tag_List inventory = NBTBuilder.list("Inventory", NBTTags.Tag_Compound)
- *     .addCompound("item1")
- *         .addString("id", "minecraft:diamond_sword")
- *         .addInt("Count", 1)
- *     .end()
- *     .build();
- * }</pre>
- *
- * @see NBTBuilder
- * @see CompoundBuilder
+ * @since 1.3
  */
 public class ListBuilder extends NBTBuilder
 {
@@ -29,11 +17,11 @@ public class ListBuilder extends NBTBuilder
     private final NBTTags listType;
 
     /**
-     * Creates a new list builder with strict type enforcement.
+     * Creates a list builder with a fixed element type.
      *
      * @param name     the list tag name
      * @param listType the NBT type all elements must match
-     * @param parent   the parent builder for nesting support, or null for root lists
+     * @param parent   the parent builder, or null for a root list
      * @throws IllegalArgumentException if listType is null
      */
     public ListBuilder(String name, NBTTags listType, NBTBuilder parent)
@@ -53,7 +41,7 @@ public class ListBuilder extends NBTBuilder
      *
      * @param name  the element name
      * @param value the string value
-     * @return this builder for chaining
+     * @return this builder
      * @throws IllegalArgumentException if this list doesn't accept strings
      */
     public ListBuilder addString(String name, String value)
@@ -69,7 +57,7 @@ public class ListBuilder extends NBTBuilder
      *
      * @param name  the element name
      * @param value the integer value
-     * @return this builder for chaining
+     * @return this builder
      * @throws IllegalArgumentException if this list doesn't accept integers
      */
     public ListBuilder addInt(String name, int value)
@@ -85,7 +73,7 @@ public class ListBuilder extends NBTBuilder
      *
      * @param name  the element name
      * @param value the double value
-     * @return this builder for chaining
+     * @return this builder
      * @throws IllegalArgumentException if this list doesn't accept doubles
      */
     public ListBuilder addDouble(String name, double value)
@@ -101,7 +89,7 @@ public class ListBuilder extends NBTBuilder
      *
      * @param name  the element name
      * @param value the float value
-     * @return this builder for chaining
+     * @return this builder
      * @throws IllegalArgumentException if this list doesn't accept floats
      */
     public ListBuilder addFloat(String name, float value)
@@ -117,7 +105,7 @@ public class ListBuilder extends NBTBuilder
      *
      * @param name  the element name
      * @param value the byte value
-     * @return this builder for chaining
+     * @return this builder
      * @throws IllegalArgumentException if this list doesn't accept bytes
      */
     public ListBuilder addByte(String name, byte value)
@@ -133,7 +121,7 @@ public class ListBuilder extends NBTBuilder
      *
      * @param name  the element name
      * @param value the short value
-     * @return this builder for chaining
+     * @return this builder
      * @throws IllegalArgumentException if this list doesn't accept shorts
      */
     public ListBuilder addShort(String name, short value)
@@ -149,7 +137,7 @@ public class ListBuilder extends NBTBuilder
      *
      * @param name  the element name
      * @param value the long value
-     * @return this builder for chaining
+     * @return this builder
      * @throws IllegalArgumentException if this list doesn't accept longs
      */
     public ListBuilder addLong(String name, long value)
@@ -190,7 +178,7 @@ public class ListBuilder extends NBTBuilder
     }
 
     /**
-     * Adds a pre-built tag to this list. Used internally by nested builders.
+     * Adds a completed tag from a nested builder.
      *
      * @param tag the completed tag to add
      * @throws IllegalArgumentException if tag is null or type doesn't match
@@ -214,10 +202,9 @@ public class ListBuilder extends NBTBuilder
     }
 
     /**
-     * Completes construction and returns the built list.
+     * {@inheritDoc}
      *
-     * @return the completed {@link IListTag}
-     * @throws IllegalStateException if this is a nested builder (call {@link #end()} first)
+     * @throws IllegalStateException {@inheritDoc}
      */
     @Override
     public IListTag build()
@@ -230,25 +217,9 @@ public class ListBuilder extends NBTBuilder
     }
 
     /**
-     * Finishes this nested list and returns to the parent builder.
-     * Automatically integrates the completed list into its parent structure.
+     * {@inheritDoc}
      *
-     * <p><b>When to use {@code end()}:</b></p>
-     * <ul>
-     *   <li>Terminal operations - when finishing the current branch without further chaining</li>
-     *   <li>Simple single-level nesting where parent type is obvious</li>
-     *   <li>Variable storage patterns where builders are stored in variables</li>
-     *   <li>Legacy code compatibility</li>
-     * </ul>
-     *
-     * <p><b>Consider using type-safe alternatives:</b></p>
-     * <ul>
-     *   <li>{@link #endCompound()} - when continuing to build on a compound parent</li>
-     *   <li>{@link #endList()} - when continuing to build on a list parent</li>
-     * </ul>
-     *
-     * @return the parent {@link NBTBuilder}
-     * @throws IllegalStateException if this is a root builder (call {@link #build()} instead)
+     * @throws IllegalStateException {@inheritDoc}
      * @since 1.3.0
      */
     @Override
@@ -259,7 +230,6 @@ public class ListBuilder extends NBTBuilder
             throw new IllegalStateException("Cannot end root builder - call build() instead");
         }
 
-        // Add this list to the parent
         if (parent instanceof CompoundBuilder parentCompound)
         {
             parentCompound.getCompound().addTag(list);
@@ -291,25 +261,7 @@ public class ListBuilder extends NBTBuilder
     }
 
     /**
-     * Type-safe method to return to a CompoundBuilder parent.
-     * Provides compile-time safety for fluent method chaining when you know the parent is a compound.
-     *
-     * <p><b>When to use {@code endCompound()}:</b></p>
-     * <ul>
-     *   <li>Lists nested within compounds where you need to continue building the compound</li>
-     *   <li>When you want compile-time type safety instead of runtime casting</li>
-     *   <li>Building complex structures with mixed container types</li>
-     * </ul>
-     *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * NBTBuilder.compound("Player")
-     *     .addList("inventory", NBTTags.Tag_String)
-     *         .addString("item1", "sword")
-     *         .addString("item2", "potion")
-     *     .endCompound()  // ← Type-safe return to Player compound
-     *     .addInt("level", 50);  // ← Can continue building Player
-     * }</pre>
+     * Adds this tag to its parent and returns the compound parent builder.
      *
      * @return the parent as a CompoundBuilder
      * @throws IllegalStateException if parent is not a CompoundBuilder
@@ -326,28 +278,7 @@ public class ListBuilder extends NBTBuilder
     }
 
     /**
-     * Type-safe method to return to a ListBuilder parent.
-     * Provides compile-time safety for fluent method chaining when you know the parent is a list.
-     *
-     * <p><b>When to use {@code endList()}:</b></p>
-     * <ul>
-     *   <li>Nested lists (lists within lists) where you need to continue building the parent list</li>
-     *   <li>When you want compile-time type safety for complex list structures</li>
-     *   <li>Building multi-dimensional array-like structures</li>
-     * </ul>
-     *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * NBTBuilder.list("matrix", NBTTags.Tag_List)
-     *     .addList("row1", NBTTags.Tag_Int)
-     *         .addInt("col1", 1)
-     *         .addInt("col2", 2)
-     *     .endList()  // ← Type-safe return to matrix list
-     *     .addList("row2", NBTTags.Tag_Int)  // ← Can continue adding rows
-     *         .addInt("col1", 3)
-     *         .addInt("col2", 4)
-     *     .endList();
-     * }</pre>
+     * Adds this tag to its parent and returns the list parent builder.
      *
      * @return the parent as a ListBuilder
      * @throws IllegalStateException if parent is not a ListBuilder
@@ -374,7 +305,7 @@ public class ListBuilder extends NBTBuilder
     }
 
     /**
-     * Provides access to the underlying list for parent builders.
+     * Returns the list being built.
      *
      * @return the list being constructed
      */

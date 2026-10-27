@@ -3,14 +3,13 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- * Class representing a NBT int tag.
+ *  An NBT int tag.
  *
+ * @since 0.1
  */
 public class Tag_Int extends Tag<Integer>
 {
-    /**
-     * Creates a tag initialized to zero.
-     */
+    /** Creates a tag initialized to zero. */
     public Tag_Int()
     {
         super(NBTTags.Tag_Int.getId());
@@ -19,7 +18,7 @@ public class Tag_Int extends Tag<Integer>
     /**
      * Creates a named tag initialized to zero.
      *
-     * @param name Name of the tag.
+     * @param name the tag name
      */
     public Tag_Int(String name)
     {
@@ -27,10 +26,10 @@ public class Tag_Int extends Tag<Integer>
     }
 
     /**
-     * Create a int tag with name and data.
+     * Creates an int tag with name and data.
      *
-     * @param name Name of the tag.
-     * @param data The initial data of the tag.
+     * @param name the tag name
+     * @param data the initial value
      */
     public Tag_Int(String name, int data)
     {

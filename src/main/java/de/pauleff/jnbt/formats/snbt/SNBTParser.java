@@ -13,19 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Parser for SNBT (Stringified NBT) format.
- * Converts SNBT strings into NBT tag structures using recursive descent parsing.
- * <p>
- * Supports all SNBT syntax including:
- * - Basic types with suffixes (42b, 1.5f, etc.)
- * - Strings (quoted and unquoted)
- * - Compounds {key: value}
- * - Lists [value1, value2]
- * - Arrays [B; 1b, 2b] [I; 1, 2] [L; 1l, 2l]
+ *  Parses SNBT strings into NBT tags.
+ *
+ * @since 1.6.0
  */
 public class SNBTParser
 {
-
     private final SNBTTokenizer tokenizer;
     private Token currentToken;
 
@@ -40,16 +33,14 @@ public class SNBTParser
     }
 
     /**
-     * Parses the complete SNBT string into an NBT tag.
-     * The root element can be a compound, list, or primitive value.
-     * Duplicate keys within any compound are rejected.
+     * Parses the complete SNBT string into an NBT tag. Duplicate keys within any compound are rejected.
      *
      * @return the parsed NBT tag
      * @throws SNBTException if parsing fails due to syntax errors
      */
     public ITag<?> parse() throws SNBTException
     {
-        advance(); // Get first token
+        advance();
         ITag<?> result = parseValue();
 
         if (currentToken.getType() != TokenType.EOF)
@@ -96,7 +87,6 @@ public class SNBTParser
         expect(TokenType.LBRACE);
         ICompoundTag compound = NBTFactory.createCompound();
 
-        // Handle empty compound
         if (currentToken.getType() == TokenType.RBRACE)
         {
             advance();
@@ -105,7 +95,6 @@ public class SNBTParser
 
         do
         {
-            // Parse key
             if (currentToken.getType() != TokenType.STRING)
             {
                 throw new SNBTException("Expected string key in compound",
@@ -119,15 +108,12 @@ public class SNBTParser
             }
             advance();
 
-            // Expect colon
             expect(TokenType.COLON);
 
-            // Parse value
             ITag<?> value = parseValue();
             value.setName(key);
             ((Collection_Tag) compound).addTag(value);
 
-            // Check for comma or end
             if (currentToken.getType() == TokenType.COMMA)
             {
                 advance();
@@ -155,7 +141,6 @@ public class SNBTParser
     {
         expect(TokenType.LBRACKET);
 
-        // Check for array prefix (B;, I;, L;)
         if (currentToken.getType() == TokenType.ARRAY_PREFIX)
         {
             return parseArray();
@@ -201,7 +186,6 @@ public class SNBTParser
     {
         List<Byte> values = new ArrayList<>();
 
-        // Handle empty array
         if (currentToken.getType() == TokenType.RBRACKET)
         {
             advance();
@@ -252,7 +236,6 @@ public class SNBTParser
     {
         List<Integer> values = new ArrayList<>();
 
-        // Handle empty array
         if (currentToken.getType() == TokenType.RBRACKET)
         {
             advance();
@@ -303,7 +286,6 @@ public class SNBTParser
     {
         List<Long> values = new ArrayList<>();
 
-        // Handle empty array
         if (currentToken.getType() == TokenType.RBRACKET)
         {
             advance();
@@ -345,8 +327,7 @@ public class SNBTParser
     }
 
     /**
-     * Parses a list in the format [value1, value2, value3].
-     * All values must be of the same type.
+     * Parses a list with one element type. Empty lists use compound type.
      *
      * @return the parsed list tag
      * @throws SNBTException if parsing fails or mixed types are found
@@ -355,7 +336,6 @@ public class SNBTParser
     {
         List<ITag<?>> values = new ArrayList<>();
 
-        // Handle empty list
         if (currentToken.getType() == TokenType.RBRACKET)
         {
             advance();
@@ -363,12 +343,10 @@ public class SNBTParser
             return NBTFactory.createList("", NBTTags.Tag_Compound.getId());
         }
 
-        // Parse first element to determine list type
         ITag<?> firstValue = parseValue();
         values.add(firstValue);
         int listType = getTagTypeId(firstValue);
 
-        // Parse remaining elements
         while (currentToken.getType() == TokenType.COMMA)
         {
             advance();
@@ -403,8 +381,7 @@ public class SNBTParser
     }
 
     /**
-     * Parses a string value and handles special cases like boolean keywords.
-     * Converts "true" and "false" to byte values following Minecraft convention.
+     * Parses a string. The values "true" and "false" become bytes 1 and 0.
      *
      * @return the parsed string or byte tag
      * @throws SNBTException if parsing fails
@@ -414,7 +391,6 @@ public class SNBTParser
         String value = currentToken.getValue();
         advance();
 
-        // Handle boolean values as bytes (Minecraft convention)
         if ("true".equals(value))
         {
             return NBTFactory.createByte("", (byte) 1);
@@ -427,8 +403,8 @@ public class SNBTParser
     }
 
     /**
-     * Parses a numeric value with optional type suffix.
-     * Supports suffixes: b (byte), s (short), l (long), f (float), d (double).
+     * Parses a number with an optional b, s, l, f, or d suffix. Without a suffix, decimals use double and
+     * whole numbers use int.
      *
      * @return the parsed numeric tag
      * @throws SNBTException if parsing fails or number format is invalid
@@ -440,7 +416,6 @@ public class SNBTParser
 
         try
         {
-            // Check for type suffix
             char lastChar = numberStr.charAt(numberStr.length() - 1);
 
             if (Character.isLetter(lastChar))
@@ -466,14 +441,11 @@ public class SNBTParser
                 }
             } else
             {
-                // No suffix - determine type by content
                 if (numberStr.contains("."))
                 {
-                    // Floating point - default to double
                     return NBTFactory.createDouble("", Double.parseDouble(numberStr));
                 } else
                 {
-                    // Integer - default to int
                     return NBTFactory.createInt("", Integer.parseInt(numberStr));
                 }
             }
@@ -507,7 +479,7 @@ public class SNBTParser
         if (tag instanceof IListTag) return NBTTags.Tag_List.getId();
         if (tag instanceof ICompoundTag) return NBTTags.Tag_Compound.getId();
 
-        return NBTTags.Tag_End.getId(); // Unknown type
+        return NBTTags.Tag_End.getId();
     }
 
     /**

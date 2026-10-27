@@ -1,12 +1,12 @@
 package de.pauleff.jnbt.formats.snbt;
 
 /**
- * Tokenizer for SNBT (Stringified NBT) format.
- * Breaks down SNBT strings into tokens for parsing.
+ *  Splits SNBT input into tokens.
+ *
+ * @since 1.6.0
  */
 public class SNBTTokenizer
 {
-
     private final String input;
     private final int length;
     private int position;
@@ -97,7 +97,7 @@ public class SNBTTokenizer
     private Token parseQuotedString(char quote, int tokenStart) throws SNBTException
     {
         StringBuilder sb = new StringBuilder();
-        position++; // Skip opening quote
+        position++;
 
         while (position < length)
         {
@@ -105,7 +105,7 @@ public class SNBTTokenizer
 
             if (c == quote)
             {
-                position++; // Skip closing quote
+                position++;
                 return new Token(TokenType.STRING, sb.toString(), tokenStart);
             } else if (c == '\\')
             {
@@ -153,7 +153,7 @@ public class SNBTTokenizer
                             String hex = input.substring(position + 1, position + 5);
                             int codePoint = Integer.parseInt(hex, 16);
                             sb.append((char) codePoint);
-                            position += 4; // Skip the 4 hex digits
+                            position += 4;
                         } catch (NumberFormatException e)
                         {
                             throw new SNBTException("Invalid unicode escape sequence", position, input, e);
@@ -186,7 +186,6 @@ public class SNBTTokenizer
     {
         StringBuilder sb = new StringBuilder();
 
-        // Handle sign
         if (position < length && (input.charAt(position) == '-' || input.charAt(position) == '+'))
         {
             sb.append(input.charAt(position));
@@ -195,7 +194,6 @@ public class SNBTTokenizer
 
         boolean hasDecimal = false;
 
-        // Parse digits and decimal point
         while (position < length)
         {
             char c = input.charAt(position);
@@ -215,7 +213,6 @@ public class SNBTTokenizer
             }
         }
 
-        // Check for type suffix
         if (position < length)
         {
             char suffix = input.charAt(position);
@@ -261,10 +258,8 @@ public class SNBTTokenizer
 
         String value = sb.toString();
 
-        // Check if this is an array prefix (single letter followed by potential semicolon)
         if (value.length() == 1 && (value.equals("B") || value.equals("I") || value.equals("L")))
         {
-            // Look ahead to see if there's a semicolon
             int nextPos = position;
             while (nextPos < length && Character.isWhitespace(input.charAt(nextPos)))
             {
@@ -305,62 +300,30 @@ public class SNBTTokenizer
     }
 
     /**
-     * Enumeration of all token types recognized by the SNBT tokenizer.
+     *  SNBT token types.
+     *
+     * @since 1.6.0
      */
     public enum TokenType
     {
-        /**
-         * Left brace {
-         */
         LBRACE,
-        /**
-         * Right brace }
-         */
         RBRACE,
-        /**
-         * Left bracket [
-         */
         LBRACKET,
-        /**
-         * Right bracket ]
-         */
         RBRACKET,
-        /**
-         * Comma ,
-         */
         COMMA,
-        /**
-         * Colon :
-         */
         COLON,
-        /**
-         * Semicolon ;
-         */
         SEMICOLON,
-        /**
-         * String value (quoted or unquoted)
-         */
         STRING,
-        /**
-         * Numeric value with optional type suffix
-         */
         NUMBER,
-        /**
-         * Array type prefix (B, I, L)
-         */
         ARRAY_PREFIX,
-        /**
-         * End of input
-         */
         EOF,
-        /**
-         * Invalid or unrecognized character
-         */
         UNKNOWN
     }
 
     /**
-     * Represents a single token in the SNBT input.
+     *  An SNBT token with its input position.
+     *
+     * @since 1.6.0
      */
     public static class Token
     {
@@ -369,7 +332,7 @@ public class SNBTTokenizer
         private final int position;
 
         /**
-         * Creates a new token.
+         * Creates a token.
          *
          * @param type     the token type
          * @param value    the token value
@@ -412,6 +375,7 @@ public class SNBTTokenizer
             return position;
         }
 
+        /** Returns a string with the stored values. */
         @Override
         public String toString()
         {

@@ -3,14 +3,13 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- * Class representing a NBT string tag.
+ *  An NBT string tag.
  *
+ * @since 0.1
  */
 public class Tag_String extends Tag<String>
 {
-    /**
-     * Creates a tag initialized to an empty string.
-     */
+    /** Creates a tag initialized to an empty string. */
     public Tag_String()
     {
         super(NBTTags.Tag_String.getId());
@@ -19,7 +18,7 @@ public class Tag_String extends Tag<String>
     /**
      * Creates a named tag initialized to an empty string.
      *
-     * @param name Name of the tag.
+     * @param name the tag name
      */
     public Tag_String(String name)
     {
@@ -27,10 +26,10 @@ public class Tag_String extends Tag<String>
     }
 
     /**
-     * Create a string tag with name and data.
+     * Creates a string tag with name and data.
      *
-     * @param name Name of the tag.
-     * @param data The non-null initial data of the tag.
+     * @param name the tag name
+     * @param data the non-null initial value
      * @throws IllegalArgumentException if data is null
      */
     public Tag_String(String name, String data)

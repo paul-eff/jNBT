@@ -5,28 +5,24 @@ import de.pauleff.jnbt.formats.binary.Compression_Types;
 import java.io.IOException;
 
 /**
- * Interface for reading NBT data from files with automatic format detection.
- * Automatically detects and handles compression (GZIP, ZLIB, or uncompressed) and properly decodes the binary NBT format.
+ * Reads binary NBT with GZIP, ZLIB, or no compression.
  *
- * @see ICompoundTag
- * @see Compression_Types
+ * @since 1.3
  */
 public interface INBTReader extends AutoCloseable
 {
     /**
-     * Reads and parses the entire NBT file into a compound tag structure.
-     * The method automatically detects compression and handles all the binary format complexities.
-     * Since NBT files always have compound tags as roots in Java Edition, this returns an {@link ICompoundTag}.
+     * Reads the root compound.
      *
-     * @return The root {@link ICompoundTag} containing the complete NBT structure
-     * @throws IOException If the file cannot be read, is corrupted, or uses an unsupported format
+     * @return the root {@link ICompoundTag} containing the complete NBT structure
+     * @throws IOException if the file cannot be read, is corrupted, or uses an unsupported format
      */
     ICompoundTag read() throws IOException;
 
     /**
-     * Closes this reader and releases any associated system resources.
+     * Closes the reader.
      *
-     * @throws IOException If an error occurs during resource cleanup
+     * @throws IOException if an error occurs during resource cleanup
      */
     @Override
     void close() throws IOException;

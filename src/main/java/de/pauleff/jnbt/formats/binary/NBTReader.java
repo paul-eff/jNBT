@@ -14,17 +14,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Class for handling the parsing and formatting of a Java NBT file.
+ *  Reads binary NBT and adds the stream position to parse errors.
  *
+ * @since 0.1
  */
 public class NBTReader implements INBTReader
 {
     private final PositionTrackingDataInputStream stream;
 
     /**
-     * Create a reader by passing it the target NBT file.
+     * Creates a reader by passing it the target NBT file.
      *
-     * @param nbtFile The target NBT file.
+     * @param nbtFile the target NBT file.
      */
     public NBTReader(File nbtFile)
     {
@@ -40,9 +41,9 @@ public class NBTReader implements INBTReader
     }
 
     /**
-     * Create a reader by passing it a {@link DataInputStream}.
+     * Creates a reader by passing it a {@link DataInputStream}.
      *
-     * @param dis A {@link DataInputStream} containing a NBT file.
+     * @param dis a {@link DataInputStream} containing a NBT file.
      */
     public NBTReader(DataInputStream dis)
     {
@@ -50,10 +51,10 @@ public class NBTReader implements INBTReader
     }
 
     /**
-     * Converts a byte array into a position-tracking DataInputStream for NBT reading.
+     * Wraps a byte array in an input stream that counts bytes read.
      *
-     * @param chunkData The byte array to convert
-     * @return A {@link PositionTrackingDataInputStream} for enhanced error reporting
+     * @param chunkData the byte array to convert
+     * @return a {@link PositionTrackingDataInputStream} with a byte count
      */
     public static PositionTrackingDataInputStream byteArrayToDataInputStream(byte[] chunkData)
     {
@@ -61,22 +62,16 @@ public class NBTReader implements INBTReader
         return new PositionTrackingDataInputStream(byteArrayInputStream);
     }
 
-    /**
-     * Method to close the reader.
-     *
-     * @throws IOException When encountering an error whilst closing the reader.
-     */
+    /** {@inheritDoc} */
     public void close() throws IOException
     {
         stream.close();
     }
 
     /**
-     * Parses the NBT file and returns the root compound tag.
-     * This method automatically closes the reader when parsing is complete or if an error occurs.
+     * {@inheritDoc}
      *
-     * @return The root {@link ICompoundTag} containing the complete NBT structure
-     * @throws IOException If the file cannot be read, is corrupted, or doesn't follow NBT specification
+     * <p>Closes the reader after reading, including on failure.</p>
      */
     public ICompoundTag read() throws IOException
     {
@@ -86,7 +81,7 @@ public class NBTReader implements INBTReader
             return tag;
         } catch (IOException e)
         {
-            throw e; // Re-throw IOException directly
+            throw e;
         } catch (Exception e)
         {
             throw new IOException("Failed to parse NBT data: " + e.getMessage(), e);
@@ -99,9 +94,9 @@ public class NBTReader implements INBTReader
     /**
      * Reads an entire NBT tag including its name header.
      *
-     * @param depth Current nesting depth for validation and error reporting
-     * @return The complete tag read from the stream
-     * @throws IOException If tag structure is invalid or stream is corrupted
+     * @param depth the current nesting depth for validation and error reporting
+     * @return the complete tag read from the stream
+     * @throws IOException if tag structure is invalid or stream is corrupted
      */
     private Tag readNBTTag(int depth) throws IOException
     {
@@ -122,20 +117,20 @@ public class NBTReader implements INBTReader
         {
             if (e.getMessage() != null && e.getMessage().contains("[Position:"))
             {
-                throw e; // Already has context
+                throw e;
             }
             throw new IOException(stream.createContextualError("Failed to read NBT tag: " + e.getMessage()), e);
         }
     }
 
     /**
-     * Method to only read a NBT tag's payload.
+     * Reads a tag payload without a name header.
      *
-     * @param type  The type of the NBT tag, which's payload should be read.
-     * @param name  The name of the NBT tag.
-     * @param depth The current depth at which is beeing read.
-     * @return The complete read NBT tag.
-     * @throws IOException When encountering a parsing error caused by the file (e.g. corrupted).
+     * @param type  the NBT type ID
+     * @param name  the name of the NBT tag.
+     * @param depth the current nesting depth
+     * @return the complete read NBT tag.
+     * @throws IOException if the stream or payload is invalid
      */
     private Tag readNBTPayload(int type, String name, int depth) throws IOException
     {
@@ -197,7 +192,7 @@ public class NBTReader implements INBTReader
                     throw new IOException(stream.createContextualError(
                             "TAG_End list type is only valid for empty lists"));
                 }
-                ArrayList<Tag<?>> tagList = new ArrayList<>(Math.min(arrayLength, 1000)); // Pre-size reasonably
+                ArrayList<Tag<?>> tagList = new ArrayList<>(Math.min(arrayLength, 1000)); // Limit the initial allocation for large lists.
                 for (int i = 0; i < arrayLength; i++)
                 {
                     tagList.add(readNBTPayload(listType, "", depth + 1));

@@ -1,8 +1,9 @@
 package de.pauleff.jnbt.formats.snbt;
 
 /**
- * Exception thrown when parsing or generating SNBT (Stringified NBT) data fails.
- * Provides position information for better error reporting.
+ *  An SNBT error with optional input and character position.
+ *
+ * @since 1.6.0
  */
 public class SNBTException extends Exception
 {
@@ -39,7 +40,7 @@ public class SNBTException extends Exception
      * Creates an SNBT exception with a message and underlying cause.
      *
      * @param message the error message
-     * @param cause   the underlying exception that caused this error
+     * @param cause   the cause
      */
     public SNBTException(String message, Throwable cause)
     {
@@ -54,7 +55,7 @@ public class SNBTException extends Exception
      * @param message  the error message
      * @param position the character position where the error occurred
      * @param input    the input string being parsed
-     * @param cause    the underlying exception that caused this error
+     * @param cause    the cause
      */
     public SNBTException(String message, int position, String input, Throwable cause)
     {

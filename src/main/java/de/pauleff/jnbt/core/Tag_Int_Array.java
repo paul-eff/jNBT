@@ -5,14 +5,13 @@ import de.pauleff.jnbt.util.NBTTags;
 import java.util.Arrays;
 
 /**
- * Class representing a NBT int array tag.
+ *  An NBT int array tag.
  *
+ * @since 0.1
  */
 public class Tag_Int_Array extends Tag<int[]>
 {
-    /**
-     * Creates a tag initialized to a new empty array.
-     */
+    /** Creates a tag initialized to a new empty array. */
     public Tag_Int_Array()
     {
         super(NBTTags.Tag_Int_Array.getId());
@@ -21,7 +20,7 @@ public class Tag_Int_Array extends Tag<int[]>
     /**
      * Creates a named tag initialized to a new empty array.
      *
-     * @param name Name of the tag.
+     * @param name the tag name
      */
     public Tag_Int_Array(String name)
     {
@@ -31,8 +30,8 @@ public class Tag_Int_Array extends Tag<int[]>
     /**
      * Create an int array tag with name and data.
      *
-     * @param name Name of the tag.
-     * @param data The non-null initial data of the tag.
+     * @param name the tag name
+     * @param data the non-null initial value
      * @throws IllegalArgumentException if data is null
      */
     public Tag_Int_Array(String name, int[] data)
@@ -40,6 +39,7 @@ public class Tag_Int_Array extends Tag<int[]>
         super(NBTTags.Tag_Int_Array.getId(), name, data);
     }
 
+    /** Returns a string with the stored values. */
     @Override
     public String toString()
     {

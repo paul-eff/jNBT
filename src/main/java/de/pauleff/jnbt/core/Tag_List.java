@@ -7,24 +7,17 @@ import de.pauleff.jnbt.util.NBTTags;
 import java.util.ArrayList;
 
 /**
- * Represents an NBT list tag - a homogeneous collection containing multiple
- * tags of the same type, accessed by index rather than name.
- * <p>List tags enforce type consistency, ensuring all contained elements
- * match the declared list type. They provide indexed access and fluent
- * builder methods for type-safe element addition.</p>
- * <p>Extends {@link Collection_Tag} with list-specific type validation and
- * implements {@link IListTag} for standardized access.</p>
- * <p>Collection inputs are copied, and {@link #getData()} returns a shallow
- * snapshot. Use list operations to change membership. Type 0 (END) is valid
- * only for empty lists.</p>
+ * A list with one fixed element type. Type 0 (END) is allowed only for empty lists. Inputs and
+ * getData() use shallow copies with shared element objects.
  *
+ * @since 0.1
  */
 public class Tag_List extends Collection_Tag implements IListTag
 {
     private final int listTypeID;
 
     /**
-     * Creates an empty list with the specified element type.
+     * Creates an empty list with the element type.
      *
      * @param listTypeID the NBT type ID for all elements in this list
      * @throws IllegalArgumentException if the element type ID is invalid
@@ -35,7 +28,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Creates an empty named list with the specified element type.
+     * Creates an empty named list with the element type.
      *
      * @param name       the tag name
      * @param listTypeID the NBT type ID for all elements in this list
@@ -46,13 +39,13 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Creates a list pre-populated with elements of the specified type.
+     * Creates a list filled with elements of the given type.
      *
      * @param name       the tag name
      * @param listTypeID the NBT type ID for all elements in this list
      * @param data       the initial collection of elements
      * @throws IllegalArgumentException if the type ID is invalid, data is null,
-     *                                  or an element is null, END, or of the wrong type
+     * or an element is null, END, or of the wrong type
      */
     public Tag_List(String name, int listTypeID, ArrayList<Tag<?>> data)
     {
@@ -60,6 +53,7 @@ public class Tag_List extends Collection_Tag implements IListTag
         this.listTypeID = listTypeID;
     }
 
+    /** Copies the elements after checking the declared type and each element. */
     private static ArrayList<Tag<?>> validatedCopy(int type, ArrayList<Tag<?>> values)
     {
         if (NBTTags.getById(type) == null || values == null)
@@ -78,12 +72,7 @@ public class Tag_List extends Collection_Tag implements IListTag
         return copy;
     }
 
-    /**
-     * Returns a shallow snapshot of the elements. Use list methods to change membership.
-     * The element objects themselves remain shared.
-     *
-     * @return a copy of the element collection
-     */
+    /** {@inheritDoc IListTag} */
     @Override
     public ArrayList<Tag<?>> getData()
     {
@@ -120,28 +109,16 @@ public class Tag_List extends Collection_Tag implements IListTag
         setName(list.getName());
     }
 
-    /**
-     * Returns the NBT type identifier for elements in this list.
-     *
-     * <p>All elements must match this type to maintain list homogeneity.</p>
-     *
-     * @return the NBT type ID of list elements
-     */
+    /** {@inheritDoc} */
     public int getListTypeID()
     {
         return listTypeID;
     }
 
     /**
-     * Adds a string element to this list with fluent chaining.
+     * {@inheritDoc}
      *
-     * <p>Only valid for lists declared as string type.</p>
-     *
-     * @param name  the element name
-     * @param value the string value
-     * @return this list tag for fluent operations
-     * @throws IllegalArgumentException if list type is not {@link Tag_String}
-     * @see #getListTypeID()
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public IListTag addString(String name, String value)
     {
@@ -150,15 +127,9 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Adds an integer element to this list with fluent chaining.
+     * {@inheritDoc}
      *
-     * <p>Only valid for lists declared as integer type.</p>
-     *
-     * @param name  the element name
-     * @param value the integer value
-     * @return this list tag for fluent operations
-     * @throws IllegalArgumentException if list type is not {@link Tag_Int}
-     * @see #getListTypeID()
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public IListTag addInt(String name, int value)
     {
@@ -167,15 +138,9 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Adds a double-precision element to this list with fluent chaining.
+     * {@inheritDoc}
      *
-     * <p>Only valid for lists declared as double type.</p>
-     *
-     * @param name  the element name
-     * @param value the double value
-     * @return this list tag for fluent operations
-     * @throws IllegalArgumentException if list type is not {@link Tag_Double}
-     * @see #getListTypeID()
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public IListTag addDouble(String name, double value)
     {
@@ -184,14 +149,9 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Adds a compound element to this list with fluent chaining.
+     * {@inheritDoc}
      *
-     * <p>Only valid for lists declared as compound type.</p>
-     *
-     * @param name the element name
-     * @return this list tag for fluent operations
-     * @throws IllegalArgumentException if list type is not {@link Tag_Compound}
-     * @see #getListTypeID()
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public IListTag addCompound(String name)
     {
@@ -200,15 +160,9 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Adds a float element to this list with fluent chaining.
+     * {@inheritDoc}
      *
-     * <p>Only valid for lists declared as float type.</p>
-     *
-     * @param name  the element name
-     * @param value the float value
-     * @return this list tag for fluent operations
-     * @throws IllegalArgumentException if list type is not {@link Tag_Float}
-     * @see #getListTypeID()
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public IListTag addFloat(String name, float value)
     {
@@ -217,15 +171,9 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Adds a byte element to this list with fluent chaining.
+     * {@inheritDoc}
      *
-     * <p>Only valid for lists declared as byte type.</p>
-     *
-     * @param name  the element name
-     * @param value the byte value
-     * @return this list tag for fluent operations
-     * @throws IllegalArgumentException if list type is not {@link Tag_Byte}
-     * @see #getListTypeID()
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public IListTag addByte(String name, byte value)
     {
@@ -234,15 +182,9 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Adds a short element to this list with fluent chaining.
+     * {@inheritDoc}
      *
-     * <p>Only valid for lists declared as short type.</p>
-     *
-     * @param name  the element name
-     * @param value the short value
-     * @return this list tag for fluent operations
-     * @throws IllegalArgumentException if list type is not {@link Tag_Short}
-     * @see #getListTypeID()
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public IListTag addShort(String name, short value)
     {
@@ -251,15 +193,9 @@ public class Tag_List extends Collection_Tag implements IListTag
     }
 
     /**
-     * Adds a long element to this list with fluent chaining.
+     * {@inheritDoc}
      *
-     * <p>Only valid for lists declared as long type.</p>
-     *
-     * @param name  the element name
-     * @param value the long value
-     * @return this list tag for fluent operations
-     * @throws IllegalArgumentException if list type is not {@link Tag_Long}
-     * @see #getListTypeID()
+     * @throws IllegalArgumentException {@inheritDoc}
      */
     public IListTag addLong(String name, long value)
     {
@@ -267,54 +203,108 @@ public class Tag_List extends Collection_Tag implements IListTag
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setString(int index, String name, String value)
     {
         return setTag(index, new Tag_String(name, value));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setInt(int index, String name, int value)
     {
         return setTag(index, new Tag_Int(name, value));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setDouble(int index, String name, double value)
     {
         return setTag(index, new Tag_Double(name, value));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setCompound(int index, String name)
     {
         return setTag(index, new Tag_Compound(name));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setFloat(int index, String name, float value)
     {
         return setTag(index, new Tag_Float(name, value));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setByte(int index, String name, byte value)
     {
         return setTag(index, new Tag_Byte(name, value));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setShort(int index, String name, short value)
     {
         return setTag(index, new Tag_Short(name, value));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setLong(int index, String name, long value)
     {
         return setTag(index, new Tag_Long(name, value));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag setTag(int index, ITag<?> tag)
     {
@@ -328,6 +318,11 @@ public class Tag_List extends Collection_Tag implements IListTag
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public IListTag removeAt(int index)
     {
@@ -336,6 +331,7 @@ public class Tag_List extends Collection_Tag implements IListTag
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IListTag remove(ITag<?> tag)
     {
@@ -343,6 +339,7 @@ public class Tag_List extends Collection_Tag implements IListTag
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IListTag clear()
     {
@@ -350,6 +347,11 @@ public class Tag_List extends Collection_Tag implements IListTag
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IndexOutOfBoundsException {@inheritDoc}
+     */
     @Override
     public ITag<?> get(int index)
     {
@@ -357,12 +359,14 @@ public class Tag_List extends Collection_Tag implements IListTag
         return data.get(index);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return data.size();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isEmpty()
     {
@@ -383,12 +387,8 @@ public class Tag_List extends Collection_Tag implements IListTag
         }
     }
 
-    // Interface methods from IListTag are inherited from Collection_Tag
-
     /**
-     * Generates a hierarchical string representation showing list metadata and elements.
-     *
-     * <p>Output includes tag type, name, element type, size, and formatted child elements.</p>
+     * Returns a string with the list type, name, and elements.
      *
      * @return formatted multi-line string representation
      */

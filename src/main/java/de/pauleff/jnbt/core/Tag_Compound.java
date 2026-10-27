@@ -11,31 +11,22 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Represents an NBT compound tag - a named collection of heterogeneous tags
- * that forms the backbone of NBT data structures.
- * <p>Compound tags store multiple child tags of different types, accessed by name.
- * Lookup, replacement, and removal by name operate on direct children only.
- * Child names must be unique within each compound. Additions and bulk replacements
- * reject duplicate keys; setters explicitly replace the direct child with that name.
- * Collection membership is copied on input and returned as a shallow snapshot.
- * Explicit recursive operations such as {@link #getTagByName(String)} remain
- * available separately.</p>
- * <p>Extends {@link Collection_Tag} with compound-specific operations and
- * implements {@link ICompoundTag} for standardized access.</p>
+ * A compound with unique child names. Lookup, replacement, and removal by name use direct children.
+ * Inputs and getData() use shallow copies with shared child objects. Recursive operations are
+ * available through {@link Collection_Tag}.
  *
+ * @since 0.1
  */
 public class Tag_Compound extends Collection_Tag implements ICompoundTag
 {
-    /**
-     * Creates an empty compound tag with default name.
-     */
+    /** Creates an empty compound tag with default name. */
     public Tag_Compound()
     {
         super(NBTTags.Tag_Compound.getId());
     }
 
     /**
-     * Creates an empty compound tag with the specified name.
+     * Creates an empty compound tag.
      *
      * @param name the tag name
      */
@@ -45,7 +36,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     }
 
     /**
-     * Creates a compound tag pre-populated with child tags.
+     * Creates a compound tag filled with child tags.
      *
      * @param name the tag name
      * @param data the initial collection of child tags (membership is copied)
@@ -57,6 +48,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         registerChildren();
     }
 
+    /** Copies the children after rejecting nulls, END markers, and duplicate names. */
     private static ArrayList<Tag<?>> validatedCopy(List<Tag<?>> values)
     {
         if (values == null) throw new IllegalArgumentException("Compound data cannot be null");
@@ -73,12 +65,13 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return copy;
     }
 
+    /** Registers this compound as a parent of each child. */
     private void registerChildren()
     {
         for (Tag<?> child : data) child.registerCompoundParent(this);
     }
 
-    // Removed children may still hold a weak parent reference; ignore those by identity.
+    /** Rejects a new name that would duplicate another direct child. */
     final void validateChildRename(Tag<?> child, String name)
     {
         boolean present = false;
@@ -101,8 +94,8 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     }
 
     /**
-     * Returns a shallow snapshot of the children; use compound methods to change membership.
-     * Child objects remain shared, with renames checked against their containing compounds.
+     * Returns a shallow copy of the children. Child objects are shared.
+     * Renames are checked for duplicate names in every containing compound.
      *
      * @return a copy of the child collection
      */
@@ -146,7 +139,6 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
 
     /**
      * Adds a child, rejecting a name already present in this compound.
-     * Use {@link #setTag(ITag)} for explicit replacement.
      *
      * @param tag the child to add
      * @return this compound
@@ -166,7 +158,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     }
 
     /**
-     * Adds children atomically, rejecting duplicate names in the existing or new membership.
+     * Adds children after checking all names. Invalid input leaves this compound unchanged.
      *
      * @param tags the children to add
      * @return this compound
@@ -217,160 +209,91 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         }
     }
 
-    /**
-     * Adds a string tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the string value
-     * @return this compound tag for fluent operations
-     * @see Tag_String
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addString(String name, String value)
     {
         this.addTag(new Tag_String(name, value));
         return this;
     }
 
-    /**
-     * Adds an integer tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the integer value
-     * @return this compound tag for fluent operations
-     * @see Tag_Int
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addInt(String name, int value)
     {
         this.addTag(new Tag_Int(name, value));
         return this;
     }
 
-    /**
-     * Adds a double-precision tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the double value
-     * @return this compound tag for fluent operations
-     * @see Tag_Double
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addDouble(String name, double value)
     {
         this.addTag(new Tag_Double(name, value));
         return this;
     }
 
-    /**
-     * Adds a single-precision float tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the float value
-     * @return this compound tag for fluent operations
-     * @see Tag_Float
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addFloat(String name, float value)
     {
         this.addTag(new Tag_Float(name, value));
         return this;
     }
 
-    /**
-     * Adds a byte tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the byte value
-     * @return this compound tag for fluent operations
-     * @see Tag_Byte
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addByte(String name, byte value)
     {
         this.addTag(new Tag_Byte(name, value));
         return this;
     }
 
-    /**
-     * Adds a short integer tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the short value
-     * @return this compound tag for fluent operations
-     * @see Tag_Short
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addShort(String name, short value)
     {
         this.addTag(new Tag_Short(name, value));
         return this;
     }
 
-    /**
-     * Adds a long integer tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the long value
-     * @return this compound tag for fluent operations
-     * @see Tag_Long
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addLong(String name, long value)
     {
         this.addTag(new Tag_Long(name, value));
         return this;
     }
 
-    /**
-     * Adds a byte array tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the byte array value
-     * @return this compound tag for fluent operations
-     * @see Tag_Byte_Array
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addByteArray(String name, byte[] value)
     {
         this.addTag(new Tag_Byte_Array(name, value));
         return this;
     }
 
-    /**
-     * Adds an integer array tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the integer array value
-     * @return this compound tag for fluent operations
-     * @see Tag_Int_Array
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addIntArray(String name, int[] value)
     {
         this.addTag(new Tag_Int_Array(name, value));
         return this;
     }
 
-    /**
-     * Adds a long array tag and returns this compound for method chaining.
-     *
-     * @param name  the tag name
-     * @param value the long array value
-     * @return this compound tag for fluent operations
-     * @see Tag_Long_Array
-     */
+    /** {@inheritDoc} */
     public ICompoundTag addLongArray(String name, long[] value)
     {
         this.addTag(new Tag_Long_Array(name, value));
         return this;
     }
 
-    // Interface methods from ICompoundTag
-
+    /** {@inheritDoc} */
     @Override
     public boolean hasTag(String tagName)
     {
         return findDirectChild(tagName) != null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ITag<?> getTag(String name)
     {
         return findDirectChild(name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getString(String name)
     {
@@ -382,6 +305,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int getInt(String name)
     {
@@ -393,6 +317,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double getDouble(String name)
     {
@@ -404,6 +329,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0.0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte getByte(String name)
     {
@@ -415,6 +341,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public float getFloat(String name)
     {
@@ -426,6 +353,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0.0f;
     }
 
+    /** {@inheritDoc} */
     @Override
     public short getShort(String name)
     {
@@ -437,6 +365,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public long getLong(String name)
     {
@@ -448,6 +377,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0L;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag getCompound(String name)
     {
@@ -459,6 +389,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public IListTag getList(String name)
     {
@@ -470,6 +401,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] getByteArray(String name)
     {
@@ -481,6 +413,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int[] getIntArray(String name)
     {
@@ -492,6 +425,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public long[] getLongArray(String name)
     {
@@ -503,66 +437,77 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setString(String name, String value)
     {
         return setTag(new Tag_String(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setInt(String name, int value)
     {
         return setTag(new Tag_Int(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setDouble(String name, double value)
     {
         return setTag(new Tag_Double(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setFloat(String name, float value)
     {
         return setTag(new Tag_Float(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setByte(String name, byte value)
     {
         return setTag(new Tag_Byte(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setShort(String name, short value)
     {
         return setTag(new Tag_Short(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setLong(String name, long value)
     {
         return setTag(new Tag_Long(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setByteArray(String name, byte[] value)
     {
         return setTag(new Tag_Byte_Array(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setIntArray(String name, int[] value)
     {
         return setTag(new Tag_Int_Array(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setLongArray(String name, long[] value)
     {
         return setTag(new Tag_Long_Array(name, value));
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag setTag(ITag<?> tag)
     {
@@ -572,6 +517,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag removeTag(String name)
     {
@@ -579,6 +525,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag removeTags(String... names)
     {
@@ -589,6 +536,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ICompoundTag clear()
     {
@@ -596,12 +544,14 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int size()
     {
         return data.size();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isEmpty()
     {
@@ -609,9 +559,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     }
 
     /**
-     * Generates a hierarchical string representation showing all nested tags.
-     *
-     * <p>Output includes tag type, name, size, and recursively formatted child tags.</p>
+     * Returns a string with the compound name and nested tags.
      *
      * @return formatted multi-line string representation
      */

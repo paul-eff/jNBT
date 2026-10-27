@@ -7,23 +7,17 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Abstract base class for NBT tags that contain collections of other tags.
- * <p>Provides comprehensive functionality for managing child tags including
- * addition, removal, and retrieval operations. Supports both name-based and
- * object-based lookups with optional recursive searching.</p>
- * <p>Implements fluent API patterns for method chaining and offers specialized
- * handling for different collection types (compounds vs. lists).</p>
+ * Base class for collections of child tags. Name and tag searches and removals include nested
+ * collections. Null children and END markers are rejected.
  *
- * @see Tag_Compound
- * @see Tag_List
+ * @since 1.0
  */
 public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
 {
     /**
-     * Creates a collection tag with the specified NBT type identifier.
-     * Initializes with an empty ArrayList for child tags.
+     * Creates a collection tag with the NBT type ID. Initializes with an empty ArrayList for child tags.
      *
-     * @param id the NBT type identifier
+     * @param id the NBT type ID
      */
     public Collection_Tag(int id)
     {
@@ -31,10 +25,10 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Creates a named collection tag with the specified NBT type identifier.
-     * Initializes with an empty ArrayList for child tags.
+     * Creates a named collection tag with the NBT type ID. Initializes with an empty ArrayList for child
+     * tags.
      *
-     * @param id   the NBT type identifier
+     * @param id   the NBT type ID
      * @param name the tag name
      */
     public Collection_Tag(int id, String name)
@@ -43,9 +37,9 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Creates a collection tag pre-populated with child tags.
+     * Creates a collection tag filled with child tags.
      *
-     * @param id   the NBT type identifier
+     * @param id   the NBT type ID
      * @param name the tag name (null becomes "null", empty strings are preserved)
      * @param data the initial collection of child tags
      */
@@ -59,7 +53,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Rejects structural termination markers and null child values.
+     * Rejects null children and END markers.
      *
      * @param tag the proposed child
      * @throws IllegalArgumentException if the child is null or a TAG_End
@@ -73,16 +67,11 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Adds a child tag to this collection with type validation.
-     *
-     * <p>For lists, validates that the new tag matches the declared list type.
-     * Compounds accept any value tag type. TAG_End is a structural marker,
-     * so neither collection accepts it as a child.</p>
+     * Adds a child. List elements must match the declared element type.
      *
      * @param tag the tag to add
-     * @return this collection tag for method chaining
+     * @return this collection tag
      * @throws IllegalArgumentException if the child is null, is TAG_End, or has an incompatible list type
-     * @see Tag_List#getListTypeID()
      */
     public Collection_Tag addTag(ITag<?> tag)
     {
@@ -96,15 +85,11 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Adds multiple child tags to this collection with batch type validation.
-     *
-     * <p>For lists, validates that all new tags match the declared list type
-     * before adding any elements.</p>
+     * Adds children after checking all their types.
      *
      * @param tags the collection of tags to add
-     * @return this collection tag for method chaining
+     * @return this collection tag
      * @throws IllegalArgumentException if any child is null, is TAG_End, or has an incompatible list type
-     * @see #addTag(ITag)
      */
     public Collection_Tag addAllTags(List<Tag<?>> tags)
     {
@@ -124,13 +109,10 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Finds all tags with the specified name, including nested matches.
-     *
-     * <p>Performs recursive search through all collection descendants.</p>
+     * Finds all tags with the given name, including nested tags.
      *
      * @param name the tag name to search for
      * @return list of matching tags (empty if none found)
-     * @see #getTagByName(String)
      */
     public List<Tag<?>> getAllTagsByName(String name)
     {
@@ -138,13 +120,10 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Finds the first tag with the specified name, including nested search.
-     *
-     * <p>Returns immediately upon finding the first match during traversal.</p>
+     * Finds a tag with the given name, including nested tags.
      *
      * @param name the tag name to search for
      * @return the first matching tag, or null if not found
-     * @see #getAllTagsByName(String)
      */
     public Tag<?> getTagByName(String name)
     {
@@ -152,7 +131,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Internal method for flexible tag retrieval by name with scope control.
+     * Finds tags by name in nested collections.
      *
      * @param name   the tag name to search for
      * @param global true to find all matches, false to stop at first match
@@ -176,13 +155,10 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Finds all tags that are equal to the specified target tag.
-     *
-     * <p>Uses {@link Tag#equals(Object)} for comparison and searches recursively.</p>
+     * Finds equal tags in this collection and nested collections.
      *
      * @param targetTag the tag to match against
      * @return list of equal tags (empty if none found)
-     * @see #getTag(Tag)
      */
     public List<Tag<?>> getAllTags(Tag<?> targetTag)
     {
@@ -190,13 +166,10 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Finds the first tag that equals the specified target tag.
-     *
-     * <p>Returns immediately upon finding the first match during traversal.</p>
+     * Finds an equal tag in this collection or nested collections.
      *
      * @param targetTag the tag to match against
      * @return the first equal tag, or null if not found
-     * @see #getAllTags(Tag)
      */
     public Tag<?> getTag(Tag<?> targetTag)
     {
@@ -204,7 +177,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Internal method for flexible tag retrieval by equality with scope control.
+     * Finds equal tags in nested collections.
      *
      * @param targetTag the tag to match against
      * @param global    true to find all matches, false to stop at first match
@@ -228,12 +201,9 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Removes all tags with the specified name from this collection and descendants.
-     *
-     * <p>Performs recursive removal through all nested collections.</p>
+     * Removes tags with the given name from this collection and nested collections.
      *
      * @param name the tag name to remove
-     * @see #removeTagByName(String)
      */
     public void removeAllTagsByName(String name)
     {
@@ -241,13 +211,10 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Removes the first tag with the specified name and returns this collection.
-     *
-     * <p>Stops after removing the first match found during traversal.</p>
+     * Removes a matching tag by name from this collection and nested collections.
      *
      * @param name the tag name to remove
-     * @return this collection tag for method chaining
-     * @see #removeAllTagsByName(String)
+     * @return this collection tag
      */
     public Collection_Tag removeTagByName(String name)
     {
@@ -256,7 +223,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Internal method for flexible tag removal by name with scope control.
+     * Removes tags by name from nested collections.
      *
      * @param name   the tag name to remove
      * @param global true to remove all matches, false to stop at first removal
@@ -279,12 +246,9 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Removes all tags equal to the specified target from this collection and descendants.
-     *
-     * <p>Uses {@link Tag#equals(Object)} for comparison and removes recursively.</p>
+     * Removes equal tags from this collection and nested collections.
      *
      * @param targetTag the tag to remove
-     * @see #removeTag(Tag)
      */
     public void removeAllTags(Tag<?> targetTag)
     {
@@ -292,13 +256,10 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Removes the first tag equal to the specified target and returns this collection.
-     *
-     * <p>Stops after removing the first match found during traversal.</p>
+     * Removes a matching tag from this collection and nested collections.
      *
      * @param targetTag the tag to remove
-     * @return this collection tag for method chaining
-     * @see #removeAllTags(Tag)
+     * @return this collection tag
      */
     public Collection_Tag removeTag(Tag<?> targetTag)
     {
@@ -307,7 +268,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     }
 
     /**
-     * Internal method for flexible tag removal by equality with scope control.
+     * Removes equal tags from nested collections.
      *
      * @param targetTag the tag to remove
      * @param global    true to remove all matches, false to stop at first removal

@@ -13,14 +13,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Serializer for converting NBT tags into SNBT (Stringified NBT) format.
- * Produces valid SNBT strings that can be used in Minecraft commands and debugging.
- * Uses Minecraft-compatible formatting by default.
+ *  Converts NBT tags to SNBT strings.
+ *
+ * @since 1.6.0
  */
 public class SNBTSerializer
 {
-
-    // Default Minecraft-style formatting settings
     private static final boolean SPACES_AROUND_COLON = true;
     private static final boolean SPACES_IN_COMPOUNDS = true;
     private static final boolean SPACES_IN_LISTS = true;
@@ -29,16 +27,13 @@ public class SNBTSerializer
     private static final boolean ADD_TRAILING_NEWLINE = true;
     private static final boolean ALWAYS_QUOTE_STRINGS = false;
 
-    /**
-     * Creates a serializer with Minecraft-compatible formatting.
-     */
+    /** Creates a serializer with Minecraft-compatible formatting. */
     public SNBTSerializer()
     {
-        // Uses default Minecraft-style formatting
     }
 
     /**
-     * Serializes an NBT tag to SNBT string format.
+     * Returns the tag as SNBT, or the string {@code "null"} for null input.
      *
      * @param tag the NBT tag to serialize
      * @return the SNBT string representation
@@ -81,7 +76,7 @@ public class SNBTSerializer
      *
      * @param tag   the tag to serialize
      * @param sb    the string builder to append to
-     * @param depth the current nesting depth (for potential formatting)
+     * @param depth the current nesting depth
      */
     private void serializeTag(ITag<?> tag, StringBuilder sb, int depth)
     {
@@ -95,7 +90,6 @@ public class SNBTSerializer
         {
             Object data = tag.getData();
 
-            // Use NBT type ID for precise type detection
             int tagId = tag.getId();
 
             switch (tagId)
@@ -236,8 +230,7 @@ public class SNBTSerializer
     }
 
     /**
-     * Serializes a float value with 'f' suffix.
-     * Handles special values like NaN and Infinity.
+     * Writes a float, NaN, or Infinity with an f suffix.
      *
      * @param value the float value
      * @param sb    the string builder to append to
@@ -257,8 +250,7 @@ public class SNBTSerializer
     }
 
     /**
-     * Serializes a double value without suffix by default.
-     * Handles special values like NaN and Infinity.
+     * Writes a double, NaN, or Infinity. Doubles have no suffix by default.
      *
      * @param value the double value
      * @param sb    the string builder to append to
@@ -284,8 +276,7 @@ public class SNBTSerializer
     }
 
     /**
-     * Serializes a string with smart quoting and escaping.
-     * Only quotes when necessary based on SNBT rules.
+     * Writes a string with quotes and escapes when needed. Null becomes an empty quoted string.
      *
      * @param value the string value
      * @param sb    the string builder to append to
@@ -298,7 +289,6 @@ public class SNBTSerializer
             return;
         }
 
-        // Check if we need to quote the string
         if (needsQuoting(value))
         {
             sb.append('"');
@@ -323,19 +313,16 @@ public class SNBTSerializer
             return true;
         }
 
-        // Check for reserved words
         if (value.equals("true") || value.equals("false"))
         {
             return true;
         }
 
-        // Check if it looks like a number
         if (looksLikeNumber(value))
         {
             return true;
         }
 
-        // According to SNBT spec: quotes optional if string contains only 0-9, A-Z, a-z, _, and doesn't start with digit, -, ., +
         char first = value.charAt(0);
         if (Character.isDigit(first) || first == '-' || first == '.' || first == '+')
         {
@@ -351,13 +338,11 @@ public class SNBTSerializer
             }
         }
 
-        // Based on test expectations, it seems we should quote most strings for safety
-        // Only leave very simple identifier-like strings unquoted
         return ALWAYS_QUOTE_STRINGS;
     }
 
     /**
-     * Checks if a string looks like a number that might be confused with numeric literals.
+     * Checks whether a string starts like a number.
      *
      * @param value the string to check
      * @return true if the string looks like a number
@@ -375,7 +360,6 @@ public class SNBTSerializer
 
     /**
      * Escapes special characters in strings for SNBT format.
-     * Handles standard escape sequences and unicode characters.
      *
      * @param value the string to escape
      * @param sb    the string builder to append to
@@ -409,9 +393,9 @@ public class SNBTSerializer
                     sb.append("\\f");
                     break;
                 default:
+                    // Keep output within printable ASCII, from space through tilde.
                     if (c < 32 || c > 126)
                     {
-                        // Non-printable ASCII characters as unicode escapes
                         sb.append(String.format("\\u%04x", (int) c));
                     } else
                     {
@@ -423,7 +407,7 @@ public class SNBTSerializer
     }
 
     /**
-     * Serializes a byte array with [B; prefix.
+     * Writes a byte array with the {@code [B;} prefix.
      *
      * @param array the byte array
      * @param sb    the string builder to append to
@@ -451,7 +435,7 @@ public class SNBTSerializer
     }
 
     /**
-     * Serializes an int array with [I; prefix.
+     * Writes an int array with the {@code [I;} prefix.
      *
      * @param array the int array
      * @param sb    the string builder to append to
@@ -479,7 +463,7 @@ public class SNBTSerializer
     }
 
     /**
-     * Serializes a long array with [L; prefix.
+     * Writes a long array with the {@code [L;} prefix.
      *
      * @param array the long array
      * @param sb    the string builder to append to
@@ -507,7 +491,7 @@ public class SNBTSerializer
     }
 
     /**
-     * Serializes a compound tag with proper key-value formatting.
+     * Writes a compound with named children.
      *
      * @param compound the compound tag to serialize
      * @param sb       the string builder to append to
@@ -540,7 +524,6 @@ public class SNBTSerializer
 
             Tag<?> tag = tags.get(i);
 
-            // Serialize key
             serializeString(tag.getName(), sb);
             sb.append(':');
             if (SPACES_AROUND_COLON)
@@ -548,7 +531,6 @@ public class SNBTSerializer
                 sb.append(' ');
             }
 
-            // Serialize value
             serializeTag(tag, sb, depth + 1);
         }
 
@@ -556,7 +538,7 @@ public class SNBTSerializer
     }
 
     /**
-     * Serializes a list tag with proper element formatting.
+     * Writes a list of values.
      *
      * @param list  the list tag to serialize
      * @param sb    the string builder to append to

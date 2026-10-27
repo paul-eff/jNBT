@@ -5,14 +5,13 @@ import de.pauleff.jnbt.util.NBTTags;
 import java.util.Arrays;
 
 /**
- * Class representing a NBT long array tag.
+ *  An NBT long array tag.
  *
+ * @since 0.1
  */
 public class Tag_Long_Array extends Tag<long[]>
 {
-    /**
-     * Creates a tag initialized to a new empty array.
-     */
+    /** Creates a tag initialized to a new empty array. */
     public Tag_Long_Array()
     {
         super(NBTTags.Tag_Long_Array.getId());
@@ -21,7 +20,7 @@ public class Tag_Long_Array extends Tag<long[]>
     /**
      * Creates a named tag initialized to a new empty array.
      *
-     * @param name Name of the tag.
+     * @param name the tag name
      */
     public Tag_Long_Array(String name)
     {
@@ -29,10 +28,10 @@ public class Tag_Long_Array extends Tag<long[]>
     }
 
     /**
-     * Create a long array tag with name and data.
+     * Creates a long array tag with name and data.
      *
-     * @param name Name of the tag.
-     * @param data The non-null initial data of the tag.
+     * @param name the tag name
+     * @param data the non-null initial value
      * @throws IllegalArgumentException if data is null
      */
     public Tag_Long_Array(String name, long[] data)
@@ -40,6 +39,7 @@ public class Tag_Long_Array extends Tag<long[]>
         super(NBTTags.Tag_Long_Array.getId(), name, data);
     }
 
+    /** Returns a string with the stored values. */
     @Override
     public String toString()
     {

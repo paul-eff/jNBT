@@ -8,17 +8,18 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
 /**
- * Class for managing the loading and conversion of a given NBT file to the desired stream.
+ *  Opens binary NBT streams and detects compression from file headers.
  *
+ * @since 0.1
  */
 public class NBTFileHandler
 {
     /**
-     * Method to fully load a NBT file and return it as a {@link DataInputStream}.
+     * Opens a binary NBT stream with automatic decompression. The caller must close it.
      *
-     * @param file The target file.
-     * @return The file as {@link DataInputStream}.
-     * @throws IOException When encountering an error whilst reading the file to a {@link DataInputStream}.
+     * @param file the target file.
+     * @return the file as {@link DataInputStream}.
+     * @throws IOException when encountering an error while reading the file to a {@link DataInputStream}.
      */
     public static DataInputStream loadNBTToReader(File file) throws IOException
     {
@@ -50,13 +51,13 @@ public class NBTFileHandler
     }
 
     /**
-     * Method to create a {@link DataOutputStream} to later write a NBT file.
-     * If the file already exists, a backup will be created.
+     * Opens a binary NBT output stream and backs up an existing file to {@code .bak}. The caller must
+     * close the stream.
      *
-     * @param file        The target file.
-     * @param compression The compression type of the file.
-     * @return The file as {@link DataOutputStream}.
-     * @throws IOException When encountering an error whilst reading the file to a {@link DataOutputStream}.
+     * @param file        the target file.
+     * @param compression the compression type of the file.
+     * @return the file as {@link DataOutputStream}.
+     * @throws IOException when encountering an error while reading the file to a {@link DataOutputStream}.
      */
     public static DataOutputStream loadNBTToWriter(File file, Compression_Types compression) throws IOException
     {
@@ -98,10 +99,10 @@ public class NBTFileHandler
     }
 
     /**
-     * Method to get the compression type of a file.
+     * Detects compression from the file header. Defaults to NONE if detection fails.
      *
-     * @param file The target file.
-     * @return The compression type of the file.
+     * @param file the target file.
+     * @return the compression type of the file.
      */
     public static Compression_Types getCompressionType(File file)
     {
@@ -112,9 +113,9 @@ public class NBTFileHandler
     }
 
     /**
-     * Checks if a file was compressed with GZIP by examining magic bytes.
+     * Checks for a GZIP header. Returns false on read errors.
      *
-     * @param file The target file to check
+     * @param file the target file to check
      * @return {@code true} if the file has GZIP magic bytes, {@code false} otherwise
      */
     private static boolean isGzipped(File file)
@@ -126,7 +127,6 @@ public class NBTFileHandler
             return magic == GZIPInputStream.GZIP_MAGIC;
         } catch (IOException e)
         {
-            // Log the exception but don't fail compression detection
             System.err.printf("Warning: Could not check GZIP magic for file %s: %s%n",
                     file.getName(), e.getMessage());
             return false;
@@ -134,9 +134,9 @@ public class NBTFileHandler
     }
 
     /**
-     * Checks if a file was compressed with ZLIB by examining magic bytes.
+     * Checks for a ZLIB header. Returns false on read errors.
      *
-     * @param file The target file to check
+     * @param file the target file to check
      * @return {@code true} if the file has ZLIB magic bytes, {@code false} otherwise
      */
     private static boolean isZlibed(File file)
@@ -151,12 +151,12 @@ public class NBTFileHandler
             // Check zlib header: first two bytes form a 16-bit value that must be divisible by 31
             int headerValue = ((header[0] & 0xFF) << 8) | (header[1] & 0xFF);
 
-            // Verify it's a valid zlib header
             if (headerValue % 31 != 0)
             {
                 return false;
             }
 
+            // The low four bits hold the compression method. Method 8 is DEFLATE.
             int compressionMethod = header[0] & 0x0F;
             return compressionMethod == 8;
         } catch (IOException e)
@@ -166,9 +166,9 @@ public class NBTFileHandler
     }
 
     /**
-     * Method to check if a file was compressed with LZ4.
+     * Returns false because LZ4 detection is not implemented.
      *
-     * @param file The target file.
+     * @param file the target file.
      * @return {@code True} if the file was compressed with LZ4.
      */
     private static boolean isLZ4ed(File file)

@@ -96,7 +96,7 @@ String snbt = serializer.serialize(tag);
 
 ## Documentation
 
-Explore the `examples/` folder for comprehensive usage patterns.
+Explore [`src/examples`](src/examples) for some basic usage patterns.
 
 Constructors and factories without a value initialize numbers to zero, strings to
 `""`, and arrays/collections to new empty instances. Explicit null payloads are

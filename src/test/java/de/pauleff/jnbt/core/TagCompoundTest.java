@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TagCompoundTest
 {
-
     private Tag_Compound compound;
 
     @BeforeEach
@@ -20,7 +19,6 @@ class TagCompoundTest
     @Test
     void testCreateEmpty()
     {
-        // Test empty compound creation
         assertEquals("testCompound", compound.getName());
         assertTrue(compound.getData().isEmpty());
     }
@@ -28,7 +26,6 @@ class TagCompoundTest
     @Test
     void testAddStringTag()
     {
-        // Test adding string tag
         compound.addString("name", "Steve");
         assertEquals("Steve", compound.getString("name"));
         assertTrue(compound.hasTag("name"));
@@ -37,7 +34,6 @@ class TagCompoundTest
     @Test
     void testAddIntTag()
     {
-        // Test adding int tag
         compound.addInt("level", 42);
         assertEquals(42, compound.getInt("level"));
     }
@@ -45,7 +41,6 @@ class TagCompoundTest
     @Test
     void testAddDoubleTag()
     {
-        // Test adding double tag
         compound.addDouble("health", 20.5);
         assertEquals(20.5, compound.getDouble("health"));
     }
@@ -53,7 +48,6 @@ class TagCompoundTest
     @Test
     void testAddByteTag()
     {
-        // Test adding byte tag
         compound.addByte("flag", (byte) 1);
         assertEquals((byte) 1, compound.getByte("flag"));
     }
@@ -61,7 +55,6 @@ class TagCompoundTest
     @Test
     void testGetNonExistentTag()
     {
-        // Test default values for missing tags
         assertNull(compound.getString("missing"));
         assertEquals(0, compound.getInt("missing"));
         assertEquals(0.0, compound.getDouble("missing"));
@@ -71,7 +64,6 @@ class TagCompoundTest
     @Test
     void testFluentChaining()
     {
-        // Test fluent method chaining
         ICompoundTag result = compound.addString("name", "Alice")
                 .addInt("age", 25);
 
@@ -83,7 +75,6 @@ class TagCompoundTest
     @Test
     void testAddNestedCompound()
     {
-        // Test nested compound tags
         Tag_Compound nested = new Tag_Compound("nested");
         nested.addString("inner", "value");
         compound.addTag(nested);
@@ -96,7 +87,6 @@ class TagCompoundTest
     @Test
     void testToString()
     {
-        // Test string representation
         compound.addString("test", "value");
         String result = compound.toString();
         assertTrue(result.contains("testCompound"));

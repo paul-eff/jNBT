@@ -10,11 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SNBTParserTest
 {
-
     @Test
     public void testParsePrimitiveValues() throws SNBTException
     {
-        // Test basic numeric types with suffixes
         ITag<?> byteTag = NBTFactory.parseFromSNBT("42b");
         assertEquals((byte) 42, byteTag.getData());
 
@@ -31,7 +29,6 @@ public class SNBTParserTest
     @Test
     public void testParseBooleanValues() throws SNBTException
     {
-        // Test boolean conversion to bytes
         ITag<?> trueTag = NBTFactory.parseFromSNBT("true");
         assertEquals((byte) 1, trueTag.getData());
 
@@ -42,12 +39,10 @@ public class SNBTParserTest
     @Test
     public void testParseCompounds() throws SNBTException
     {
-        // Test empty compound
         ITag<?> empty = NBTFactory.parseFromSNBT("{}");
         assertInstanceOf(ICompoundTag.class, empty);
         assertTrue(((ICompoundTag) empty).getData().isEmpty());
 
-        // Test simple compound
         ITag<?> simple = NBTFactory.parseFromSNBT("{name: \"Steve\", level: 42}");
         ICompoundTag compound = (ICompoundTag) simple;
         assertEquals("Steve", compound.getString("name"));
@@ -57,7 +52,6 @@ public class SNBTParserTest
     @Test
     public void testParseLists() throws SNBTException
     {
-        // Test string list
         ITag<?> stringList = NBTFactory.parseFromSNBT("[\"apple\", \"banana\"]");
         IListTag list = (IListTag) stringList;
         assertEquals(2, list.getData().size());
@@ -67,11 +61,9 @@ public class SNBTParserTest
     @Test
     public void testParseArrays() throws SNBTException
     {
-        // Test byte array
         ITag<?> byteArray = NBTFactory.parseFromSNBT("[B; 1b, 2b, 3b]");
         assertArrayEquals(new byte[]{1, 2, 3}, (byte[]) byteArray.getData());
 
-        // Test int array
         ITag<?> intArray = NBTFactory.parseFromSNBT("[I; 100, 200]");
         assertArrayEquals(new int[]{100, 200}, (int[]) intArray.getData());
     }
@@ -79,7 +71,6 @@ public class SNBTParserTest
     @Test
     public void testErrorCases()
     {
-        // Test invalid syntax
         assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("{invalid"));
         assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("[1, \"mixed\"]"));
         assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("\"unterminated"));

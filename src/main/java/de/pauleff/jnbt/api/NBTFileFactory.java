@@ -13,33 +13,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
- * Factory for creating NBT file I/O handlers with automatic format detection.
- * Simplifies the process of reading from and writing to NBT files by handling compression detection,
- * stream management, and format validation automatically.
+ * Reads, writes, copies, and updates binary NBT files.
  *
- * <p><strong>Quick start:</strong></p>
- * <pre>{@code
- * // Read an NBT file
- * INBTReader reader = NBTFileFactory.createReader(new File("level.dat"));
- * ICompoundTag levelData = reader.read();
- * reader.close();
- *
- * // Write back with same compression
- * INBTWriter writer = NBTFileFactory.createWriter(new File("level.dat"));
- * writer.write(levelData);
- * }</pre>
- *
- * @see INBTReader
- * @see INBTWriter
- * @see Compression_Types
+ * @since 1.3
  */
 public class NBTFileFactory
 {
     /**
      * Creates a reader that automatically detects compression format.
      *
-     * @param nbtFile The {@link java.io.File} to read NBT data from
-     * @return New {@link INBTReader} ready to parse the file
+     * @param nbtFile the file to read NBT data from
+     * @return new {@link INBTReader} ready to parse the file
      */
     public static INBTReader createReader(File nbtFile)
     {
@@ -49,8 +33,8 @@ public class NBTFileFactory
     /**
      * Creates a reader from an existing data stream.
      *
-     * @param dis The {@link java.io.DataInputStream} containing NBT data
-     * @return New {@link INBTReader} ready to parse the stream
+     * @param dis the stream containing NBT data
+     * @return new {@link INBTReader} ready to parse the stream
      */
     public static INBTReader createReader(DataInputStream dis)
     {
@@ -58,12 +42,12 @@ public class NBTFileFactory
     }
 
     /**
-     * Creates a writer that preserves the original file's compression format.
-     * File must exist to detect compression type.
+     * Creates a writer that preserves the original file's compression format. File must exist to detect
+     * compression type.
      *
-     * @param nbtFile The {@link java.io.File} to write NBT data to
-     * @return New {@link INBTWriter} ready to write data
-     * @throws FileNotFoundException If the target file doesn't exist for compression detection
+     * @param nbtFile the file to write NBT data to
+     * @return new {@link INBTWriter} ready to write data
+     * @throws FileNotFoundException if the target file doesn't exist for compression detection
      */
     public static INBTWriter createWriter(File nbtFile) throws FileNotFoundException
     {
@@ -72,11 +56,10 @@ public class NBTFileFactory
 
     /**
      * Creates a writer with explicit compression settings.
-     * The target file is opened when writing, after encoded string lengths pass validation.
      *
-     * @param nbtFile     The {@link java.io.File} to write NBT data to
-     * @param compression The {@link Compression_Types} to apply
-     * @return New {@link INBTWriter} ready to write compressed data
+     * @param nbtFile     the file to write NBT data to
+     * @param compression the {@link Compression_Types} to apply
+     * @return new {@link INBTWriter} ready to write compressed data
      */
     public static INBTWriter createWriter(File nbtFile, Compression_Types compression)
     {
@@ -85,11 +68,10 @@ public class NBTFileFactory
 
     /**
      * Reads an NBT file completely and returns the root compound tag.
-     * Automatically handles compression detection and resource cleanup.
      *
-     * @param nbtFile The {@link java.io.File} to read
-     * @return The root {@link ICompoundTag} containing all NBT data
-     * @throws IOException If the file cannot be read or parsed
+     * @param nbtFile the file to read
+     * @return the root {@link ICompoundTag} containing all NBT data
+     * @throws IOException if the file cannot be read or parsed
      */
     public static ICompoundTag readNBTFile(File nbtFile) throws IOException
     {
@@ -100,12 +82,12 @@ public class NBTFileFactory
     }
 
     /**
-     * Writes an NBT compound tag to file with automatic compression detection.
-     * If the file exists, preserves its original compression format.
+     * Writes a compound to a file. Existing files are backed up. Without an explicit compression type,
+     * keeps the existing compression or uses no compression for a new file.
      *
-     * @param nbtFile The {@link java.io.File} to write to
-     * @param root    The {@link ICompoundTag} to write
-     * @throws IOException If the file cannot be written
+     * @param nbtFile the file to write to
+     * @param root    the {@link ICompoundTag} to write
+     * @throws IOException if the file cannot be written
      */
     public static void writeNBTFile(File nbtFile, ICompoundTag root) throws IOException
     {
@@ -114,7 +96,6 @@ public class NBTFileFactory
             writer.write(root);
         } catch (FileNotFoundException e)
         {
-            // If the file doesn't exist, create a new one with default compression = NONE
             try (INBTWriter writer = createWriter(nbtFile, Compression_Types.NONE))
             {
                 writer.write(root);
@@ -123,12 +104,13 @@ public class NBTFileFactory
     }
 
     /**
-     * Writes an NBT compound tag to a new file with specified compression.
+     * Writes a compound to a file. Existing files are backed up. Without an explicit compression type,
+     * keeps the existing compression or uses no compression for a new file.
      *
-     * @param nbtFile     The {@link java.io.File} to write to
-     * @param root        The {@link ICompoundTag} to write
-     * @param compression The {@link Compression_Types} to use
-     * @throws IOException If the file cannot be written
+     * @param nbtFile     the file to write to
+     * @param root        the {@link ICompoundTag} to write
+     * @param compression the {@link Compression_Types} to use
+     * @throws IOException if the file cannot be written
      */
     public static void writeNBTFile(File nbtFile, ICompoundTag root, Compression_Types compression) throws IOException
     {
@@ -141,9 +123,9 @@ public class NBTFileFactory
     /**
      * Copies an NBT file to a new location, preserving compression format.
      *
-     * @param source      The source {@link java.io.File} to copy from
-     * @param destination The destination {@link java.io.File} to copy to
-     * @throws IOException If the copy operation fails
+     * @param source      the source {@link java.io.File} to copy from
+     * @param destination the destination {@link java.io.File} to copy to
+     * @throws IOException if the copy operation fails
      */
     public static void copyNBTFile(File source, File destination) throws IOException
     {
@@ -153,9 +135,9 @@ public class NBTFileFactory
     }
 
     /**
-     * Checks if a file appears to be a valid NBT file by attempting to read its header.
+     * Checks whether the whole file can be read as NBT.
      *
-     * @param nbtFile The {@link java.io.File} to validate
+     * @param nbtFile the file to validate
      * @return {@code true} if the file appears to be valid NBT, {@code false} otherwise
      */
     public static boolean isValidNBTFile(File nbtFile)
@@ -171,15 +153,14 @@ public class NBTFileFactory
     }
 
     /**
-     * Updates a specific tag in an NBT file using a dot-separated path.
-     * Performs a read-modify-write operation preserving original compression.
-     * Each parent path component must name a direct compound child.
+     * Updates a tag using a dot-separated path and keeps the file compression. Each parent path part must
+     * be a direct compound child.
      *
-     * @param nbtFile The {@link java.io.File} to update
-     * @param tagPath The path to the tag (e.g., "Data.Player.Level")
-     * @param newValue The new value to set
-     * @param <T> The type of the new value
-     * @throws IOException If the file operation fails
+     * @param nbtFile the file to update
+     * @param tagPath the path to the tag (e.g., "Data.Player.Level")
+     * @param newValue the new value to set
+     * @param <T> the type of the new value
+     * @throws IOException if the file operation fails
      */
     public static <T> void updateTag(File nbtFile, String tagPath, T newValue) throws IOException
     {
@@ -189,14 +170,12 @@ public class NBTFileFactory
     }
 
     /**
-     * Removes a specific tag from an NBT file.
-     * Performs a read-modify-write operation preserving original compression.
-     * Each parent path component must name a direct compound child; a missing
-     * final child leaves the parent unchanged.
+     * Removes a tag using a dot-separated path and keeps the file compression. Each parent path part must
+     * be a direct compound child. A missing final child is ignored.
      *
-     * @param nbtFile The {@link java.io.File} to update
-     * @param tagPath The path to the tag to remove (e.g., "Data.Player.OldField")
-     * @throws IOException If the file operation fails
+     * @param nbtFile the file to update
+     * @param tagPath the path to the tag to remove (e.g., "Data.Player.OldField")
+     * @throws IOException if the file operation fails
      */
     public static void removeTag(File nbtFile, String tagPath) throws IOException
     {
@@ -208,9 +187,9 @@ public class NBTFileFactory
     /**
      * Creates a backup of an NBT file before modification.
      *
-     * @param original The original {@link java.io.File}
-     * @return The backup {@link java.io.File}
-     * @throws IOException If the backup operation fails
+     * @param original the original {@link java.io.File}
+     * @return the backup {@link java.io.File}
+     * @throws IOException if the backup operation fails
      */
     public static File createBackup(File original) throws IOException
     {
@@ -220,35 +199,31 @@ public class NBTFileFactory
     }
 
     /**
-     * Merges two NBT files, with the second file's data overriding the first.
-     * Matching direct compound children are merged recursively; other matching
-     * direct children are replaced. Unrelated descendants are preserved.
+     * Merges files and keeps the base file's compression. Matching compound children are merged
+     * recursively. Other matching children are replaced.
      *
-     * @param baseFile The base {@link java.io.File}
-     * @param mergeFile The file to merge into the base
-     * @param outputFile The output {@link java.io.File}
-     * @throws IOException If the merge operation fails
+     * @param baseFile the base {@link java.io.File}
+     * @param mergeFile the file to merge into the base
+     * @param outputFile the output {@link java.io.File}
+     * @throws IOException if the merge operation fails
      */
     public static void mergeNBTFiles(File baseFile, File mergeFile, File outputFile) throws IOException
     {
         ICompoundTag base = readNBTFile(baseFile);
         ICompoundTag merge = readNBTFile(mergeFile);
-        
+
         mergeCompounds(base, merge);
-        
+
         Compression_Types compression = NBTFileHandler.getCompressionType(baseFile);
         writeNBTFile(outputFile, base, compression);
     }
 
-    /**
-     * Updates a tag value deep within a compound structure using dot notation.
-     */
+    /** Updates a tag value deep within a compound structure using dot notation. */
     private static <T> void updateTagInCompound(ICompoundTag compound, String tagPath, T newValue)
     {
         String[] pathParts = tagPath.split("\\.");
         ICompoundTag current = compound;
-        
-        // Navigate to the parent compound
+
         for (int i = 0; i < pathParts.length - 1; i++)
         {
             ICompoundTag next = current.getCompound(pathParts[i]);
@@ -258,8 +233,7 @@ public class NBTFileFactory
             }
             current = next;
         }
-        
-        // Update the final tag
+
         String finalTagName = pathParts[pathParts.length - 1];
         if (newValue instanceof String)
         {
@@ -288,15 +262,12 @@ public class NBTFileFactory
         }
     }
 
-    /**
-     * Removes a tag deep within a compound structure using dot notation.
-     */
+    /** Removes a tag deep within a compound structure using dot notation. */
     private static void removeTagFromCompound(ICompoundTag compound, String tagPath)
     {
         String[] pathParts = tagPath.split("\\.");
         ICompoundTag current = compound;
-        
-        // Navigate to the parent compound
+
         for (int i = 0; i < pathParts.length - 1; i++)
         {
             ICompoundTag next = current.getCompound(pathParts[i]);
@@ -306,16 +277,12 @@ public class NBTFileFactory
             }
             current = next;
         }
-        
-        // Remove the final tag
+
         String finalTagName = pathParts[pathParts.length - 1];
         current.removeTag(finalTagName);
     }
 
-    /**
-     * Merges the contents of the source compound into the target compound.
-     * Source values override target values for matching keys.
-     */
+    /** Merges the contents of the source compound into the target compound. */
     private static void mergeCompounds(ICompoundTag target, ICompoundTag source)
     {
         if (source instanceof Tag_Compound sourceCompound)
@@ -324,7 +291,6 @@ public class NBTFileFactory
             {
                 if (sourceTag instanceof Tag_Compound && target.hasTag(sourceTag.getName()))
                 {
-                    // Recursively merge nested compounds
                     ICompoundTag targetNested = target.getCompound(sourceTag.getName());
                     if (targetNested != null)
                     {
@@ -335,7 +301,6 @@ public class NBTFileFactory
                     }
                 } else
                 {
-                    // Replace or add the tag
                     target.setTag(sourceTag);
                 }
             }

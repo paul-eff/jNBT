@@ -1,29 +1,15 @@
 package de.pauleff.jnbt.formats.binary;
 
 /**
- * Compression formats supported for NBT file storage.
- * NBT files can be stored with different compression schemes depending on their usage context.
- * Minecraft primarily uses GZIP compression, though other formats are supported for compatibility.
+ * Compression types for binary NBT. LZ4 is not implemented.
  *
- * @see NBTFileHandler
+ * @since 1.0
  */
 public enum Compression_Types
 {
-    /**
-     * No compression - raw NBT binary data
-     */
     NONE(0, "NONE"),
-    /**
-     * GZIP compression - most common for Minecraft saves
-     */
     GZIP(1, "GZIP"),
-    /**
-     * ZLIB compression - used by some Minecraft components
-     */
     ZLIB(2, "ZLIB"),
-    /**
-     * LZ4 compression - planned support for high-performance scenarios
-     */
     LZ4(3, "LZ4");
 
     private static final Compression_Types[] ID_LOOKUP = new Compression_Types[4];
@@ -42,8 +28,8 @@ public enum Compression_Types
     /**
      * Creates a compression type entry with its identifier and name.
      *
-     * @param id              The numeric identifier for this compression type
-     * @param compressionType The human-readable compression name
+     * @param id              the ID for this compression type
+     * @param compressionType the readable compression name
      */
     Compression_Types(int id, String compressionType)
     {
@@ -52,10 +38,10 @@ public enum Compression_Types
     }
 
     /**
-     * Looks up a compression type by its numeric identifier.
+     * Looks up a compression type by its ID.
      *
-     * @param id The compression type ID to find
-     * @return The corresponding {@link Compression_Types} enum, or {@code null} if ID is invalid
+     * @param id the compression type ID to find
+     * @return the corresponding {@link Compression_Types} enum, or {@code null} if ID is invalid
      */
     public static Compression_Types getById(int id)
     {
@@ -63,9 +49,9 @@ public enum Compression_Types
     }
 
     /**
-     * Returns the numeric identifier for this compression type.
+     * Returns the ID for this compression type.
      *
-     * @return The compression type ID
+     * @return the compression type ID
      */
     public int getId()
     {
@@ -73,9 +59,9 @@ public enum Compression_Types
     }
 
     /**
-     * Returns the human-readable name of this compression format.
+     * Returns the readable name of this compression format.
      *
-     * @return The compression type name (e.g., "GZIP", "ZLIB")
+     * @return the compression type name (e.g., "GZIP", "ZLIB")
      */
     public String getName()
     {

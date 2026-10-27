@@ -5,349 +5,341 @@ import de.pauleff.jnbt.core.Tag;
 import java.util.ArrayList;
 
 /**
- * Interface for NBT compound tags - the workhorse of NBT data structures.
- * Compounds function like dictionaries or maps, storing named child tags in key-value pairs.
- * Child names are unique within each compound. Additions, construction, bulk updates,
- * and parsing reject duplicate keys; set methods explicitly replace a direct child.
- * Renaming a shared child must preserve uniqueness in every containing compound.
- * {@code getData()} returns a shallow snapshot; use mutation methods to change membership.
- * They're essential for organizing complex data like player inventories, world chunks, and entity properties.
- * <p>Lookup, updates, and removal by name apply to direct children only.
- * Descendants must be accessed through their parent compounds. Missing or
- * incorrectly typed values retain the defaults documented by each getter.</p>
+ * A collection of named child tags. Names must be unique, including after a rename. Add methods reject
+ * duplicate names. Set methods replace direct children. Lookups and removals by name only use direct
+ * children. getData() returns a shallow copy with shared child objects.
  *
- * @see ITag
- * @see IListTag
+ * @since 1.3
  */
 public interface ICompoundTag extends ITag<ArrayList<Tag<?>>>
 {
     /**
-     * Checks whether this compound contains a tag with the specified name.
+     * Checks whether this compound contains a tag.
      *
-     * @param tagName The name to search for
+     * @param tagName the name to search for
      * @return {@code true} if a tag with this name exists, {@code false} otherwise
      */
     boolean hasTag(String tagName);
 
     /**
-     * Adds a string tag with the given name and value.
+     * Adds a string tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.String} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the string value to store
+     * @return This compound
      */
     ICompoundTag addString(String name, String value);
 
     /**
-     * Adds an integer tag with the given name and value.
+     * Adds an integer tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Integer} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the integer value to store
+     * @return This compound
      */
     ICompoundTag addInt(String name, int value);
 
     /**
-     * Adds a double-precision floating point tag.
+     * Adds a double tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Double} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the double value to store
+     * @return This compound
      */
     ICompoundTag addDouble(String name, double value);
 
     /**
-     * Adds a single-precision floating point tag.
+     * Adds a float tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Float} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the float value to store
+     * @return This compound
      */
     ICompoundTag addFloat(String name, float value);
 
     /**
-     * Adds a byte tag with the given name and value.
+     * Adds a byte tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Byte} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the byte value to store
+     * @return This compound
      */
     ICompoundTag addByte(String name, byte value);
 
     /**
      * Adds a short integer tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Short} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the short value to store
+     * @return This compound
      */
     ICompoundTag addShort(String name, short value);
 
     /**
      * Adds a long integer tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Long} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the long value to store
+     * @return This compound
      */
     ICompoundTag addLong(String name, long value);
 
     /**
      * Adds a byte array tag.
      *
-     * @param name  The tag name
-     * @param value The byte array value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the byte array value to store
+     * @return This compound
      */
     ICompoundTag addByteArray(String name, byte[] value);
 
     /**
      * Adds an integer array tag.
      *
-     * @param name  The tag name
-     * @param value The integer array value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the integer array value to store
+     * @return This compound
      */
     ICompoundTag addIntArray(String name, int[] value);
 
     /**
      * Adds a long array tag.
      *
-     * @param name  The tag name
-     * @param value The long array value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the long array value to store
+     * @return This compound
      */
     ICompoundTag addLongArray(String name, long[] value);
 
     /**
-     * Retrieves a child tag by name without requiring casts.
+     * Returns a child tag by name without requiring casts.
      *
-     * @param name The name of the tag to find
-     * @return The tag if found, {@code null} otherwise
+     * @param name the name of the tag to find
+     * @return the tag if found, {@code null} otherwise
      */
     ITag<?> getTag(String name);
 
     /**
-     * Retrieves a string value directly from a child tag.
+     * Returns a string value directly from a child tag.
      *
-     * @param name The name of the string tag
-     * @return The string value, or {@code null} if tag doesn't exist or isn't a string
+     * @param name the name of the string tag
+     * @return the string value, or {@code null} if tag doesn't exist or isn't a string
      */
     String getString(String name);
 
     /**
-     * Retrieves an integer value directly from a child tag.
+     * Returns an integer value directly from a child tag.
      *
-     * @param name The name of the integer tag
-     * @return The integer value, or 0 if tag doesn't exist or isn't an integer
+     * @param name the name of the integer tag
+     * @return the integer value, or 0 if tag doesn't exist or isn't an integer
      */
     int getInt(String name);
 
     /**
-     * Retrieves a double value directly from a child tag.
+     * Returns a double value directly from a child tag.
      *
-     * @param name The name of the double tag
-     * @return The double value, or 0.0 if tag doesn't exist or isn't a double
+     * @param name the name of the double tag
+     * @return the double value, or 0.0 if tag doesn't exist or isn't a double
      */
     double getDouble(String name);
 
     /**
-     * Retrieves a byte value directly from a child tag.
+     * Returns a byte value directly from a child tag.
      *
-     * @param name The name of the byte tag
-     * @return The byte value, or 0 if tag doesn't exist or isn't a byte
+     * @param name the name of the byte tag
+     * @return the byte value, or 0 if tag doesn't exist or isn't a byte
      */
     byte getByte(String name);
 
     /**
-     * Retrieves a float value directly from a child tag.
+     * Returns a float value directly from a child tag.
      *
-     * @param name The name of the float tag
-     * @return The float value, or 0.0f if tag doesn't exist or isn't a float
+     * @param name the name of the float tag
+     * @return the float value, or 0.0f if tag doesn't exist or isn't a float
      */
     float getFloat(String name);
 
     /**
-     * Retrieves a short value directly from a child tag.
+     * Returns a short value directly from a child tag.
      *
-     * @param name The name of the short tag
-     * @return The short value, or 0 if tag doesn't exist or isn't a short
+     * @param name the name of the short tag
+     * @return the short value, or 0 if tag doesn't exist or isn't a short
      */
     short getShort(String name);
 
     /**
-     * Retrieves a long value directly from a child tag.
+     * Returns a long value directly from a child tag.
      *
-     * @param name The name of the long tag
-     * @return The long value, or 0L if tag doesn't exist or isn't a long
+     * @param name the name of the long tag
+     * @return the long value, or 0L if tag doesn't exist or isn't a long
      */
     long getLong(String name);
 
     /**
-     * Retrieves a compound tag by name without casting.
+     * Returns a compound tag by name without casting.
      *
-     * @param name The name of the compound tag
-     * @return The {@link ICompoundTag} if found, {@code null} otherwise
+     * @param name the name of the compound tag
+     * @return the {@link ICompoundTag} if found, {@code null} otherwise
      */
     ICompoundTag getCompound(String name);
 
     /**
-     * Retrieves a list tag by name without casting.
+     * Returns a list tag by name without casting.
      *
-     * @param name The name of the list tag
-     * @return The {@link IListTag} if found, {@code null} otherwise
+     * @param name the name of the list tag
+     * @return the {@link IListTag} if found, {@code null} otherwise
      */
     IListTag getList(String name);
 
     /**
-     * Retrieves a byte array value directly from a child tag.
+     * Returns a byte array value directly from a child tag.
      *
-     * @param name The name of the byte array tag
-     * @return The byte array value, or {@code null} if tag doesn't exist or isn't a byte array
+     * @param name the name of the byte array tag
+     * @return the byte array value, or {@code null} if tag doesn't exist or isn't a byte array
      */
     byte[] getByteArray(String name);
 
     /**
-     * Retrieves an integer array value directly from a child tag.
+     * Returns an integer array value directly from a child tag.
      *
-     * @param name The name of the integer array tag
-     * @return The integer array value, or {@code null} if tag doesn't exist or isn't an integer array
+     * @param name the name of the integer array tag
+     * @return the integer array value, or {@code null} if tag doesn't exist or isn't an integer array
      */
     int[] getIntArray(String name);
 
     /**
-     * Retrieves a long array value directly from a child tag.
+     * Returns a long array value directly from a child tag.
      *
-     * @param name The name of the long array tag
-     * @return The long array value, or {@code null} if tag doesn't exist or isn't a long array
+     * @param name the name of the long array tag
+     * @return the long array value, or {@code null} if tag doesn't exist or isn't a long array
      */
     long[] getLongArray(String name);
 
     /**
-     * Updates or creates a string tag with the given name and value.
+     * Updates or creates a string tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.String} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the string value to store
+     * @return This compound
      */
     ICompoundTag setString(String name, String value);
 
     /**
-     * Updates or creates an integer tag with the given name and value.
+     * Updates or creates an integer tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Integer} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the integer value to store
+     * @return This compound
      */
     ICompoundTag setInt(String name, int value);
 
     /**
-     * Updates or creates a double-precision floating point tag.
+     * Updates or creates a double tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Double} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the double value to store
+     * @return This compound
      */
     ICompoundTag setDouble(String name, double value);
 
     /**
-     * Updates or creates a single-precision floating point tag.
+     * Updates or creates a float tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Float} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the float value to store
+     * @return This compound
      */
     ICompoundTag setFloat(String name, float value);
 
     /**
-     * Updates or creates a byte tag with the given name and value.
+     * Updates or creates a byte tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Byte} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the byte value to store
+     * @return This compound
      */
     ICompoundTag setByte(String name, byte value);
 
     /**
      * Updates or creates a short integer tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Short} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the short value to store
+     * @return This compound
      */
     ICompoundTag setShort(String name, short value);
 
     /**
      * Updates or creates a long integer tag.
      *
-     * @param name  The tag name
-     * @param value The {@link java.lang.Long} value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the long value to store
+     * @return This compound
      */
     ICompoundTag setLong(String name, long value);
 
     /**
      * Updates or creates a byte array tag.
      *
-     * @param name  The tag name
-     * @param value The byte array value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the byte array value to store
+     * @return This compound
      */
     ICompoundTag setByteArray(String name, byte[] value);
 
     /**
      * Updates or creates an integer array tag.
      *
-     * @param name  The tag name
-     * @param value The integer array value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the integer array value to store
+     * @return This compound
      */
     ICompoundTag setIntArray(String name, int[] value);
 
     /**
      * Updates or creates a long array tag.
      *
-     * @param name  The tag name
-     * @param value The long array value to store
-     * @return This compound for fluent method chaining
+     * @param name  the tag name
+     * @param value the long array value to store
+     * @return This compound
      */
     ICompoundTag setLongArray(String name, long[] value);
 
     /**
      * Updates or replaces an existing tag with a new one.
      *
-     * @param tag The tag to set (replaces any existing tag with the same name)
-     * @return This compound for fluent method chaining
+     * @param tag the tag to set (replaces any existing tag with the same name)
+     * @return This compound
      */
     ICompoundTag setTag(ITag<?> tag);
 
     /**
-     * Removes a tag by name and returns this compound for chaining.
+     * Removes a tag by name and returns this compound.
      *
-     * @param name The name of the tag to remove
-     * @return This compound for fluent method chaining
+     * @param name the name of the tag to remove
+     * @return This compound
      */
     ICompoundTag removeTag(String name);
 
     /**
-     * Removes multiple tags by name and returns this compound for chaining.
+     * Removes multiple tags by name and returns this compound.
      *
-     * @param names The names of the tags to remove
-     * @return This compound for fluent method chaining
+     * @param names the names of the tags to remove
+     * @return This compound
      */
     ICompoundTag removeTags(String... names);
 
     /**
      * Removes all tags from this compound.
      *
-     * @return This compound for fluent method chaining
+     * @return This compound
      */
     ICompoundTag clear();
 
     /**
      * Gets the number of child tags in this compound.
      *
-     * @return The number of child tags
+     * @return the number of child tags
      */
     int size();
 
