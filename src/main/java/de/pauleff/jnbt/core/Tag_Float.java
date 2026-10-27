@@ -9,7 +9,7 @@ import de.pauleff.jnbt.util.NBTTags;
 public class Tag_Float extends Tag<Float>
 {
     /**
-     * Create an empty float tag.
+     * Creates a tag initialized to zero.
      */
     public Tag_Float()
     {
@@ -17,7 +17,7 @@ public class Tag_Float extends Tag<Float>
     }
 
     /**
-     * Create a float tag with name and data set to null.
+     * Creates a named tag initialized to zero.
      *
      * @param name Name of the tag.
      */

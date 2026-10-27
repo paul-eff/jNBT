@@ -41,22 +41,25 @@ public interface ITag<T>
     /**
      * Returns the actual data payload stored in this tag.
      *
-     * @return The tag's data of type T
+     * @return The tag's data of type T; structural END markers without metadata have no payload
      */
     T getData();
 
     /**
-     * Updates the data payload of this tag.
+     * Initializes or replaces the payload with a non-null value of the declared NBT type.
      *
      * @param data The new data to store
+     * @throws IllegalArgumentException if data is null or incompatible with the declared type
      */
     void setData(T data);
 
     /**
      * Replaces this tag's content with data from another compatible tag.
-     * Both tags must be of the same NBT type.
+     * Both tags must be of the same NBT type, and the source payload must be non-null.
+     * Invalid input leaves the destination name and payload unchanged.
      *
      * @param newTag The source tag to copy from
+     * @throws IllegalArgumentException if the source, payload, or proposed name is invalid
      */
     void editTag(ITag<?> newTag);
 

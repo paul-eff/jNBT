@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class Tag_Byte_Array extends Tag<byte[]>
 {
     /**
-     * Create an empty byte array tag.
+     * Creates a tag initialized to a new empty array.
      */
     public Tag_Byte_Array()
     {
@@ -19,7 +19,7 @@ public class Tag_Byte_Array extends Tag<byte[]>
     }
 
     /**
-     * Create a byte array tag with name and data set to null.
+     * Creates a named tag initialized to a new empty array.
      *
      * @param name Name of the tag.
      */
@@ -32,7 +32,8 @@ public class Tag_Byte_Array extends Tag<byte[]>
      * Create a byte array tag with name and data.
      *
      * @param name Name of the tag.
-     * @param data The initial data of the tag.
+     * @param data The non-null initial data of the tag.
+     * @throws IllegalArgumentException if data is null
      */
     public Tag_Byte_Array(String name, byte[] data)
     {

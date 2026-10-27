@@ -9,7 +9,7 @@ import de.pauleff.jnbt.util.NBTTags;
 public class Tag_String extends Tag<String>
 {
     /**
-     * Create an empty string tag.
+     * Creates a tag initialized to an empty string.
      */
     public Tag_String()
     {
@@ -17,7 +17,7 @@ public class Tag_String extends Tag<String>
     }
 
     /**
-     * Create a string tag with name and data set to null.
+     * Creates a named tag initialized to an empty string.
      *
      * @param name Name of the tag.
      */
@@ -30,7 +30,8 @@ public class Tag_String extends Tag<String>
      * Create a string tag with name and data.
      *
      * @param name Name of the tag.
-     * @param data The initial data of the tag.
+     * @param data The non-null initial data of the tag.
+     * @throws IllegalArgumentException if data is null
      */
     public Tag_String(String name, String data)
     {

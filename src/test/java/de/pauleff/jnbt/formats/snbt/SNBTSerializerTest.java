@@ -14,6 +14,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SNBTSerializerTest
 {
@@ -119,6 +120,7 @@ public class SNBTSerializerTest
     {
         // Test null handling
         assertEquals("null", NBTFactory.toSNBT(null));
-        assertEquals("\"\"", NBTFactory.toSNBT(NBTFactory.createString("", null)));
+        assertThrows(IllegalArgumentException.class, () -> NBTFactory.createString("", null));
+        assertEquals("\"\"", NBTFactory.toSNBT(NBTFactory.createString("")));
     }
 }

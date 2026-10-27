@@ -9,7 +9,7 @@ import de.pauleff.jnbt.util.NBTTags;
 public class Tag_Byte extends Tag<Byte>
 {
     /**
-     * Create an empty byte tag.
+     * Creates a tag initialized to zero.
      */
     public Tag_Byte()
     {
@@ -17,7 +17,7 @@ public class Tag_Byte extends Tag<Byte>
     }
 
     /**
-     * Create a byte tag with name and data set to null.
+     * Creates a named tag initialized to zero.
      *
      * @param name Name of the tag.
      */

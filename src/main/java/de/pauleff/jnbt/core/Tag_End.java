@@ -32,7 +32,8 @@ public class Tag_End extends Tag<Object>
      * Binary END markers have no name or payload and cannot be collection values.
      *
      * @param name Name of the tag.
-     * @param data The initial data of the tag.
+     * @param data The non-null legacy metadata of the tag.
+     * @throws IllegalArgumentException if explicit metadata is null
      */
     public Tag_End(String name, Object data)
     {

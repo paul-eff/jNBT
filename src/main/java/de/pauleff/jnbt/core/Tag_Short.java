@@ -9,7 +9,7 @@ import de.pauleff.jnbt.util.NBTTags;
 public class Tag_Short extends Tag<Short>
 {
     /**
-     * Create an empty short tag.
+     * Creates a tag initialized to zero.
      */
     public Tag_Short()
     {
@@ -17,7 +17,7 @@ public class Tag_Short extends Tag<Short>
     }
 
     /**
-     * Create a short tag with name and data set to null.
+     * Creates a named tag initialized to zero.
      *
      * @param name Name of the tag.
      */

@@ -13,6 +13,9 @@ import java.util.ArrayList;
  * Factory for creating NBT tags through the public API.
  * Provides convenient static methods for building NBT structures without dealing with constructors directly.
  * Use this when you need to create individual tags programmatically.
+ * <p>Factories without a value initialize numbers to zero, strings to empty,
+ * and arrays/collections to new empty instances. Explicit null payloads are
+ * rejected during construction and updates.</p>
  *
  * <p><strong>Example usage:</strong></p>
  * <pre>{@code
@@ -62,6 +65,7 @@ public class NBTFactory
      */
     public static ICompoundTag createCompound(String name, ArrayList<ITag<?>> data)
     {
+        if (data == null) throw new IllegalArgumentException("Compound data cannot be null");
         ArrayList<Tag<?>> tagData = new ArrayList<>();
         for (ITag<?> tag : data)
         {

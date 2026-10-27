@@ -16,6 +16,10 @@ import java.util.function.Consumer;
  * <p>Explicit names, including empty strings and whitespace, are preserved exactly.
  * For compatibility, null names and constructors without a name use the literal
  * string {@code "null"}.</p>
+ * <p>Constructors without a payload initialize numbers to zero, strings to empty,
+ * and arrays/collections to new empty instances. Constructors and updates reject
+ * explicit null payloads. TAG_End is a structural marker and has no payload when
+ * created without legacy metadata.</p>
  *
  * @param <T> the data type stored within this tag
 
@@ -29,18 +33,19 @@ public abstract class Tag<T> implements ITag<T>
     private ArrayList<WeakReference<Tag_Compound>> compoundParents;
 
     /**
-     * Creates a new tag with the specified NBT type identifier.
+     * Creates a new tag with the specified NBT type identifier and its default payload.
      *
      * @param id the NBT type identifier
      * @throws IllegalArgumentException if the ID is not a valid NBT tag type
      */
     public Tag(int id)
     {
-        this(id, "null", null);
+        this(id, "null");
     }
 
     /**
-     * Creates a new named tag with the specified NBT type identifier.
+     * Creates a named tag with zero, an empty string, or a new empty array/collection.
+     * END markers have no payload.
      *
      * @param id   the NBT type identifier
      * @param name the tag name (null becomes "null"; empty strings are preserved)
@@ -48,7 +53,9 @@ public abstract class Tag<T> implements ITag<T>
      */
     public Tag(int id, String name)
     {
-        this(id, name, null);
+        this.id = id;
+        this.name = name == null ? "null" : name;
+        this.data = (T) defaultPayload(id);
     }
 
     /**
@@ -56,8 +63,8 @@ public abstract class Tag<T> implements ITag<T>
      *
      * @param id   the NBT type identifier
      * @param name the tag name (null becomes "null"; empty strings are preserved)
-     * @param data the initial payload for this tag
-     * @throws IllegalArgumentException if the ID is not a valid NBT tag type
+     * @param data the non-null initial payload
+     * @throws IllegalArgumentException if the ID is invalid or data is null or incompatible
      */
     public Tag(int id, String name, T data)
     {
@@ -67,7 +74,28 @@ public abstract class Tag<T> implements ITag<T>
         }
         this.id = id;
         this.name = name == null ? "null" : name;
+        validatePayload(data);
         this.data = data;
+    }
+
+    private static Object defaultPayload(int id)
+    {
+        return switch (id)
+        {
+            case 0 -> null; // Structural END markers carry no payload.
+            case 1 -> (byte) 0;
+            case 2 -> (short) 0;
+            case 3 -> 0;
+            case 4 -> 0L;
+            case 5 -> 0.0f;
+            case 6 -> 0.0d;
+            case 7 -> new byte[0];
+            case 8 -> "";
+            case 9, 10 -> new ArrayList<>();
+            case 11 -> new int[0];
+            case 12 -> new long[0];
+            default -> throw new IllegalArgumentException("Invalid ID: " + id);
+        };
     }
 
     /**
@@ -142,40 +170,66 @@ public abstract class Tag<T> implements ITag<T>
     }
 
     /**
-     * Updates the data payload with type validation.
+     * Initializes or replaces the payload using the type declared by the NBT ID.
+     * A null or incompatible update leaves the existing payload unchanged.
      *
-     * @param data the new data content
-     * @throws IllegalArgumentException if the data type doesn't match the existing type
+     * @param data the non-null replacement payload
+     * @throws IllegalArgumentException if data is null or has an incompatible type
      */
     public void setData(T data)
     {
-        if (this.data.getClass() == data.getClass())
+        validatePayload(data);
+        this.data = data;
+    }
+
+    private void validatePayload(Object value)
+    {
+        Class<?> expected = switch (id)
         {
-            this.data = data;
-        } else
+            // END retains its legacy in-memory metadata API; it is never a stored value.
+            case 0 -> Object.class;
+            case 1 -> Byte.class;
+            case 2 -> Short.class;
+            case 3 -> Integer.class;
+            case 4 -> Long.class;
+            case 5 -> Float.class;
+            case 6 -> Double.class;
+            case 7 -> byte[].class;
+            case 8 -> String.class;
+            case 9, 10 -> ArrayList.class;
+            case 11 -> int[].class;
+            case 12 -> long[].class;
+            default -> throw new IllegalArgumentException("Invalid ID: " + id);
+        };
+        if (!expected.isInstance(value))
         {
-            throw new IllegalArgumentException(String.format("Tag type mismatch! Expected %s, got %s", this.data.getClass(), data.getClass()));
+            throw new IllegalArgumentException("Invalid payload for " + NBTTags.getById(id).getName()
+                    + ": expected " + expected.getTypeName() + ", got "
+                    + (value == null ? "null" : value.getClass().getTypeName()));
         }
     }
 
     /**
-     * Replaces this tag's content with data from another compatible tag.
+     * Copies a compatible tag's name and non-null payload.
+     * Validation failures leave both the existing name and payload unchanged.
      *
      * @param newTag the source tag to copy from
-     * @throws IllegalArgumentException if tag types don't match
+     * @throws IllegalArgumentException if the source is null, has another tag type,
+     *                                  has an invalid payload, or has a conflicting name
      * @see #setData(Object)
      * @see #setName(String)
      */
     public void editTag(ITag<?> newTag)
     {
-        if (this.getId() == newTag.getId())
+        if (newTag == null || this.getId() != newTag.getId())
         {
-            this.setName(newTag.getName());
-            this.setData((T) newTag.getData());
-        } else
-        {
-            throw new IllegalArgumentException(String.format("Tag type mismatch! Expected %d, got %d", this.getId(), newTag.getId()));
+            throw new IllegalArgumentException("Source must be a non-null tag with type " + this.getId());
         }
+        T replacement = (T) newTag.getData();
+        validatePayload(replacement);
+        validateNameChange(newTag.getName());
+        this.setData(replacement);
+        this.setName(newTag.getName());
     }
 
     /**

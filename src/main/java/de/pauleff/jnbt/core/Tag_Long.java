@@ -9,7 +9,7 @@ import de.pauleff.jnbt.util.NBTTags;
 public class Tag_Long extends Tag<Long>
 {
     /**
-     * Create an empty long tag.
+     * Creates a tag initialized to zero.
      */
     public Tag_Long()
     {
@@ -17,7 +17,7 @@ public class Tag_Long extends Tag<Long>
     }
 
     /**
-     * Create a long tag with name and data set to null.
+     * Creates a named tag initialized to zero.
      *
      * @param name Name of the tag.
      */

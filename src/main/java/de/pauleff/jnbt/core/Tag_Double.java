@@ -9,7 +9,7 @@ import de.pauleff.jnbt.util.NBTTags;
 public class Tag_Double extends Tag<Double>
 {
     /**
-     * Create an empty double tag.
+     * Creates a tag initialized to zero.
      */
     public Tag_Double()
     {
@@ -17,7 +17,7 @@ public class Tag_Double extends Tag<Double>
     }
 
     /**
-     * Create a double tag with name and data set to null.
+     * Creates a named tag initialized to zero.
      *
      * @param name Name of the tag.
      */

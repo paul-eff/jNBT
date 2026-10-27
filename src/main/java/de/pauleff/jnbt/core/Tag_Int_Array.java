@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class Tag_Int_Array extends Tag<int[]>
 {
     /**
-     * Create an empty int array tag.
+     * Creates a tag initialized to a new empty array.
      */
     public Tag_Int_Array()
     {
@@ -19,7 +19,7 @@ public class Tag_Int_Array extends Tag<int[]>
     }
 
     /**
-     * Create an int array tag with name and data set to null.
+     * Creates a named tag initialized to a new empty array.
      *
      * @param name Name of the tag.
      */
@@ -32,7 +32,8 @@ public class Tag_Int_Array extends Tag<int[]>
      * Create an int array tag with name and data.
      *
      * @param name Name of the tag.
-     * @param data The initial data of the tag.
+     * @param data The non-null initial data of the tag.
+     * @throws IllegalArgumentException if data is null
      */
     public Tag_Int_Array(String name, int[] data)
     {
