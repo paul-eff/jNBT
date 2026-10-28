@@ -5,6 +5,8 @@ import de.pauleff.jnbt.api.ICompoundTag;
 import de.pauleff.jnbt.api.IListTag;
 import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.api.NBTFactory;
+import de.pauleff.jnbt.api.NBTLimits;
+import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.formats.snbt.SNBTTokenizer.Token;
 import de.pauleff.jnbt.formats.snbt.SNBTTokenizer.TokenType;
 import de.pauleff.jnbt.util.NBTTags;
@@ -13,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  Parses SNBT strings into NBT tags.
+ *  Parses SNBT strings into NBT tags. Uses {@link NBTLimits#DEFAULT}
+ * unless limits are supplied to the constructor.
  *
  * @since 1.6.0
  */
@@ -21,6 +24,9 @@ public class SNBTParser
 {
     private final SNBTTokenizer tokenizer;
     private Token currentToken;
+    private final NBTLimits limits;
+    private NBTBudget budget;
+    private int depth;
 
     /**
      * Creates a parser for the given SNBT input string.
@@ -29,6 +35,19 @@ public class SNBTParser
      */
     public SNBTParser(String input)
     {
+        this(input, NBTLimits.DEFAULT);
+    }
+
+    /**
+     * Creates an SNBT parser with configurable limits.
+     *
+     * @param input  the SNBT string to parse, with null treated as empty input
+     * @param limits the limits for this operation
+     * @throws NullPointerException if limits is null
+     */
+    public SNBTParser(String input, NBTLimits limits)
+    {
+        this.limits = java.util.Objects.requireNonNull(limits, "limits");
         this.tokenizer = new SNBTTokenizer(input);
     }
 
@@ -36,20 +55,32 @@ public class SNBTParser
      * Parses the complete SNBT string into an NBT tag. Duplicate keys within any compound are rejected.
      *
      * @return the parsed NBT tag
-     * @throws SNBTException if parsing fails due to syntax errors
+     * @throws SNBTException if syntax is invalid or a configured limit is exceeded
      */
     public ITag<?> parse() throws SNBTException
     {
-        advance();
-        ITag<?> result = parseValue();
-
-        if (currentToken.getType() != TokenType.EOF)
+        budget = new NBTBudget(limits);
+        depth = 0;
+        try
         {
-            throw new SNBTException("Unexpected token after parsing completed",
-                    currentToken.getPosition(), tokenizer.getInput());
-        }
+            if (tokenizer.getInput().length() > limits.maxTextLength())
+                throw new IllegalArgumentException("SNBT text length limit exceeded: " + limits.maxTextLength());
+            budget.allocate(4L * tokenizer.getInput().length());
+            advance();
+            ITag<?> result = parseValue();
 
-        return result;
+            if (currentToken.getType() != TokenType.EOF)
+            {
+                throw new SNBTException("Unexpected token after parsing completed",
+                        currentToken.getPosition(), tokenizer.getInput());
+            }
+
+            return result;
+        } catch (IllegalArgumentException e)
+        {
+            throw new SNBTException(e.getMessage(), currentToken == null ? 0 : currentToken.getPosition(),
+                    tokenizer.getInput(), e);
+        }
     }
 
     /**
@@ -60,10 +91,18 @@ public class SNBTParser
      */
     private ITag<?> parseValue() throws SNBTException
     {
+        budget.tag();
         switch (currentToken.getType())
         {
             case LBRACE:
-                return parseCompound();
+                budget.depth(++depth);
+                try
+                {
+                    return parseCompound();
+                } finally
+                {
+                    depth--;
+                }
             case LBRACKET:
                 return parseListOrArray();
             case STRING:
@@ -86,6 +125,7 @@ public class SNBTParser
     {
         expect(TokenType.LBRACE);
         ICompoundTag compound = NBTFactory.createCompound();
+        int children = 0;
 
         if (currentToken.getType() == TokenType.RBRACE)
         {
@@ -110,6 +150,8 @@ public class SNBTParser
 
             expect(TokenType.COLON);
 
+            budget.length(++children);
+            budget.allocate(64);
             ITag<?> value = parseValue();
             value.setName(key);
             ((Collection_Tag) compound).addTag(value);
@@ -146,7 +188,14 @@ public class SNBTParser
             return parseArray();
         } else
         {
-            return parseList();
+            budget.depth(++depth);
+            try
+            {
+                return parseList();
+            } finally
+            {
+                depth--;
+            }
         }
     }
 
@@ -185,6 +234,7 @@ public class SNBTParser
     private ITag<byte[]> parseByteArray() throws SNBTException
     {
         List<Byte> values = new ArrayList<>();
+        budget.allocate(16);
 
         if (currentToken.getType() == TokenType.RBRACKET)
         {
@@ -194,7 +244,9 @@ public class SNBTParser
 
         do
         {
-            ITag<?> value = parseValue();
+            budget.length(values.size() + 1);
+            budget.allocate(1);
+            ITag<?> value = parseArrayElement();
             if (!(value.getData() instanceof Byte))
             {
                 throw new SNBTException("Expected byte value in byte array",
@@ -235,6 +287,7 @@ public class SNBTParser
     private ITag<int[]> parseIntArray() throws SNBTException
     {
         List<Integer> values = new ArrayList<>();
+        budget.allocate(16);
 
         if (currentToken.getType() == TokenType.RBRACKET)
         {
@@ -244,7 +297,9 @@ public class SNBTParser
 
         do
         {
-            ITag<?> value = parseValue();
+            budget.length(values.size() + 1);
+            budget.allocate(4);
+            ITag<?> value = parseArrayElement();
             if (!(value.getData() instanceof Integer))
             {
                 throw new SNBTException("Expected int value in int array",
@@ -285,6 +340,7 @@ public class SNBTParser
     private ITag<long[]> parseLongArray() throws SNBTException
     {
         List<Long> values = new ArrayList<>();
+        budget.allocate(16);
 
         if (currentToken.getType() == TokenType.RBRACKET)
         {
@@ -294,7 +350,9 @@ public class SNBTParser
 
         do
         {
-            ITag<?> value = parseValue();
+            budget.length(values.size() + 1);
+            budget.allocate(8);
+            ITag<?> value = parseArrayElement();
             if (!(value.getData() instanceof Long))
             {
                 throw new SNBTException("Expected long value in long array",
@@ -327,6 +385,23 @@ public class SNBTParser
     }
 
     /**
+     * Rejects nested containers in typed arrays before entering another recursive parse.
+     *
+     * @return the parsed scalar array element
+     * @throws SNBTException if the next value is a container or is not a valid scalar
+     * @throws IllegalArgumentException if a configured limit is exceeded
+     */
+    private ITag<?> parseArrayElement() throws SNBTException
+    {
+        if (currentToken.getType() != TokenType.NUMBER && currentToken.getType() != TokenType.STRING)
+        {
+            throw new SNBTException("Expected scalar value in typed array",
+                    currentToken.getPosition(), tokenizer.getInput());
+        }
+        return parseValue();
+    }
+
+    /**
      * Parses a list with one element type. Empty lists use compound type.
      *
      * @return the parsed list tag
@@ -343,6 +418,8 @@ public class SNBTParser
             return NBTFactory.createList("", NBTTags.Tag_Compound.getId());
         }
 
+        budget.length(1);
+        budget.allocate(32);
         ITag<?> firstValue = parseValue();
         values.add(firstValue);
         int listType = getTagTypeId(firstValue);
@@ -356,6 +433,8 @@ public class SNBTParser
                 break; // Trailing comma
             }
 
+            budget.length(values.size() + 1);
+            budget.allocate(32);
             ITag<?> value = parseValue();
             int valueType = getTagTypeId(value);
 

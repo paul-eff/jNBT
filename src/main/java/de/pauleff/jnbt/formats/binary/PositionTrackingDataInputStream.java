@@ -14,6 +14,7 @@ public class PositionTrackingDataInputStream
 {
     private final DataInputStream dataStream;
     private long bytesRead;
+    private final long maxBytes;
     private int tagDepth;
     private String currentTagName;
     private int currentTagType;
@@ -25,6 +26,20 @@ public class PositionTrackingDataInputStream
      */
     public PositionTrackingDataInputStream(InputStream in)
     {
+        this(in, Long.MAX_VALUE);
+    }
+
+    /**
+     * Creates a position tracking stream with a limit on uncompressed bytes read.
+     *
+     * @param in       the already-decompressed input stream to wrap
+     * @param maxBytes the maximum bytes that may be read
+     * @throws IllegalArgumentException if maxBytes is not positive
+     */
+    public PositionTrackingDataInputStream(InputStream in, long maxBytes)
+    {
+        if (maxBytes < 1) throw new IllegalArgumentException("Byte limit must be positive");
+        this.maxBytes = maxBytes;
         this.dataStream = (in instanceof DataInputStream) ? (DataInputStream) in : new DataInputStream(in);
         this.bytesRead = 0;
         this.tagDepth = 0;
@@ -36,10 +51,11 @@ public class PositionTrackingDataInputStream
      * Fills the requested byte range and updates the byte count.
      *
      * @param b the destination array
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public void readFully(byte[] b) throws IOException
     {
+        checkAvailable(b.length);
         dataStream.readFully(b);
         bytesRead += b.length;
     }
@@ -50,10 +66,11 @@ public class PositionTrackingDataInputStream
      * @param b the destination array
      * @param off the starting index
      * @param len the number of bytes to read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public void readFully(byte[] b, int off, int len) throws IOException
     {
+        checkAvailable(len);
         dataStream.readFully(b, off, len);
         bytesRead += len;
     }
@@ -62,10 +79,11 @@ public class PositionTrackingDataInputStream
      * Reads a byte and updates the byte count.
      *
      * @return the value read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public byte readByte() throws IOException
     {
+        checkAvailable(1);
         byte result = dataStream.readByte();
         bytesRead++;
         return result;
@@ -75,10 +93,11 @@ public class PositionTrackingDataInputStream
      * Reads an unsigned byte and updates the byte count.
      *
      * @return the value read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public int readUnsignedByte() throws IOException
     {
+        checkAvailable(1);
         int result = dataStream.readUnsignedByte();
         bytesRead++;
         return result;
@@ -88,10 +107,11 @@ public class PositionTrackingDataInputStream
      * Reads a short and updates the byte count.
      *
      * @return the value read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public short readShort() throws IOException
     {
+        checkAvailable(2);
         short result = dataStream.readShort();
         bytesRead += 2;
         return result;
@@ -101,10 +121,11 @@ public class PositionTrackingDataInputStream
      * Reads an unsigned short and updates the byte count.
      *
      * @return the value read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public int readUnsignedShort() throws IOException
     {
+        checkAvailable(2);
         int result = dataStream.readUnsignedShort();
         bytesRead += 2;
         return result;
@@ -114,11 +135,23 @@ public class PositionTrackingDataInputStream
      * Reads a Java modified UTF-8 string with its unsigned 16-bit byte length.
      *
      * @return the decoded string
-     * @throws IOException if the field is truncated or its encoding is malformed
+     * @throws IOException if the field is truncated, malformed, or exceeds the remaining byte budget
      */
     public String readUTF() throws IOException
     {
-        int length = readUnsignedShort();
+        return readUTF(readUnsignedShort());
+    }
+
+    /**
+     * Decodes an already-read UTF length after checking the remaining byte budget.
+     *
+     * @param length the encoded byte length from the unsigned 16-bit prefix
+     * @return the decoded modified UTF-8 string
+     * @throws IOException if the field is truncated, malformed, or exceeds the remaining byte budget
+     */
+    String readUTF(int length) throws IOException
+    {
+        checkAvailable(length);
         // Retain the length prefix so Java's UTF decoder can validate the field.
         byte[] encoded = new byte[length + 2];
         encoded[0] = (byte) (length >>> 8);
@@ -131,10 +164,11 @@ public class PositionTrackingDataInputStream
      * Reads an int and updates the byte count.
      *
      * @return the value read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public int readInt() throws IOException
     {
+        checkAvailable(4);
         int result = dataStream.readInt();
         bytesRead += 4;
         return result;
@@ -144,10 +178,11 @@ public class PositionTrackingDataInputStream
      * Reads a long and updates the byte count.
      *
      * @return the value read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public long readLong() throws IOException
     {
+        checkAvailable(8);
         long result = dataStream.readLong();
         bytesRead += 8;
         return result;
@@ -157,10 +192,11 @@ public class PositionTrackingDataInputStream
      * Reads a float and updates the byte count.
      *
      * @return the value read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public float readFloat() throws IOException
     {
+        checkAvailable(4);
         float result = dataStream.readFloat();
         bytesRead += 4;
         return result;
@@ -170,13 +206,28 @@ public class PositionTrackingDataInputStream
      * Reads a double and updates the byte count.
      *
      * @return the value read
-     * @throws IOException if the stream cannot be read
+     * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
     public double readDouble() throws IOException
     {
+        checkAvailable(8);
         double result = dataStream.readDouble();
         bytesRead += 8;
         return result;
+    }
+
+    /**
+     * Rejects a declared payload that cannot fit in the remaining byte budget.
+     *
+     * @param count the payload bytes to check without consuming them
+     * @throws IOException if count is negative or exceeds the remaining byte budget
+     */
+    void checkAvailable(long count) throws IOException
+    {
+        if (count < 0 || count > maxBytes - bytesRead)
+        {
+            throw new IOException(createContextualError("NBT byte limit exceeded: " + maxBytes));
+        }
     }
 
     /**

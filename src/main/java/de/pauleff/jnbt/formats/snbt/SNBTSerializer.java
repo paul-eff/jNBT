@@ -3,17 +3,22 @@ package de.pauleff.jnbt.formats.snbt;
 import de.pauleff.jnbt.api.ICompoundTag;
 import de.pauleff.jnbt.api.IListTag;
 import de.pauleff.jnbt.api.ITag;
+import de.pauleff.jnbt.api.NBTLimits;
+import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.core.Tag;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
 /**
- *  Converts NBT tags to SNBT strings.
+ *  Converts NBT tags to SNBT strings. Uses {@link NBTLimits#DEFAULT}
+ * unless limits are supplied to the constructor.
  *
  * @since 1.6.0
  */
@@ -27,9 +32,23 @@ public class SNBTSerializer
     private static final boolean ADD_TRAILING_NEWLINE = true;
     private static final boolean ALWAYS_QUOTE_STRINGS = false;
 
+    private final NBTLimits limits;
+
     /** Creates a serializer with Minecraft-compatible formatting. */
     public SNBTSerializer()
     {
+        this(NBTLimits.DEFAULT);
+    }
+
+    /**
+     * Creates an SNBT serializer with configurable limits.
+     *
+     * @param limits the limits for each serialization operation
+     * @throws NullPointerException if limits is null
+     */
+    public SNBTSerializer(NBTLimits limits)
+    {
+        this.limits = java.util.Objects.requireNonNull(limits, "limits");
     }
 
     /**
@@ -37,26 +56,28 @@ public class SNBTSerializer
      *
      * @param tag the NBT tag to serialize
      * @return the SNBT string representation
-     * @throws IllegalArgumentException if a compound contains duplicate child names
+     * @throws IllegalArgumentException if keys are duplicated, the graph is cyclic, or a limit is exceeded
      */
     public String serialize(ITag<?> tag)
     {
+        LimitedText sb = new LimitedText(limits);
         if (tag == null)
         {
-            return "null";
+            sb.append("null");
+            return sb.toString();
         }
 
-        StringBuilder sb = new StringBuilder();
         serializeTag(tag, sb, 0);
         return sb.toString();
     }
 
     /**
-     * Writes an NBT tag to a text file in SNBT format.
+     * Writes an NBT tag to a text file in SNBT format. Serialization finishes before opening the file.
      *
      * @param tag  the NBT tag to serialize
      * @param file the file to write to
      * @throws IOException if writing fails
+     * @throws IllegalArgumentException if keys are duplicated, the graph is cyclic, or a limit is exceeded
      */
     public void writeToFile(ITag<?> tag, File file) throws IOException
     {
@@ -78,8 +99,15 @@ public class SNBTSerializer
      * @param sb    the string builder to append to
      * @param depth the current nesting depth
      */
-    private void serializeTag(ITag<?> tag, StringBuilder sb, int depth)
+    private void serializeTag(ITag<?> tag, LimitedText sb, int depth)
     {
+        sb.budget.tag();
+        boolean container = tag instanceof ICompoundTag || tag instanceof IListTag;
+        if (container)
+        {
+            sb.budget.depth(depth + 1);
+            if (!sb.active.add(tag)) throw new IllegalArgumentException("Cyclic NBT collection graph");
+        }
         if (tag instanceof ICompoundTag)
         {
             serializeCompound((ICompoundTag) tag, sb, depth);
@@ -183,6 +211,7 @@ public class SNBTSerializer
                     break;
             }
         }
+        if (container) sb.active.remove(tag);
     }
 
     /**
@@ -191,7 +220,7 @@ public class SNBTSerializer
      * @param value the byte value
      * @param sb    the string builder to append to
      */
-    private void serializeByte(Byte value, StringBuilder sb)
+    private void serializeByte(Byte value, LimitedText sb)
     {
         sb.append(value).append('b');
     }
@@ -202,7 +231,7 @@ public class SNBTSerializer
      * @param value the short value
      * @param sb    the string builder to append to
      */
-    private void serializeShort(Short value, StringBuilder sb)
+    private void serializeShort(Short value, LimitedText sb)
     {
         sb.append(value).append('s');
     }
@@ -213,7 +242,7 @@ public class SNBTSerializer
      * @param value the int value
      * @param sb    the string builder to append to
      */
-    private void serializeInt(Integer value, StringBuilder sb)
+    private void serializeInt(Integer value, LimitedText sb)
     {
         sb.append(value);
     }
@@ -224,7 +253,7 @@ public class SNBTSerializer
      * @param value the long value
      * @param sb    the string builder to append to
      */
-    private void serializeLong(Long value, StringBuilder sb)
+    private void serializeLong(Long value, LimitedText sb)
     {
         sb.append(value).append('l');
     }
@@ -235,7 +264,7 @@ public class SNBTSerializer
      * @param value the float value
      * @param sb    the string builder to append to
      */
-    private void serializeFloat(Float value, StringBuilder sb)
+    private void serializeFloat(Float value, LimitedText sb)
     {
         if (Float.isNaN(value))
         {
@@ -255,7 +284,7 @@ public class SNBTSerializer
      * @param value the double value
      * @param sb    the string builder to append to
      */
-    private void serializeDouble(Double value, StringBuilder sb)
+    private void serializeDouble(Double value, LimitedText sb)
     {
         if (Double.isNaN(value))
         {
@@ -281,7 +310,7 @@ public class SNBTSerializer
      * @param value the string value
      * @param sb    the string builder to append to
      */
-    private void serializeString(String value, StringBuilder sb)
+    private void serializeString(String value, LimitedText sb)
     {
         if (value == null)
         {
@@ -289,6 +318,7 @@ public class SNBTSerializer
             return;
         }
 
+        sb.checkLength(value.length());
         if (needsQuoting(value))
         {
             sb.append('"');
@@ -364,7 +394,7 @@ public class SNBTSerializer
      * @param value the string to escape
      * @param sb    the string builder to append to
      */
-    private void escapeString(String value, StringBuilder sb)
+    private void escapeString(String value, LimitedText sb)
     {
         for (int i = 0; i < value.length(); i++)
         {
@@ -412,8 +442,10 @@ public class SNBTSerializer
      * @param array the byte array
      * @param sb    the string builder to append to
      */
-    private void serializeByteArray(byte[] array, StringBuilder sb)
+    private void serializeByteArray(byte[] array, LimitedText sb)
     {
+        sb.budget.length(array.length);
+        sb.budget.allocate(16 + 1L * array.length);
         sb.append("[B;");
         for (int i = 0; i < array.length; i++)
         {
@@ -440,8 +472,10 @@ public class SNBTSerializer
      * @param array the int array
      * @param sb    the string builder to append to
      */
-    private void serializeIntArray(int[] array, StringBuilder sb)
+    private void serializeIntArray(int[] array, LimitedText sb)
     {
+        sb.budget.length(array.length);
+        sb.budget.allocate(16 + 4L * array.length);
         sb.append("[I;");
         for (int i = 0; i < array.length; i++)
         {
@@ -468,8 +502,10 @@ public class SNBTSerializer
      * @param array the long array
      * @param sb    the string builder to append to
      */
-    private void serializeLongArray(long[] array, StringBuilder sb)
+    private void serializeLongArray(long[] array, LimitedText sb)
     {
+        sb.budget.length(array.length);
+        sb.budget.allocate(16 + 8L * array.length);
         sb.append("[L;");
         for (int i = 0; i < array.length; i++)
         {
@@ -497,8 +533,11 @@ public class SNBTSerializer
      * @param sb       the string builder to append to
      * @param depth    the current nesting depth
      */
-    private void serializeCompound(ICompoundTag compound, StringBuilder sb, int depth)
+    private void serializeCompound(ICompoundTag compound, LimitedText sb, int depth)
     {
+        sb.budget.length(compound.size());
+        sb.budget.requireTags(compound.size());
+        sb.budget.allocate(64L * compound.size());
         List<Tag<?>> tags = compound.getData();
         Set<String> names = new HashSet<>();
         for (Tag<?> child : tags)
@@ -544,8 +583,11 @@ public class SNBTSerializer
      * @param sb    the string builder to append to
      * @param depth the current nesting depth
      */
-    private void serializeList(IListTag list, StringBuilder sb, int depth)
+    private void serializeList(IListTag list, LimitedText sb, int depth)
     {
+        sb.budget.length(list.size());
+        sb.budget.requireTags(list.size());
+        sb.budget.allocate(32L * list.size());
         List<Tag<?>> tags = list.getData();
 
         sb.append('[');
@@ -574,4 +616,86 @@ public class SNBTSerializer
 
         sb.append(']');
     }
+
+    /** Checks output growth before appending, with accounting local to each serialization. */
+    private static final class LimitedText
+    {
+        private final StringBuilder text = new StringBuilder();
+        private final NBTBudget budget;
+        private final int maxLength;
+        private final Set<ITag<?>> active = Collections.newSetFromMap(new IdentityHashMap<>());
+
+        /**
+         * Creates an empty bounded output buffer.
+         *
+         * @param limits the limits for this serialization
+         * @throws NullPointerException if limits is null
+         */
+        private LimitedText(NBTLimits limits)
+        {
+            budget = new NBTBudget(limits);
+            maxLength = limits.maxTextLength();
+        }
+
+        /**
+         * Checks and appends a string or formatted scalar.
+         *
+         * @param value the value to format, with null written as "null"
+         * @return this output buffer
+         * @throws IllegalArgumentException if the text or allocation limit is exceeded
+         */
+        private LimitedText append(Object value)
+        {
+            String part = String.valueOf(value);
+            reserve(part.length());
+            text.append(part);
+            return this;
+        }
+
+        /**
+         * Checks and appends one character without a temporary string.
+         *
+         * @param value the character to append
+         * @return this output buffer
+         * @throws IllegalArgumentException if the text or allocation limit is exceeded
+         */
+        private LimitedText append(char value)
+        {
+            reserve(1);
+            text.append(value);
+            return this;
+        }
+
+        /**
+         * Reserves output storage, including growth and the final string copy.
+         *
+         * @param count the additional UTF-16 code units
+         * @throws IllegalArgumentException if the text or allocation limit is exceeded
+         */
+        private void reserve(int count)
+        {
+            checkLength(count);
+            budget.allocate(4L * count);
+        }
+
+        /**
+         * Checks the minimum output length before scanning or escaping a string.
+         *
+         * @param count the additional UTF-16 code units
+         * @throws IllegalArgumentException if the text limit is exceeded
+         */
+        private void checkLength(int count)
+        {
+            if (count > maxLength - text.length())
+                throw new IllegalArgumentException("SNBT text length limit exceeded: " + maxLength);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public String toString()
+        {
+            return text.toString();
+        }
+    }
+
 }
