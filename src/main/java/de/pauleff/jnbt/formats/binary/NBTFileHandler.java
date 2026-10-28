@@ -8,7 +8,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
 /**
- *  Opens binary NBT streams and detects compression from file headers.
+ * Opens binary NBT streams and detects compression from file headers.
  *
  * @since 0.1
  */
@@ -28,25 +28,27 @@ public class NBTFileHandler
             throw new FileNotFoundException(String.format("The file %s doesn't exist!", file.getPath()));
         }
 
-        InputStream fileStream;
-
-        switch (getCompressionType(file))
+        InputStream fileStream = switch (getCompressionType(file))
         {
-            case NONE:
-                System.out.printf("The file %s was uncompressed.%n", file.getName(), Compression_Types.GZIP.getName());
-                fileStream = new FileInputStream(file);
-                break;
-            case GZIP:
+            case NONE ->
+            {
+                System.out.printf("The file %s was uncompressed.%n", file.getName());
+                yield new FileInputStream(file);
+            }
+            case GZIP ->
+            {
                 System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.GZIP.getName());
-                fileStream = new GZIPInputStream(new FileInputStream(file));
-                break;
-            case ZLIB:
+                yield new GZIPInputStream(new FileInputStream(file));
+            }
+            case ZLIB ->
+            {
                 System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.ZLIB.getName());
-                fileStream = new InflaterInputStream(new FileInputStream(file));
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("The file %s is compressed with an unsupported format!", file.getName()));
-        }
+                yield new InflaterInputStream(new FileInputStream(file));
+            }
+            default ->
+                    throw new IllegalArgumentException(String.format("The file %s is compressed with an unsupported format!", file.getName()));
+        };
+
         return new DataInputStream(fileStream);
     }
 
@@ -76,25 +78,26 @@ public class NBTFileHandler
             }
         }
 
-        OutputStream fileStream;
-
-        switch (compression)
+        OutputStream fileStream = switch (compression)
         {
-            case NONE:
+            case NONE ->
+            {
                 System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.NONE.getName());
-                fileStream = new FileOutputStream(file);
-                break;
-            case GZIP:
+                yield new FileOutputStream(file);
+            }
+            case GZIP ->
+            {
                 System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.GZIP.getName());
-                fileStream = new GZIPOutputStream(new FileOutputStream(file));
-                break;
-            case ZLIB:
+                yield new GZIPOutputStream(new FileOutputStream(file));
+            }
+            case ZLIB ->
+            {
                 System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.ZLIB.getName());
-                fileStream = new DeflaterOutputStream(new FileOutputStream(file));
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("The compression type %s is not supported!", compression));
-        }
+                yield new DeflaterOutputStream(new FileOutputStream(file));
+            }
+            default -> throw new IllegalArgumentException(String.format("The compression type %s is not supported!", compression));
+        };
+
         return new DataOutputStream(fileStream);
     }
 
@@ -108,7 +111,6 @@ public class NBTFileHandler
     {
         if (isGzipped(file)) return Compression_Types.GZIP;
         else if (isZlibed(file)) return Compression_Types.ZLIB;
-        else if (isLZ4ed(file)) return Compression_Types.LZ4;
         else return Compression_Types.NONE;
     }
 
@@ -165,14 +167,4 @@ public class NBTFileHandler
         }
     }
 
-    /**
-     * Returns false because LZ4 detection is not implemented.
-     *
-     * @param file the target file.
-     * @return {@code True} if the file was compressed with LZ4.
-     */
-    private static boolean isLZ4ed(File file)
-    {
-        return false;
-    }
 }

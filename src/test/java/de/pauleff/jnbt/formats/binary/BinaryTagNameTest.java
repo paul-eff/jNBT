@@ -5,17 +5,27 @@ import de.pauleff.jnbt.core.Tag_Compound;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BinaryTagNameTest
 {
+    private static void writeInt(DataOutputStream out, String name, int value) throws IOException
+    {
+        out.writeByte(3);
+        out.writeUTF(name);
+        out.writeInt(value);
+    }
+
+    private static byte[] serialize(ICompoundTag compound) throws IOException
+    {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        new NBTWriter(new DataOutputStream(bytes)).write(compound);
+        return bytes.toByteArray();
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"", "null", " ", "  spaced name  "})
     void preservesIndependentFixtureAndWritesExpectedBytes(String rootName) throws IOException
@@ -46,19 +56,5 @@ class BinaryTagNameTest
         created.addInt("null", 2);
         created.addInt(" ", 3);
         assertArrayEquals(expected, serialize(created));
-    }
-
-    private static void writeInt(DataOutputStream out, String name, int value) throws IOException
-    {
-        out.writeByte(3);
-        out.writeUTF(name);
-        out.writeInt(value);
-    }
-
-    private static byte[] serialize(ICompoundTag compound) throws IOException
-    {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        new NBTWriter(new DataOutputStream(bytes)).write(compound);
-        return bytes.toByteArray();
     }
 }

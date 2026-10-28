@@ -3,13 +3,15 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- *  Marks the end of a binary NBT compound. It cannot be stored as a child tag.
+ * Marks the end of a binary NBT compound. It cannot be stored as a child tag.
  *
  * @since 0.1
  */
 public class Tag_End extends Tag<Object>
 {
-    /** Create an empty end tag. */
+    /**
+     * Create an empty end tag.
+     */
     public Tag_End()
     {
         super(NBTTags.Tag_End.getId());

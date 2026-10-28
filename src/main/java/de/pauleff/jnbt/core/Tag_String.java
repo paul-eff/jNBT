@@ -3,13 +3,15 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- *  An NBT string tag.
+ * An NBT string tag.
  *
  * @since 0.1
  */
 public class Tag_String extends Tag<String>
 {
-    /** Creates a tag initialized to an empty string. */
+    /**
+     * Creates a tag initialized to an empty string.
+     */
     public Tag_String()
     {
         super(NBTTags.Tag_String.getId());

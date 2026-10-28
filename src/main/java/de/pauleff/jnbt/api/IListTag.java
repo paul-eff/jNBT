@@ -113,7 +113,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param name  the new element name
      * @param value the new string value
      * @return This list
-     * @throws IllegalArgumentException if this list doesn't store string tags
+     * @throws IllegalArgumentException  if this list doesn't store string tags
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setString(int index, String name, String value);
@@ -125,7 +125,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param name  the new element name
      * @param value the new integer value
      * @return This list
-     * @throws IllegalArgumentException if this list doesn't store integer tags
+     * @throws IllegalArgumentException  if this list doesn't store integer tags
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setInt(int index, String name, int value);
@@ -137,7 +137,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param name  the new element name
      * @param value the new double value
      * @return This list
-     * @throws IllegalArgumentException if this list doesn't store double tags
+     * @throws IllegalArgumentException  if this list doesn't store double tags
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setDouble(int index, String name, double value);
@@ -148,7 +148,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param index the index to update
      * @param name  the new element name
      * @return This list
-     * @throws IllegalArgumentException if this list doesn't store compound tags
+     * @throws IllegalArgumentException  if this list doesn't store compound tags
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setCompound(int index, String name);
@@ -160,7 +160,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param name  the new element name
      * @param value the new float value
      * @return This list
-     * @throws IllegalArgumentException if this list doesn't store float tags
+     * @throws IllegalArgumentException  if this list doesn't store float tags
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setFloat(int index, String name, float value);
@@ -172,7 +172,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param name  the new element name
      * @param value the new byte value
      * @return This list
-     * @throws IllegalArgumentException if this list doesn't store byte tags
+     * @throws IllegalArgumentException  if this list doesn't store byte tags
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setByte(int index, String name, byte value);
@@ -184,7 +184,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param name  the new element name
      * @param value the new short value
      * @return This list
-     * @throws IllegalArgumentException if this list doesn't store short tags
+     * @throws IllegalArgumentException  if this list doesn't store short tags
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setShort(int index, String name, short value);
@@ -196,7 +196,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param name  the new element name
      * @param value the new long value
      * @return This list
-     * @throws IllegalArgumentException if this list doesn't store long tags
+     * @throws IllegalArgumentException  if this list doesn't store long tags
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setLong(int index, String name, long value);
@@ -207,7 +207,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param index the index to update
      * @param tag   the new tag to set
      * @return This list
-     * @throws IllegalArgumentException if tag type doesn't match list type
+     * @throws IllegalArgumentException  if tag type doesn't match list type
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setTag(int index, ITag<?> tag);

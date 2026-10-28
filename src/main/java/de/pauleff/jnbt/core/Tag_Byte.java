@@ -3,13 +3,15 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- *  An NBT byte tag.
+ * An NBT byte tag.
  *
  * @since 0.1
  */
 public class Tag_Byte extends Tag<Byte>
 {
-    /** Creates a tag initialized to zero. */
+    /**
+     * Creates a tag initialized to zero.
+     */
     public Tag_Byte()
     {
         super(NBTTags.Tag_Byte.getId());

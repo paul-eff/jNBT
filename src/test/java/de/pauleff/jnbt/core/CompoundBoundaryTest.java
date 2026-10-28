@@ -47,6 +47,38 @@ class CompoundBoundaryTest
         return compound;
     }
 
+    private static Stream<Consumer<Tag_Compound>> updates()
+    {
+        return Stream.of(c -> c.setString("x", "new"), c -> c.setInt("x", 9),
+                c -> c.setDouble("x", 9), c -> c.setFloat("x", 9),
+                c -> c.setByte("x", (byte) 9), c -> c.setShort("x", (short) 9),
+                c -> c.setLong("x", 9), c -> c.setByteArray("x", new byte[]{9}),
+                c -> c.setIntArray("x", new int[]{9}), c -> c.setLongArray("x", new long[]{9}),
+                c -> c.setTag(new Tag_Int("x", 9)), c -> c.setTag(new Tag_Compound("x")),
+                c -> c.setTag(new Tag_List("x", 3)));
+    }
+
+    private static Stream<Consumer<Tag_Compound>> removals()
+    {
+        return Stream.of(c -> c.removeTag("x"), c -> c.removeTags("x", "missing"));
+    }
+
+    private static void assertValues(Tag_Compound compound, int value)
+    {
+        assertEquals(Integer.toString(value), compound.getString("string"));
+        assertEquals(value, compound.getInt("integer"));
+        assertEquals(value, compound.getDouble("double"));
+        assertEquals((float) value, compound.getFloat("float"));
+        assertEquals((byte) value, compound.getByte("byte"));
+        assertEquals((short) value, compound.getShort("short"));
+        assertEquals(value, compound.getLong("long"));
+        assertArrayEquals(new byte[]{(byte) value}, compound.getByteArray("bytes"));
+        assertArrayEquals(new int[]{value}, compound.getIntArray("ints"));
+        assertArrayEquals(new long[]{value}, compound.getLongArray("longs"));
+        assertEquals(value, compound.getCompound("compound").getInt("value"));
+        assertEquals(value, compound.getList("list").get(0).getData());
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void gettersUseDirectChildrenRegardlessOfOrder(boolean directFirst)
@@ -79,17 +111,6 @@ class CompoundBoundaryTest
         assertEquals("1", root.getCompound("nested").getString("string"));
     }
 
-    private static Stream<Consumer<Tag_Compound>> updates()
-    {
-        return Stream.of(c -> c.setString("x", "new"), c -> c.setInt("x", 9),
-                c -> c.setDouble("x", 9), c -> c.setFloat("x", 9),
-                c -> c.setByte("x", (byte) 9), c -> c.setShort("x", (short) 9),
-                c -> c.setLong("x", 9), c -> c.setByteArray("x", new byte[]{9}),
-                c -> c.setIntArray("x", new int[]{9}), c -> c.setLongArray("x", new long[]{9}),
-                c -> c.setTag(new Tag_Int("x", 9)), c -> c.setTag(new Tag_Compound("x")),
-                c -> c.setTag(new Tag_List("x", 3)));
-    }
-
     @ParameterizedTest
     @MethodSource("updates")
     void updatesPreserveMatchingDescendants(Consumer<Tag_Compound> update)
@@ -101,11 +122,6 @@ class CompoundBoundaryTest
         assertEquals(3, root.size());
         assertEquals(1, root.getCompound("a").getInt("x"));
         assertEquals(2, root.getCompound("b").getInt("x"));
-    }
-
-    private static Stream<Consumer<Tag_Compound>> removals()
-    {
-        return Stream.of(c -> c.removeTag("x"), c -> c.removeTags("x", "missing"));
     }
 
     @ParameterizedTest
@@ -128,21 +144,5 @@ class CompoundBoundaryTest
         assertEquals(3, root.getAllTagsByName("x").size());
         root.removeAllTagsByName("x");
         assertTrue(root.getAllTagsByName("x").isEmpty());
-    }
-
-    private static void assertValues(Tag_Compound compound, int value)
-    {
-        assertEquals(Integer.toString(value), compound.getString("string"));
-        assertEquals(value, compound.getInt("integer"));
-        assertEquals((double) value, compound.getDouble("double"));
-        assertEquals((float) value, compound.getFloat("float"));
-        assertEquals((byte) value, compound.getByte("byte"));
-        assertEquals((short) value, compound.getShort("short"));
-        assertEquals((long) value, compound.getLong("long"));
-        assertArrayEquals(new byte[]{(byte) value}, compound.getByteArray("bytes"));
-        assertArrayEquals(new int[]{value}, compound.getIntArray("ints"));
-        assertArrayEquals(new long[]{value}, compound.getLongArray("longs"));
-        assertEquals(value, compound.getCompound("compound").getInt("value"));
-        assertEquals(value, compound.getList("list").get(0).getData());
     }
 }

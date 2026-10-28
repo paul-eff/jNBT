@@ -6,15 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- *  Wraps a data input stream and counts bytes from completed reads for error messages.
+ * Wraps a data input stream and counts bytes from completed reads for error messages.
  *
  * @since 1.5
  */
 public class PositionTrackingDataInputStream
 {
     private final DataInputStream dataStream;
-    private long bytesRead;
     private final long maxBytes;
+    private long bytesRead;
     private int tagDepth;
     private String currentTagName;
     private int currentTagType;
@@ -63,7 +63,7 @@ public class PositionTrackingDataInputStream
     /**
      * Fills the requested byte range and updates the byte count.
      *
-     * @param b the destination array
+     * @param b   the destination array
      * @param off the starting index
      * @param len the number of bytes to read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded

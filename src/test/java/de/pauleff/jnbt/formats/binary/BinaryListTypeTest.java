@@ -9,11 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 import static de.pauleff.jnbt.util.NBTTags.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,10 +51,15 @@ class BinaryListTypeTest
     {
         Tag_List corrupt = new Tag_List("list", 3)
         {
-            { data.add(new Tag_String("", "wrong")); }
+            {
+                data.add(new Tag_String("", "wrong"));
+            }
 
             @Override
-            public int getListTypeID() { return declaredType; }
+            public int getListTypeID()
+            {
+                return declaredType;
+            }
         };
         Tag_Compound root = new Tag_Compound("");
         root.addInt("before", 1);

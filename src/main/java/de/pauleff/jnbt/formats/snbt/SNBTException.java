@@ -1,7 +1,7 @@
 package de.pauleff.jnbt.formats.snbt;
 
 /**
- *  An SNBT error with optional input and character position.
+ * An SNBT error with optional input and character position.
  *
  * @since 1.6.0
  */

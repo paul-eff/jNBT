@@ -10,13 +10,13 @@ public class CRUDExample
         System.out.println("=== jNBT CRUD Example ===\n");
 
         ICompoundTag player = NBTBuilder.compound("Player")
-            .addString("name", "Steve")
-            .addInt("level", 1)
-            .addList("inventory", NBTTags.Tag_String)
+                .addString("name", "Steve")
+                .addInt("level", 1)
+                .addList("inventory", NBTTags.Tag_String)
                 .addString("slot1", "sword")
                 .addString("slot2", "potion")
-            .endCompound() // Finish the inventory list and return to the player compound.
-            .build();
+                .endCompound() // Finish the inventory list and return to the player compound.
+                .build();
 
         System.out.println("Player: " + player.getString("name"));
         System.out.println("Level: " + player.getInt("level"));
@@ -24,7 +24,7 @@ public class CRUDExample
 
         // Setters replace a direct child with the same name, or add it if missing.
         player.setString("name", "Yo Mama")
-              .setInt("level", 50);
+                .setInt("level", 50);
 
         IListTag inventory = player.getList("inventory");
         // Lists use zero-based indexes. Replacement values must match the list type.

@@ -1,46 +1,32 @@
 package de.pauleff.jnbt.formats.binary;
 
-import de.pauleff.jnbt.api.ICompoundTag;
-import de.pauleff.jnbt.api.IListTag;
-import de.pauleff.jnbt.api.INBTWriter;
-import de.pauleff.jnbt.api.ITag;
-import de.pauleff.jnbt.api.NBTLimits;
+import de.pauleff.jnbt.api.*;
 import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.util.NBTTags;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UTFDataFormatException;
+import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
- *  Writes binary NBT after validating the tag tree. Uses {@link NBTLimits#DEFAULT}
+ * Writes binary NBT after validating the tag tree. Uses {@link NBTLimits#DEFAULT}
  * unless limits are supplied to the constructor.
  *
  * @since 0.1
  */
 public class NBTWriter implements INBTWriter
 {
-    private DataOutputStream stream;
     private final File file;
     private final Compression_Types compression;
-    private boolean closed;
     private final NBTLimits limits;
+    private DataOutputStream stream;
+    private boolean closed;
 
     /**
      * Creates a writer by passing it the target NBT file. Target file must already exist to determine the
      * compression type.
      *
      * @param nbtFile the target NBT file.
-     *
      * @throws FileNotFoundException if the file does not exist
      */
     public NBTWriter(File nbtFile) throws FileNotFoundException
@@ -54,7 +40,7 @@ public class NBTWriter implements INBTWriter
      * @param nbtFile the existing target file
      * @param limits  the limits for this operation
      * @throws FileNotFoundException if the file does not exist
-     * @throws NullPointerException if limits is null
+     * @throws NullPointerException  if limits is null
      */
     public NBTWriter(File nbtFile, NBTLimits limits) throws FileNotFoundException
     {
@@ -140,7 +126,7 @@ public class NBTWriter implements INBTWriter
      * Do not change the tree during writing. Closes the writer after validation
      * or writing fails, and after a successful write.</p>
      *
-     * @throws IOException if writing fails, the data is invalid, or a configured limit is exceeded
+     * @throws IOException              if writing fails, the data is invalid, or a configured limit is exceeded
      * @throws IllegalArgumentException {@inheritDoc}
      */
     public void write(ICompoundTag root) throws IOException
@@ -182,7 +168,7 @@ public class NBTWriter implements INBTWriter
      * @param depth  the number of ancestor containers, zero at the root
      * @param budget the shared accounting for this write
      * @param active the collection identities on the current traversal path
-     * @throws IOException if the structure, encoded strings, or collection graph is invalid
+     * @throws IOException              if the structure, encoded strings, or collection graph is invalid
      * @throws IllegalArgumentException if a configured limit is exceeded
      */
     private void validateForWrite(ITag<?> tag, boolean named, int depth, NBTBudget budget,
@@ -222,13 +208,17 @@ public class NBTWriter implements INBTWriter
                 throw new IOException("TAG_End list type is only valid for empty lists");
             }
             Set<String> names = new HashSet<>();
-            for (ITag<?> child : (Iterable<ITag<?>>) children)
+            for (Object value : children)
             {
-                if (child != null && child.getId() == 0)
+                if (!(value instanceof ITag<?> child))
+                {
+                    throw new IOException("Invalid collection child");
+                }
+                if (child.getId() == 0)
                 {
                     throw new IOException("TAG_End is a structural marker, not a value");
                 }
-                if (child == null || (type == NBTTags.Tag_List && child.getId() != listType))
+                if (type == NBTTags.Tag_List && child.getId() != listType)
                 {
                     throw new IOException("Invalid collection child or list element type mismatch");
                 }
@@ -283,7 +273,9 @@ public class NBTWriter implements INBTWriter
         return length;
     }
 
-    /** Writes a tag with its type ID, name, and payload. */
+    /**
+     * Writes a tag with its type ID, name, and payload.
+     */
     private void writeNBTTag(ITag<?> tag) throws IOException
     {
         if (tag.getId() == 0)
@@ -296,41 +288,30 @@ public class NBTWriter implements INBTWriter
         writeNBTPayload(tag);
     }
 
-    /** Writes a tag payload without a type or name header. */
+    /**
+     * Writes a tag payload without a type or name header.
+     */
     private void writeNBTPayload(ITag<?> tag) throws IOException
     {
         switch (NBTTags.getById(tag.getId()))
         {
-            case NBTTags.Tag_End:
-                throw new IOException("TAG_End cannot be written as a value");
-            case NBTTags.Tag_Byte:
-                stream.writeByte((byte) tag.getData());
-                break;
-            case NBTTags.Tag_Short:
-                stream.writeShort((short) tag.getData());
-                break;
-            case NBTTags.Tag_Int:
-                stream.writeInt((int) tag.getData());
-                break;
-            case NBTTags.Tag_Long:
-                stream.writeLong((long) tag.getData());
-                break;
-            case NBTTags.Tag_Float:
-                stream.writeFloat((float) tag.getData());
-                break;
-            case NBTTags.Tag_Double:
-                stream.writeDouble((double) tag.getData());
-                break;
-            case NBTTags.Tag_Byte_Array:
+            case Tag_End -> throw new IOException("TAG_End cannot be written as a value");
+            case Tag_Byte -> stream.writeByte((byte) tag.getData());
+            case Tag_Short -> stream.writeShort((short) tag.getData());
+            case Tag_Int -> stream.writeInt((int) tag.getData());
+            case Tag_Long -> stream.writeLong((long) tag.getData());
+            case Tag_Float -> stream.writeFloat((float) tag.getData());
+            case Tag_Double -> stream.writeDouble((double) tag.getData());
+            case Tag_Byte_Array ->
+            {
                 byte[] bytes = (byte[]) tag.getData();
                 stream.writeInt(bytes.length);
                 stream.write(bytes);
-                break;
-            case NBTTags.Tag_String:
-                stream.writeUTF((String) tag.getData());
-                break;
-            case NBTTags.Tag_List:
-                ArrayList<ITag<?>> listTags = (ArrayList<ITag<?>>) tag.getData();
+            }
+            case Tag_String -> stream.writeUTF((String) tag.getData());
+            case Tag_List ->
+            {
+                var listTags = ((IListTag) tag).getData();
                 int size = listTags.size();
 
                 stream.writeByte(((IListTag) tag).getListTypeID());
@@ -339,37 +320,38 @@ public class NBTWriter implements INBTWriter
                 {
                     writeNBTPayload(listTags.get(i));
                 }
-                break;
-            case NBTTags.Tag_Compound:
-                for (ITag<?> compTag : (ArrayList<ITag<?>>) tag.getData())
+            }
+            case Tag_Compound ->
+            {
+                for (ITag<?> compTag : ((ICompoundTag) tag).getData())
                 {
                     writeNBTTag(compTag);
                 }
 
                 // A zero type ID ends the compound.
                 stream.writeByte((byte) 0);
-                break;
-            case NBTTags.Tag_Int_Array:
+            }
+            case Tag_Int_Array ->
+            {
                 int[] intArray = (int[]) tag.getData();
-                size = intArray.length;
+                int size = intArray.length;
                 stream.writeInt(size);
-                for (int i = 0; i < size; i++)
+                for (int j : intArray)
                 {
-                    stream.writeInt(intArray[i]);
+                    stream.writeInt(j);
                 }
-                break;
-            case NBTTags.Tag_Long_Array:
+            }
+            case Tag_Long_Array ->
+            {
                 long[] longArray = (long[]) tag.getData();
-                size = longArray.length;
+                int size = longArray.length;
                 stream.writeInt(size);
-                for (int i = 0; i < size; i++)
+                for (long l : longArray)
                 {
-                    stream.writeLong(longArray[i]);
+                    stream.writeLong(l);
                 }
-                break;
-            case null:
-            default:
-                throw new IOException("Invalid tag type: " + tag.getId() + ".");
+            }
+            case null, default -> throw new IOException("Invalid tag type: " + tag.getId() + ".");
         }
     }
 }

@@ -474,9 +474,9 @@ public class CompoundBuilder extends NBTBuilder
     public CompoundBuilder endCompound()
     {
         NBTBuilder parent = end();
-        if (parent instanceof CompoundBuilder compound)
+        if (parent instanceof CompoundBuilder parentCompound)
         {
-            return compound;
+            return parentCompound;
         }
         throw new IllegalStateException("Parent is not a CompoundBuilder");
     }

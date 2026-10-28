@@ -156,10 +156,10 @@ public class NBTFileFactory
      * Updates a tag using a dot-separated path and keeps the file compression. Each parent path part must
      * be a direct compound child.
      *
-     * @param nbtFile the file to update
-     * @param tagPath the path to the tag (e.g., "Data.Player.Level")
+     * @param nbtFile  the file to update
+     * @param tagPath  the path to the tag (e.g., "Data.Player.Level")
      * @param newValue the new value to set
-     * @param <T> the type of the new value
+     * @param <T>      the type of the new value
      * @throws IOException if the file operation fails
      */
     public static <T> void updateTag(File nbtFile, String tagPath, T newValue) throws IOException
@@ -202,8 +202,8 @@ public class NBTFileFactory
      * Merges files and keeps the base file's compression. Matching compound children are merged
      * recursively. Other matching children are replaced.
      *
-     * @param baseFile the base {@link java.io.File}
-     * @param mergeFile the file to merge into the base
+     * @param baseFile   the base {@link java.io.File}
+     * @param mergeFile  the file to merge into the base
      * @param outputFile the output {@link java.io.File}
      * @throws IOException if the merge operation fails
      */
@@ -218,7 +218,9 @@ public class NBTFileFactory
         writeNBTFile(outputFile, base, compression);
     }
 
-    /** Updates a tag value deep within a compound structure using dot notation. */
+    /**
+     * Updates a tag value deep within a compound structure using dot notation.
+     */
     private static <T> void updateTagInCompound(ICompoundTag compound, String tagPath, T newValue)
     {
         String[] pathParts = tagPath.split("\\.");
@@ -235,34 +237,22 @@ public class NBTFileFactory
         }
 
         String finalTagName = pathParts[pathParts.length - 1];
-        if (newValue instanceof String)
+        switch (newValue)
         {
-            current.setString(finalTagName, (String) newValue);
-        } else if (newValue instanceof Integer)
-        {
-            current.setInt(finalTagName, (Integer) newValue);
-        } else if (newValue instanceof Double)
-        {
-            current.setDouble(finalTagName, (Double) newValue);
-        } else if (newValue instanceof Float)
-        {
-            current.setFloat(finalTagName, (Float) newValue);
-        } else if (newValue instanceof Byte)
-        {
-            current.setByte(finalTagName, (Byte) newValue);
-        } else if (newValue instanceof Short)
-        {
-            current.setShort(finalTagName, (Short) newValue);
-        } else if (newValue instanceof Long)
-        {
-            current.setLong(finalTagName, (Long) newValue);
-        } else
-        {
-            throw new IllegalArgumentException("Unsupported value type: " + newValue.getClass());
+            case String s -> current.setString(finalTagName, s);
+            case Integer i -> current.setInt(finalTagName, i);
+            case Double v -> current.setDouble(finalTagName, v);
+            case Float v -> current.setFloat(finalTagName, v);
+            case Byte b -> current.setByte(finalTagName, b);
+            case Short i -> current.setShort(finalTagName, i);
+            case Long l -> current.setLong(finalTagName, l);
+            default -> throw new IllegalArgumentException("Unsupported value type: " + newValue.getClass());
         }
     }
 
-    /** Removes a tag deep within a compound structure using dot notation. */
+    /**
+     * Removes a tag deep within a compound structure using dot notation.
+     */
     private static void removeTagFromCompound(ICompoundTag compound, String tagPath)
     {
         String[] pathParts = tagPath.split("\\.");
@@ -282,7 +272,9 @@ public class NBTFileFactory
         current.removeTag(finalTagName);
     }
 
-    /** Merges the contents of the source compound into the target compound. */
+    /**
+     * Merges the contents of the source compound into the target compound.
+     */
     private static void mergeCompounds(ICompoundTag target, ICompoundTag source)
     {
         if (source instanceof Tag_Compound sourceCompound)

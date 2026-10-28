@@ -1,7 +1,7 @@
 package de.pauleff.jnbt.formats.snbt;
 
 /**
- *  Splits SNBT input into tokens.
+ * Splits SNBT input into tokens.
  *
  * @since 1.6.0
  */
@@ -300,7 +300,7 @@ public class SNBTTokenizer
     }
 
     /**
-     *  SNBT token types.
+     * SNBT token types.
      *
      * @since 1.6.0
      */
@@ -321,65 +321,63 @@ public class SNBTTokenizer
     }
 
     /**
-     *  An SNBT token with its input position.
-     *
-     * @since 1.6.0
-     */
-    public static class Token
-    {
-        private final TokenType type;
-        private final String value;
-        private final int position;
-
-        /**
-         * Creates a token.
+         * An SNBT token with its input position.
          *
-         * @param type     the token type
-         * @param value    the token value
-         * @param position the position in the input where this token starts
+         * @since 1.6.0
          */
-        public Token(TokenType type, String value, int position)
+        public record Token(TokenType type, String value, int position)
         {
-            this.type = type;
-            this.value = value;
-            this.position = position;
-        }
+            /**
+             * Creates a token.
+             *
+             * @param type     the token type
+             * @param value    the token value
+             * @param position the position in the input where this token starts
+             */
+            public Token
+            {
+            }
 
-        /**
-         * Returns the type of this token.
-         *
-         * @return the token type
-         */
-        public TokenType getType()
-        {
-            return type;
-        }
+            /**
+             * Returns the type of this token.
+             *
+             * @return the token type
+             */
+            @Override
+            public TokenType type()
+            {
+                return type;
+            }
 
-        /**
-         * Returns the string value of this token.
-         *
-         * @return the token value
-         */
-        public String getValue()
-        {
-            return value;
-        }
+            /**
+             * Returns the string value of this token.
+             *
+             * @return the token value
+             */
+            @Override
+            public String value()
+            {
+                return value;
+            }
 
-        /**
-         * Returns the position where this token starts in the input.
-         *
-         * @return the starting position
-         */
-        public int getPosition()
-        {
-            return position;
-        }
+            /**
+             * Returns the position where this token starts in the input.
+             *
+             * @return the starting position
+             */
+            @Override
+            public int position()
+            {
+                return position;
+            }
 
-        /** Returns a string with the stored values. */
-        @Override
-        public String toString()
-        {
-            return String.format("Token{%s, '%s', pos=%d}", type, value, position);
+            /**
+             * Returns a string with the stored values.
+             */
+            @Override
+            public String toString()
+            {
+                return String.format("Token{%s, '%s', pos=%d}", type, value, position);
+            }
         }
-    }
 }

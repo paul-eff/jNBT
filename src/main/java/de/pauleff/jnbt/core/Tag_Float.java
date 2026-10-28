@@ -3,13 +3,15 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- *  An NBT float tag.
+ * An NBT float tag.
  *
  * @since 0.1
  */
 public class Tag_Float extends Tag<Float>
 {
-    /** Creates a tag initialized to zero. */
+    /**
+     * Creates a tag initialized to zero.
+     */
     public Tag_Float()
     {
         super(NBTTags.Tag_Float.getId());

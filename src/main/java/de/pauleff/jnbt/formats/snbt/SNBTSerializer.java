@@ -4,20 +4,16 @@ import de.pauleff.jnbt.api.ICompoundTag;
 import de.pauleff.jnbt.api.IListTag;
 import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.api.NBTLimits;
-import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.core.Tag;
+import de.pauleff.jnbt.internal.NBTBudget;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
- *  Converts NBT tags to SNBT strings. Uses {@link NBTLimits#DEFAULT}
+ * Converts NBT tags to SNBT strings. Uses {@link NBTLimits#DEFAULT}
  * unless limits are supplied to the constructor.
  *
  * @since 1.6.0
@@ -34,7 +30,9 @@ public class SNBTSerializer
 
     private final NBTLimits limits;
 
-    /** Creates a serializer with Minecraft-compatible formatting. */
+    /**
+     * Creates a serializer with Minecraft-compatible formatting.
+     */
     public SNBTSerializer()
     {
         this(NBTLimits.DEFAULT);
@@ -76,7 +74,7 @@ public class SNBTSerializer
      *
      * @param tag  the NBT tag to serialize
      * @param file the file to write to
-     * @throws IOException if writing fails
+     * @throws IOException              if writing fails
      * @throws IllegalArgumentException if keys are duplicated, the graph is cyclic, or a limit is exceeded
      */
     public void writeToFile(ITag<?> tag, File file) throws IOException
@@ -445,7 +443,7 @@ public class SNBTSerializer
     private void serializeByteArray(byte[] array, LimitedText sb)
     {
         sb.budget.length(array.length);
-        sb.budget.allocate(16 + 1L * array.length);
+        sb.budget.allocate(16L + array.length);
         sb.append("[B;");
         for (int i = 0; i < array.length; i++)
         {
@@ -617,7 +615,9 @@ public class SNBTSerializer
         sb.append(']');
     }
 
-    /** Checks output growth before appending, with accounting local to each serialization. */
+    /**
+     * Checks output growth before appending, with accounting local to each serialization.
+     */
     private static final class LimitedText
     {
         private final StringBuilder text = new StringBuilder();
@@ -690,7 +690,9 @@ public class SNBTSerializer
                 throw new IllegalArgumentException("SNBT text length limit exceeded: " + maxLength);
         }
 
-        /** {@inheritDoc} */
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public String toString()
         {

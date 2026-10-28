@@ -195,7 +195,7 @@ public class ListBuilder extends NBTBuilder
         {
             throw new IllegalArgumentException(String.format(
                     "Tag type mismatch! List expects %s but got %s",
-                    listType.getName(), tagType.getName()));
+                    listType.getName(), tagType == null ? "unknown type ID " + tag.getId() : tagType.getName()));
         }
 
         list.addTag(tag);
@@ -225,23 +225,22 @@ public class ListBuilder extends NBTBuilder
     @Override
     public NBTBuilder end()
     {
-        if (parent == null)
+        switch (parent)
         {
-            throw new IllegalStateException("Cannot end root builder - call build() instead");
+            case null -> throw new IllegalStateException("Cannot end root builder - call build() instead");
+            case CompoundBuilder parentCompound ->
+            {
+                parentCompound.getCompound().addTag(list);
+                return parentCompound;
+            }
+            case ListBuilder parentList ->
+            {
+                parentList.addBuiltTag(list);
+                return parentList;
+            }
+            default -> throw new IllegalStateException("Unknown parent builder type");
         }
 
-        if (parent instanceof CompoundBuilder parentCompound)
-        {
-            parentCompound.getCompound().addTag(list);
-            return parentCompound;
-        } else if (parent instanceof ListBuilder parentList)
-        {
-            parentList.addBuiltTag(list);
-            return parentList;
-        } else
-        {
-            throw new IllegalStateException("Unknown parent builder type");
-        }
     }
 
     /**
@@ -287,9 +286,9 @@ public class ListBuilder extends NBTBuilder
     public ListBuilder endList()
     {
         NBTBuilder parent = end();
-        if (parent instanceof ListBuilder list)
+        if (parent instanceof ListBuilder parentList)
         {
-            return list;
+            return parentList;
         }
         throw new IllegalStateException("Parent is not a ListBuilder");
     }

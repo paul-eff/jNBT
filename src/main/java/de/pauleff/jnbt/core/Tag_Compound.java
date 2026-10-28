@@ -19,7 +19,9 @@ import java.util.Set;
  */
 public class Tag_Compound extends Collection_Tag implements ICompoundTag
 {
-    /** Creates an empty compound tag with default name. */
+    /**
+     * Creates an empty compound tag with default name.
+     */
     public Tag_Compound()
     {
         super(NBTTags.Tag_Compound.getId());
@@ -48,7 +50,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         registerChildren();
     }
 
-    /** Copies the children after rejecting nulls, END markers, and duplicate names. */
+    /**
+     * Copies the children after rejecting nulls, END markers, and duplicate names.
+     */
     private static ArrayList<Tag<?>> validatedCopy(List<Tag<?>> values)
     {
         if (values == null) throw new IllegalArgumentException("Compound data cannot be null");
@@ -65,13 +69,17 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return copy;
     }
 
-    /** Registers this compound as a parent of each child. */
+    /**
+     * Registers this compound as a parent of each child.
+     */
     private void registerChildren()
     {
         for (Tag<?> child : data) child.registerCompoundParent(this);
     }
 
-    /** Rejects a new name that would duplicate another direct child. */
+    /**
+     * Rejects a new name that would duplicate another direct child.
+     */
     final void validateChildRename(Tag<?> child, String name)
     {
         boolean present = false;
@@ -209,91 +217,117 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addString(String name, String value)
     {
         this.addTag(new Tag_String(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addInt(String name, int value)
     {
         this.addTag(new Tag_Int(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addDouble(String name, double value)
     {
         this.addTag(new Tag_Double(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addFloat(String name, float value)
     {
         this.addTag(new Tag_Float(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addByte(String name, byte value)
     {
         this.addTag(new Tag_Byte(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addShort(String name, short value)
     {
         this.addTag(new Tag_Short(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addLong(String name, long value)
     {
         this.addTag(new Tag_Long(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addByteArray(String name, byte[] value)
     {
         this.addTag(new Tag_Byte_Array(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addIntArray(String name, int[] value)
     {
         this.addTag(new Tag_Int_Array(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ICompoundTag addLongArray(String name, long[] value)
     {
         this.addTag(new Tag_Long_Array(name, value));
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasTag(String tagName)
     {
         return findDirectChild(tagName) != null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ITag<?> getTag(String name)
     {
         return findDirectChild(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getString(String name)
     {
@@ -305,7 +339,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getInt(String name)
     {
@@ -317,7 +353,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getDouble(String name)
     {
@@ -329,7 +367,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0.0;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte getByte(String name)
     {
@@ -341,7 +381,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public float getFloat(String name)
     {
@@ -353,7 +395,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0.0f;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public short getShort(String name)
     {
@@ -365,7 +409,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long getLong(String name)
     {
@@ -377,7 +423,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return 0L;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag getCompound(String name)
     {
@@ -389,7 +437,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IListTag getList(String name)
     {
@@ -401,7 +451,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] getByteArray(String name)
     {
@@ -413,7 +465,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int[] getIntArray(String name)
     {
@@ -425,7 +479,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long[] getLongArray(String name)
     {
@@ -437,77 +493,99 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setString(String name, String value)
     {
         return setTag(new Tag_String(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setInt(String name, int value)
     {
         return setTag(new Tag_Int(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setDouble(String name, double value)
     {
         return setTag(new Tag_Double(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setFloat(String name, float value)
     {
         return setTag(new Tag_Float(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setByte(String name, byte value)
     {
         return setTag(new Tag_Byte(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setShort(String name, short value)
     {
         return setTag(new Tag_Short(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setLong(String name, long value)
     {
         return setTag(new Tag_Long(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setByteArray(String name, byte[] value)
     {
         return setTag(new Tag_Byte_Array(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setIntArray(String name, int[] value)
     {
         return setTag(new Tag_Int_Array(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setLongArray(String name, long[] value)
     {
         return setTag(new Tag_Long_Array(name, value));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag setTag(ITag<?> tag)
     {
@@ -517,7 +595,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag removeTag(String name)
     {
@@ -525,7 +605,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag removeTags(String... names)
     {
@@ -536,7 +618,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICompoundTag clear()
     {
@@ -544,14 +628,18 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int size()
     {
         return data.size();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isEmpty()
     {

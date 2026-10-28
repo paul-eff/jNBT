@@ -3,13 +3,15 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
- *  An NBT long tag.
+ * An NBT long tag.
  *
  * @since 0.1
  */
 public class Tag_Long extends Tag<Long>
 {
-    /** Creates a tag initialized to zero. */
+    /**
+     * Creates a tag initialized to zero.
+     */
     public Tag_Long()
     {
         super(NBTTags.Tag_Long.getId());

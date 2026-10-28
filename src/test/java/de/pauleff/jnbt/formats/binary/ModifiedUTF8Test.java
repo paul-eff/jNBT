@@ -8,13 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.UTFDataFormatException;
+import java.io.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,6 +49,11 @@ class ModifiedUTF8Test
         }
 
         return bytes.toByteArray();
+    }
+
+    private static ICompoundTag read(byte[] bytes) throws IOException
+    {
+        return new NBTReader(new DataInputStream(new ByteArrayInputStream(bytes))).read();
     }
 
     @ParameterizedTest
@@ -168,10 +167,5 @@ class ModifiedUTF8Test
         {
             in.close();
         }
-    }
-
-    private static ICompoundTag read(byte[] bytes) throws IOException
-    {
-        return new NBTReader(new DataInputStream(new ByteArrayInputStream(bytes))).read();
     }
 }

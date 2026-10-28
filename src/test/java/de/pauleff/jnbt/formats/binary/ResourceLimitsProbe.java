@@ -1,7 +1,10 @@
 package de.pauleff.jnbt.formats.binary;
 
 import de.pauleff.jnbt.api.NBTLimits;
-import de.pauleff.jnbt.core.*;
+import de.pauleff.jnbt.core.Collection_Tag;
+import de.pauleff.jnbt.core.Tag_Byte;
+import de.pauleff.jnbt.core.Tag_Compound;
+import de.pauleff.jnbt.core.Tag_List;
 import de.pauleff.jnbt.formats.snbt.SNBTException;
 import de.pauleff.jnbt.formats.snbt.SNBTParser;
 import de.pauleff.jnbt.formats.snbt.SNBTSerializer;
@@ -97,7 +100,7 @@ class ResourceLimitsProbe
         return new NBTReader(new DataInputStream(new ByteArrayInputStream(bytes)), limits).read();
     }
 
-    public static void main(String[] args) throws Exception
+    static void main(String[] args) throws Exception
     {
         for (boolean lists : new boolean[]{false, true})
         {
@@ -149,7 +152,12 @@ class ResourceLimitsProbe
         if (bytes.size() != 0) throw new AssertionError("Output before cycle rejection");
         rejected(() -> new SNBTSerializer().serialize(root), "Cyclic");
         Files.writeString(file, "original");
-        rejected(() -> new NBTWriter(file.toFile(), Compression_Types.GZIP).write(root), "Cyclic");
+        rejected(() -> {
+            try (NBTWriter writer = new NBTWriter(file.toFile(), Compression_Types.GZIP))
+            {
+                writer.write(root);
+            }
+        }, "Cyclic");
         if (!Files.readString(file).equals("original") || Files.exists(Path.of(file + ".bak")))
             throw new AssertionError("Cycle rejection changed destination");
         rejected(() -> new SNBTSerializer().writeToFile(root, file.toFile()), "Cyclic");

@@ -3,8 +3,8 @@ package de.pauleff.jnbt.formats.binary;
 import de.pauleff.jnbt.api.ICompoundTag;
 import de.pauleff.jnbt.api.INBTReader;
 import de.pauleff.jnbt.api.NBTLimits;
-import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.core.*;
+import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.io.ByteArrayInputStream;
@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *  Reads binary NBT and adds the stream position to parse errors. Uses {@link NBTLimits#DEFAULT}
+ * Reads binary NBT and adds the stream position to parse errors. Uses {@link NBTLimits#DEFAULT}
  * unless limits are supplied to the constructor.
  *
  * @since 0.1
@@ -42,7 +42,7 @@ public class NBTReader implements INBTReader
      * @param nbtFile the target NBT file
      * @param limits  the limits for this operation
      * @throws NullPointerException if limits is null
-     * @throws RuntimeException if the file stream or decompression wrapper cannot be opened
+     * @throws RuntimeException     if the file stream or decompression wrapper cannot be opened
      */
     public NBTReader(File nbtFile, NBTLimits limits)
     {
@@ -93,7 +93,9 @@ public class NBTReader implements INBTReader
         return new PositionTrackingDataInputStream(byteArrayInputStream);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void close() throws IOException
     {
         stream.close();
@@ -110,8 +112,7 @@ public class NBTReader implements INBTReader
     {
         try
         {
-            Tag_Compound tag = (Tag_Compound) readNBTTag(0, -1);
-            return tag;
+            return (Tag_Compound) readNBTTag(0, -1);
         } catch (IOException e)
         {
             throw e;
@@ -129,7 +130,7 @@ public class NBTReader implements INBTReader
      *
      * @param length the declared number of elements
      * @param width  the bytes per element (1, 4, or 8)
-     * @throws IOException if the payload exceeds the remaining binary byte budget
+     * @throws IOException              if the payload exceeds the remaining binary byte budget
      * @throws IllegalArgumentException if the length is invalid or the allocation limit is exceeded
      */
     private void reserveArray(int length, int width) throws IOException
@@ -144,7 +145,7 @@ public class NBTReader implements INBTReader
      * Reserves encoded and decoded string storage before reading the payload.
      *
      * @return the decoded modified UTF-8 string
-     * @throws IOException if the field is truncated, malformed, or exceeds the binary byte budget
+     * @throws IOException              if the field is truncated, malformed, or exceeds the binary byte budget
      * @throws IllegalArgumentException if the allocation limit is exceeded
      */
     private String readString() throws IOException
@@ -157,13 +158,13 @@ public class NBTReader implements INBTReader
     /**
      * Reads an entire NBT tag including its name header.
      *
-     * @param depth the current nesting depth for validation and error reporting
+     * @param depth    the current nesting depth for validation and error reporting
      * @param siblings the number of preceding compound children, or -1 at the root
      * @return the complete tag read from the stream
-     * @throws IOException if tag structure is invalid, the stream is corrupted, or the byte limit is exceeded
+     * @throws IOException              if tag structure is invalid, the stream is corrupted, or the byte limit is exceeded
      * @throws IllegalArgumentException if a collection or allocation limit is exceeded
      */
-    private Tag readNBTTag(int depth, int siblings) throws IOException
+    private Tag<?> readNBTTag(int depth, int siblings) throws IOException
     {
         try
         {
@@ -196,10 +197,10 @@ public class NBTReader implements INBTReader
      * @param name  the name of the NBT tag.
      * @param depth the current nesting depth
      * @return the complete read NBT tag.
-     * @throws IOException if the stream or payload is invalid or the byte limit is exceeded
+     * @throws IOException              if the stream or payload is invalid or the byte limit is exceeded
      * @throws IllegalArgumentException if a depth, count, length, or allocation limit is exceeded
      */
-    private Tag readNBTPayload(int type, String name, int depth) throws IOException
+    private Tag<?> readNBTPayload(int type, String name, int depth) throws IOException
     {
         NBTTags tagType = NBTTags.getById(type);
         if (tagType == null)
@@ -268,7 +269,7 @@ public class NBTReader implements INBTReader
                 Set<String> names = new HashSet<>();
                 while (true)
                 {
-                    Tag tag = readNBTTag(depth + 1, tagList.size());
+                    Tag<?> tag = readNBTTag(depth + 1, tagList.size());
                     if (tag.getId() == NBTTags.Tag_End.getId()) break;
                     budget.allocate(64);
                     if (!names.add(tag.getName()))

@@ -14,7 +14,6 @@ import java.util.function.Consumer;
  * payloads are rejected. END markers have no default payload.
  *
  * @param <T> the data type stored within this tag
- *
  * @since 0.1
  */
 public abstract class Tag<T> implements ITag<T>
@@ -70,7 +69,9 @@ public abstract class Tag<T> implements ITag<T>
         this.data = data;
     }
 
-    /** Returns the default payload for an NBT type ID. */
+    /**
+     * Returns the default payload for an NBT type ID.
+     */
     private static Object defaultPayload(int id)
     {
         return switch (id)
@@ -91,7 +92,9 @@ public abstract class Tag<T> implements ITag<T>
         };
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public int getId()
     {
         return id;
@@ -137,7 +140,9 @@ public abstract class Tag<T> implements ITag<T>
         }
     }
 
-    /** Tracks a containing compound so renames can check for duplicate names. */
+    /**
+     * Tracks a containing compound so renames can check for duplicate names.
+     */
     final void registerCompoundParent(Tag_Compound parent)
     {
         if (compoundParents == null) compoundParents = new ArrayList<>();
@@ -149,7 +154,9 @@ public abstract class Tag<T> implements ITag<T>
         compoundParents.add(new WeakReference<>(parent));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public T getData()
     {
         return data;
@@ -168,7 +175,9 @@ public abstract class Tag<T> implements ITag<T>
         this.data = data;
     }
 
-    /** Rejects null payloads and values that do not match the NBT type ID. */
+    /**
+     * Rejects null payloads and values that do not match the NBT type ID.
+     */
     private void validatePayload(Object value)
     {
         Class<?> expected = switch (id)
@@ -190,7 +199,7 @@ public abstract class Tag<T> implements ITag<T>
         };
         if (!expected.isInstance(value))
         {
-            throw new IllegalArgumentException("Invalid payload for " + NBTTags.getById(id).getName()
+            throw new IllegalArgumentException("Invalid payload for " + Objects.requireNonNull(NBTTags.getById(id), "Invalid NBT type ID").getName()
                     + ": expected " + expected.getTypeName() + ", got "
                     + (value == null ? "null" : value.getClass().getTypeName()));
         }
@@ -214,7 +223,9 @@ public abstract class Tag<T> implements ITag<T>
         this.setName(newTag.getName());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void applyOperation(Consumer<ITag<T>> operation)
     {
         operation.accept(this);
@@ -238,17 +249,21 @@ public abstract class Tag<T> implements ITag<T>
                 Objects.equals(data, tag.data);
     }
 
-    /** Returns a hash of the tag type, name, and data. */
+    /**
+     * Returns a hash of the tag type, name, and data.
+     */
     @Override
     public int hashCode()
     {
         return Objects.hash(id, name, data);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString()
     {
-        return NBTTags.getById(getId()).getName() + "(\"" + getName() + "\"): " + getData();
+        return Objects.requireNonNull(NBTTags.getById(getId()), "Invalid NBT type ID").getName() + "(\"" + getName() + "\"): " + getData();
     }
 }

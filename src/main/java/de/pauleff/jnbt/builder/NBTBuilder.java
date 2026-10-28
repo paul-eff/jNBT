@@ -1,10 +1,10 @@
 package de.pauleff.jnbt.builder;
 
 import de.pauleff.jnbt.api.ICompoundTag;
+import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.api.NBTFileFactory;
 import de.pauleff.jnbt.core.*;
 import de.pauleff.jnbt.formats.binary.Compression_Types;
-import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**

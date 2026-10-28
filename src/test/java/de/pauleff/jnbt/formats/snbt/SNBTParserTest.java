@@ -55,7 +55,7 @@ public class SNBTParserTest
         ITag<?> stringList = NBTFactory.parseFromSNBT("[\"apple\", \"banana\"]");
         IListTag list = (IListTag) stringList;
         assertEquals(2, list.getData().size());
-        assertEquals("apple", list.getData().get(0).getData());
+        assertEquals("apple", list.getData().getFirst().getData());
     }
 
     @Test

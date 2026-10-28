@@ -45,7 +45,7 @@ public class Tag_List extends Collection_Tag implements IListTag
      * @param listTypeID the NBT type ID for all elements in this list
      * @param data       the initial collection of elements
      * @throws IllegalArgumentException if the type ID is invalid, data is null,
-     * or an element is null, END, or of the wrong type
+     *                                  or an element is null, END, or of the wrong type
      */
     public Tag_List(String name, int listTypeID, ArrayList<Tag<?>> data)
     {
@@ -53,7 +53,9 @@ public class Tag_List extends Collection_Tag implements IListTag
         this.listTypeID = listTypeID;
     }
 
-    /** Copies the elements after checking the declared type and each element. */
+    /**
+     * Copies the elements after checking the declared type and each element.
+     */
     private static ArrayList<Tag<?>> validatedCopy(int type, ArrayList<Tag<?>> values)
     {
         if (NBTTags.getById(type) == null || values == null)
@@ -72,7 +74,9 @@ public class Tag_List extends Collection_Tag implements IListTag
         return copy;
     }
 
-    /** {@inheritDoc IListTag} */
+    /**
+     * {@inheritDoc IListTag}
+     */
     @Override
     public ArrayList<Tag<?>> getData()
     {
@@ -109,7 +113,9 @@ public class Tag_List extends Collection_Tag implements IListTag
         setName(list.getName());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public int getListTypeID()
     {
         return listTypeID;
@@ -206,7 +212,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -218,7 +224,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -230,7 +236,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -242,7 +248,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -254,7 +260,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -266,7 +272,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -278,7 +284,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -290,7 +296,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -302,7 +308,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException {@inheritDoc}
+     * @throws IllegalArgumentException  {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     @Override
@@ -331,7 +337,9 @@ public class Tag_List extends Collection_Tag implements IListTag
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IListTag remove(ITag<?> tag)
     {
@@ -339,7 +347,9 @@ public class Tag_List extends Collection_Tag implements IListTag
         return this;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IListTag clear()
     {
@@ -359,14 +369,18 @@ public class Tag_List extends Collection_Tag implements IListTag
         return data.get(index);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int size()
     {
         return data.size();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isEmpty()
     {

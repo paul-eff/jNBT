@@ -98,19 +98,6 @@ String snbt = serializer.serialize(tag);
 
 Explore [`src/examples`](src/examples) for some basic usage patterns.
 
-Constructors and factories without a value initialize numbers to zero, strings to
-`""`, and arrays/collections to new empty instances. Explicit null payloads are
-rejected during construction and updates with `IllegalArgumentException`.
-
-```java
-var tag = NBTFactory.createInt("x"); // value is 0
-NBTFactory.createString("s", null); // throws IllegalArgumentException
-```
-
-`setData()` also rejects incompatible payload types. Failed `editTag()` validation
-preserves the target's name and payload. Structural `TAG_End` markers have no
-payload and cannot be stored as collection values.
-
 ## Building
 
 Install JDK 25 and use the included Gradle wrapper:

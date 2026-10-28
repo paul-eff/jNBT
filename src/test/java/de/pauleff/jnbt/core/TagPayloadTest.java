@@ -2,11 +2,11 @@ package de.pauleff.jnbt.core;
 
 import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.api.NBTFactory;
+import de.pauleff.jnbt.formats.binary.NBTWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import de.pauleff.jnbt.formats.binary.NBTWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.util.function.Function;
@@ -19,26 +19,19 @@ class TagPayloadTest
 {
     private static Tag<Object> source(int id, String name, Object value)
     {
-        return new Tag<>(id, name, value) {};
+        return new Tag<>(id, name, value)
+        {
+        };
     }
 
     private static Tag<Object> corruptSource(int id, Object value)
     {
         return new Tag<>(id, "changed")
         {
-            { data = value; }
+            {
+                data = value;
+            }
         };
-    }
-
-    private record Payload(String name, int id, Supplier<? extends ITag<?>> empty,
-                           Function<String, ? extends ITag<?>> named,
-                           Object first, Object second, Object wrong)
-    {
-        @Override
-        public String toString()
-        {
-            return name;
-        }
     }
 
     private static Stream<Payload> payloads()
@@ -64,6 +57,39 @@ class TagPayloadTest
                         new int[]{1}, new int[]{2}, new long[]{1}),
                 new Payload("long[]", 12, NBTFactory::createLongArray, NBTFactory::createLongArray,
                         new long[]{1}, new long[]{2}, new int[]{1}));
+    }
+
+    private static Stream<Supplier<ITag<?>>> explicitNullPayloads()
+    {
+        return Stream.of(() -> NBTFactory.createString("x", null), () -> NBTFactory.createByteArray("x", null),
+                () -> NBTFactory.createIntArray("x", null), () -> NBTFactory.createLongArray("x", null),
+                () -> new Tag_String("x", null), () -> new Tag_Byte_Array("x", null),
+                () -> new Tag_Int_Array("x", null), () -> new Tag_Long_Array("x", null),
+                () -> new Tag_Compound("x", null), () -> new Tag_List("x", 3, null),
+                () -> new Tag_End("end", null), () -> NBTFactory.createCompound("x", null));
+    }
+
+    private static void assertDefault(int id, Object value)
+    {
+        switch (id)
+        {
+            case 1 -> assertEquals((byte) 0, value);
+            case 2 -> assertEquals((short) 0, value);
+            case 3 -> assertEquals(0, value);
+            case 4 -> assertEquals(0L, value);
+            case 5 -> assertEquals(0.0f, value);
+            case 6 -> assertEquals(0.0d, value);
+            case 7 -> assertArrayEquals(new byte[0], (byte[]) value);
+            case 8 -> assertEquals("", value);
+            case 11 -> assertArrayEquals(new int[0], (int[]) value);
+            case 12 -> assertArrayEquals(new long[0], (long[]) value);
+            default -> throw new AssertionError("Unexpected test type");
+        }
+    }
+
+    private static void setUnchecked(ITag tag, Object value)
+    {
+        tag.setData(value);
     }
 
     @ParameterizedTest
@@ -165,16 +191,6 @@ class TagPayloadTest
         assertSame(type.first, source(type.id, "x", type.first).getData());
     }
 
-    private static Stream<Supplier<ITag<?>>> explicitNullPayloads()
-    {
-        return Stream.of(() -> NBTFactory.createString("x", null), () -> NBTFactory.createByteArray("x", null),
-                () -> NBTFactory.createIntArray("x", null), () -> NBTFactory.createLongArray("x", null),
-                () -> new Tag_String("x", null), () -> new Tag_Byte_Array("x", null),
-                () -> new Tag_Int_Array("x", null), () -> new Tag_Long_Array("x", null),
-                () -> new Tag_Compound("x", null), () -> new Tag_List("x", 3, null),
-                () -> new Tag_End("end", null), () -> NBTFactory.createCompound("x", null));
-    }
-
     @ParameterizedTest
     @MethodSource("explicitNullPayloads")
     void explicitNullConstructorPayloadIsRejected(Supplier<ITag<?>> constructor)
@@ -222,8 +238,12 @@ class TagPayloadTest
     {
         for (int id : new int[]{7, 9, 10, 11, 12})
         {
-            Tag<Object> first = new Tag<>(id, "first") {};
-            Tag<Object> second = new Tag<>(id, "second") {};
+            Tag<Object> first = new Tag<>(id, "first")
+            {
+            };
+            Tag<Object> second = new Tag<>(id, "second")
+            {
+            };
             assertNotNull(first.getData());
             assertNotSame(first.getData(), second.getData());
         }
@@ -238,24 +258,6 @@ class TagPayloadTest
         assertThrows(IllegalArgumentException.class, () -> root.setIntArray("x", null));
         assertEquals("original", root.getString("x"));
         assertEquals(1, root.size());
-    }
-
-    private static void assertDefault(int id, Object value)
-    {
-        switch (id)
-        {
-            case 1 -> assertEquals((byte) 0, value);
-            case 2 -> assertEquals((short) 0, value);
-            case 3 -> assertEquals(0, value);
-            case 4 -> assertEquals(0L, value);
-            case 5 -> assertEquals(0.0f, value);
-            case 6 -> assertEquals(0.0d, value);
-            case 7 -> assertArrayEquals(new byte[0], (byte[]) value);
-            case 8 -> assertEquals("", value);
-            case 11 -> assertArrayEquals(new int[0], (int[]) value);
-            case 12 -> assertArrayEquals(new long[0], (long[]) value);
-            default -> throw new AssertionError("Unexpected test type");
-        }
     }
 
     @Test
@@ -273,9 +275,14 @@ class TagPayloadTest
         assertEquals("legacy", end.getData());
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void setUnchecked(ITag tag, Object value)
+    private record Payload(String name, int id, Supplier<? extends ITag<?>> empty,
+                           Function<String, ? extends ITag<?>> named,
+                           Object first, Object second, Object wrong)
     {
-        tag.setData(value);
+        @Override
+        public String toString()
+        {
+            return name;
+        }
     }
 }

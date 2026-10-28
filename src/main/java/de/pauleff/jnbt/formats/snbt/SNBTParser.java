@@ -1,21 +1,17 @@
 package de.pauleff.jnbt.formats.snbt;
 
+import de.pauleff.jnbt.api.*;
 import de.pauleff.jnbt.core.Collection_Tag;
-import de.pauleff.jnbt.api.ICompoundTag;
-import de.pauleff.jnbt.api.IListTag;
-import de.pauleff.jnbt.api.ITag;
-import de.pauleff.jnbt.api.NBTFactory;
-import de.pauleff.jnbt.api.NBTLimits;
-import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.formats.snbt.SNBTTokenizer.Token;
 import de.pauleff.jnbt.formats.snbt.SNBTTokenizer.TokenType;
+import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  Parses SNBT strings into NBT tags. Uses {@link NBTLimits#DEFAULT}
+ * Parses SNBT strings into NBT tags. Uses {@link NBTLimits#DEFAULT}
  * unless limits are supplied to the constructor.
  *
  * @since 1.6.0
@@ -23,8 +19,8 @@ import java.util.List;
 public class SNBTParser
 {
     private final SNBTTokenizer tokenizer;
-    private Token currentToken;
     private final NBTLimits limits;
+    private Token currentToken;
     private NBTBudget budget;
     private int depth;
 
@@ -69,16 +65,16 @@ public class SNBTParser
             advance();
             ITag<?> result = parseValue();
 
-            if (currentToken.getType() != TokenType.EOF)
+            if (currentToken.type() != TokenType.EOF)
             {
                 throw new SNBTException("Unexpected token after parsing completed",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
 
             return result;
         } catch (IllegalArgumentException e)
         {
-            throw new SNBTException(e.getMessage(), currentToken == null ? 0 : currentToken.getPosition(),
+            throw new SNBTException(e.getMessage(), currentToken == null ? 0 : currentToken.position(),
                     tokenizer.getInput(), e);
         }
     }
@@ -92,7 +88,7 @@ public class SNBTParser
     private ITag<?> parseValue() throws SNBTException
     {
         budget.tag();
-        switch (currentToken.getType())
+        switch (currentToken.type())
         {
             case LBRACE:
                 budget.depth(++depth);
@@ -110,8 +106,8 @@ public class SNBTParser
             case NUMBER:
                 return parseNumber();
             default:
-                throw new SNBTException("Unexpected token: " + currentToken.getType(),
-                        currentToken.getPosition(), tokenizer.getInput());
+                throw new SNBTException("Unexpected token: " + currentToken.type(),
+                        currentToken.position(), tokenizer.getInput());
         }
     }
 
@@ -127,7 +123,7 @@ public class SNBTParser
         ICompoundTag compound = NBTFactory.createCompound();
         int children = 0;
 
-        if (currentToken.getType() == TokenType.RBRACE)
+        if (currentToken.type() == TokenType.RBRACE)
         {
             advance();
             return compound;
@@ -135,16 +131,16 @@ public class SNBTParser
 
         do
         {
-            if (currentToken.getType() != TokenType.STRING)
+            if (currentToken.type() != TokenType.STRING)
             {
                 throw new SNBTException("Expected string key in compound",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
-            String key = currentToken.getValue();
+            String key = currentToken.value();
             if (compound.hasTag(key))
             {
                 throw new SNBTException("Duplicate compound key: " + key,
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
             advance();
 
@@ -156,18 +152,18 @@ public class SNBTParser
             value.setName(key);
             ((Collection_Tag) compound).addTag(value);
 
-            if (currentToken.getType() == TokenType.COMMA)
+            if (currentToken.type() == TokenType.COMMA)
             {
                 advance();
-            } else if (currentToken.getType() == TokenType.RBRACE)
+            } else if (currentToken.type() == TokenType.RBRACE)
             {
                 break;
             } else
             {
                 throw new SNBTException("Expected ',' or '}' in compound",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
-        } while (currentToken.getType() != TokenType.RBRACE);
+        } while (currentToken.type() != TokenType.RBRACE);
 
         expect(TokenType.RBRACE);
         return compound;
@@ -183,7 +179,7 @@ public class SNBTParser
     {
         expect(TokenType.LBRACKET);
 
-        if (currentToken.getType() == TokenType.ARRAY_PREFIX)
+        if (currentToken.type() == TokenType.ARRAY_PREFIX)
         {
             return parseArray();
         } else
@@ -207,22 +203,18 @@ public class SNBTParser
      */
     private ITag<?> parseArray() throws SNBTException
     {
-        String prefix = currentToken.getValue();
+        String prefix = currentToken.value();
         advance();
         expect(TokenType.SEMICOLON);
 
-        switch (prefix)
+        return switch (prefix)
         {
-            case "B":
-                return parseByteArray();
-            case "I":
-                return parseIntArray();
-            case "L":
-                return parseLongArray();
-            default:
-                throw new SNBTException("Unknown array prefix: " + prefix,
-                        currentToken.getPosition(), tokenizer.getInput());
-        }
+            case "B" -> parseByteArray();
+            case "I" -> parseIntArray();
+            case "L" -> parseLongArray();
+            default -> throw new SNBTException("Unknown array prefix: " + prefix,
+                    currentToken.position(), tokenizer.getInput());
+        };
     }
 
     /**
@@ -236,7 +228,7 @@ public class SNBTParser
         List<Byte> values = new ArrayList<>();
         budget.allocate(16);
 
-        if (currentToken.getType() == TokenType.RBRACKET)
+        if (currentToken.type() == TokenType.RBRACKET)
         {
             advance();
             return NBTFactory.createByteArray("", new byte[0]);
@@ -250,22 +242,22 @@ public class SNBTParser
             if (!(value.getData() instanceof Byte))
             {
                 throw new SNBTException("Expected byte value in byte array",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
             values.add((Byte) value.getData());
 
-            if (currentToken.getType() == TokenType.COMMA)
+            if (currentToken.type() == TokenType.COMMA)
             {
                 advance();
-            } else if (currentToken.getType() == TokenType.RBRACKET)
+            } else if (currentToken.type() == TokenType.RBRACKET)
             {
                 break;
             } else
             {
                 throw new SNBTException("Expected ',' or ']' in array",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
-        } while (currentToken.getType() != TokenType.RBRACKET);
+        } while (currentToken.type() != TokenType.RBRACKET);
 
         expect(TokenType.RBRACKET);
 
@@ -289,7 +281,7 @@ public class SNBTParser
         List<Integer> values = new ArrayList<>();
         budget.allocate(16);
 
-        if (currentToken.getType() == TokenType.RBRACKET)
+        if (currentToken.type() == TokenType.RBRACKET)
         {
             advance();
             return NBTFactory.createIntArray("", new int[0]);
@@ -303,22 +295,22 @@ public class SNBTParser
             if (!(value.getData() instanceof Integer))
             {
                 throw new SNBTException("Expected int value in int array",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
             values.add((Integer) value.getData());
 
-            if (currentToken.getType() == TokenType.COMMA)
+            if (currentToken.type() == TokenType.COMMA)
             {
                 advance();
-            } else if (currentToken.getType() == TokenType.RBRACKET)
+            } else if (currentToken.type() == TokenType.RBRACKET)
             {
                 break;
             } else
             {
                 throw new SNBTException("Expected ',' or ']' in array",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
-        } while (currentToken.getType() != TokenType.RBRACKET);
+        } while (currentToken.type() != TokenType.RBRACKET);
 
         expect(TokenType.RBRACKET);
 
@@ -342,7 +334,7 @@ public class SNBTParser
         List<Long> values = new ArrayList<>();
         budget.allocate(16);
 
-        if (currentToken.getType() == TokenType.RBRACKET)
+        if (currentToken.type() == TokenType.RBRACKET)
         {
             advance();
             return NBTFactory.createLongArray("", new long[0]);
@@ -356,22 +348,22 @@ public class SNBTParser
             if (!(value.getData() instanceof Long))
             {
                 throw new SNBTException("Expected long value in long array",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
             values.add((Long) value.getData());
 
-            if (currentToken.getType() == TokenType.COMMA)
+            if (currentToken.type() == TokenType.COMMA)
             {
                 advance();
-            } else if (currentToken.getType() == TokenType.RBRACKET)
+            } else if (currentToken.type() == TokenType.RBRACKET)
             {
                 break;
             } else
             {
                 throw new SNBTException("Expected ',' or ']' in array",
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
-        } while (currentToken.getType() != TokenType.RBRACKET);
+        } while (currentToken.type() != TokenType.RBRACKET);
 
         expect(TokenType.RBRACKET);
 
@@ -388,15 +380,15 @@ public class SNBTParser
      * Rejects nested containers in typed arrays before entering another recursive parse.
      *
      * @return the parsed scalar array element
-     * @throws SNBTException if the next value is a container or is not a valid scalar
+     * @throws SNBTException            if the next value is a container or is not a valid scalar
      * @throws IllegalArgumentException if a configured limit is exceeded
      */
     private ITag<?> parseArrayElement() throws SNBTException
     {
-        if (currentToken.getType() != TokenType.NUMBER && currentToken.getType() != TokenType.STRING)
+        if (currentToken.type() != TokenType.NUMBER && currentToken.type() != TokenType.STRING)
         {
             throw new SNBTException("Expected scalar value in typed array",
-                    currentToken.getPosition(), tokenizer.getInput());
+                    currentToken.position(), tokenizer.getInput());
         }
         return parseValue();
     }
@@ -411,7 +403,7 @@ public class SNBTParser
     {
         List<ITag<?>> values = new ArrayList<>();
 
-        if (currentToken.getType() == TokenType.RBRACKET)
+        if (currentToken.type() == TokenType.RBRACKET)
         {
             advance();
             // Empty list defaults to compound type
@@ -424,11 +416,11 @@ public class SNBTParser
         values.add(firstValue);
         int listType = getTagTypeId(firstValue);
 
-        while (currentToken.getType() == TokenType.COMMA)
+        while (currentToken.type() == TokenType.COMMA)
         {
             advance();
 
-            if (currentToken.getType() == TokenType.RBRACKET)
+            if (currentToken.type() == TokenType.RBRACKET)
             {
                 break; // Trailing comma
             }
@@ -442,7 +434,7 @@ public class SNBTParser
             {
                 throw new SNBTException("Mixed types in list not allowed. Expected type " +
                         listType + " but got " + valueType,
-                        currentToken.getPosition(), tokenizer.getInput());
+                        currentToken.position(), tokenizer.getInput());
             }
 
             values.add(value);
@@ -467,7 +459,7 @@ public class SNBTParser
      */
     private ITag<?> parseStringValue() throws SNBTException
     {
-        String value = currentToken.getValue();
+        String value = currentToken.value();
         advance();
 
         if ("true".equals(value))
@@ -490,7 +482,7 @@ public class SNBTParser
      */
     private ITag<?> parseNumber() throws SNBTException
     {
-        String numberStr = currentToken.getValue();
+        String numberStr = currentToken.value();
         advance();
 
         try
@@ -502,22 +494,16 @@ public class SNBTParser
                 String numPart = numberStr.substring(0, numberStr.length() - 1);
                 char suffix = Character.toLowerCase(lastChar);
 
-                switch (suffix)
+                return switch (suffix)
                 {
-                    case 'b':
-                        return NBTFactory.createByte("", Byte.parseByte(numPart));
-                    case 's':
-                        return NBTFactory.createShort("", Short.parseShort(numPart));
-                    case 'l':
-                        return NBTFactory.createLong("", Long.parseLong(numPart));
-                    case 'f':
-                        return NBTFactory.createFloat("", Float.parseFloat(numPart));
-                    case 'd':
-                        return NBTFactory.createDouble("", Double.parseDouble(numPart));
-                    default:
-                        throw new SNBTException("Unknown numeric suffix: " + suffix,
-                                currentToken.getPosition(), tokenizer.getInput());
-                }
+                    case 'b' -> NBTFactory.createByte("", Byte.parseByte(numPart));
+                    case 's' -> NBTFactory.createShort("", Short.parseShort(numPart));
+                    case 'l' -> NBTFactory.createLong("", Long.parseLong(numPart));
+                    case 'f' -> NBTFactory.createFloat("", Float.parseFloat(numPart));
+                    case 'd' -> NBTFactory.createDouble("", Double.parseDouble(numPart));
+                    default -> throw new SNBTException("Unknown numeric suffix: " + suffix,
+                            currentToken.position(), tokenizer.getInput());
+                };
             } else
             {
                 if (numberStr.contains("."))
@@ -531,7 +517,7 @@ public class SNBTParser
         } catch (NumberFormatException e)
         {
             throw new SNBTException("Invalid number format: " + numberStr,
-                    currentToken.getPosition(), tokenizer.getInput(), e);
+                    currentToken.position(), tokenizer.getInput(), e);
         }
     }
 
@@ -579,10 +565,10 @@ public class SNBTParser
      */
     private void expect(TokenType expectedType) throws SNBTException
     {
-        if (currentToken.getType() != expectedType)
+        if (currentToken.type() != expectedType)
         {
-            throw new SNBTException("Expected " + expectedType + " but got " + currentToken.getType(),
-                    currentToken.getPosition(), tokenizer.getInput());
+            throw new SNBTException("Expected " + expectedType + " but got " + currentToken.type(),
+                    currentToken.position(), tokenizer.getInput());
         }
         advance();
     }

@@ -18,13 +18,41 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static de.pauleff.jnbt.formats.binary.ResourceLimitsProbe.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceLimitsTest
 {
     @TempDir
     Path tempDir;
+
+    private static OutputStream compressed(Path file, Compression_Types compression) throws IOException
+    {
+        return switch (compression)
+        {
+            case NONE -> Files.newOutputStream(file);
+            case GZIP -> new GZIPOutputStream(Files.newOutputStream(file));
+            case ZLIB -> new DeflaterOutputStream(Files.newOutputStream(file));
+            default -> throw new IllegalArgumentException();
+        };
+    }
+
+    private static void assertBinaryOutputRejected(Tag_Compound tree, NBTLimits limits, String message)
+    {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        IOException error = assertThrows(IOException.class,
+                () -> new NBTWriter(new DataOutputStream(bytes), limits).write(tree));
+        assertTrue(error.getMessage().contains(message), error::getMessage);
+        assertEquals(0, bytes.size());
+    }
+
+    private static void assertOutputRejected(Tag_Compound tree, NBTLimits limits, String message)
+    {
+        assertBinaryOutputRejected(tree, limits, message);
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> new SNBTSerializer(limits).serialize(tree));
+        assertTrue(error.getMessage().contains(message), error::getMessage);
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {7, 9, 11, 12})
@@ -100,7 +128,9 @@ class ResourceLimitsTest
             case 10 -> new Tag_Compound("value");
             case 11 -> new Tag_Int_Array("value", new int[]{1, 2});
             case 12 -> new Tag_Long_Array("value", new long[]{1, 2});
-            default -> new Tag<Object>(type, "value") {};
+            default -> new Tag<>(type, "value")
+            {
+            };
         };
         Tag_Compound root = new Tag_Compound("");
         root.addTag(value);
@@ -116,7 +146,7 @@ class ResourceLimitsTest
 
     @ParameterizedTest
     @ValueSource(ints = {7, 11, 12})
-    void declaredArrayPayloadMustFitByteBudgetBeforeAllocation(int type) throws IOException
+    void declaredArrayPayloadMustFitByteBudgetBeforeAllocation(int type)
     {
         NBTLimits limits = limits(2, 20, 4096, 10, 100, 4096);
         assertTrue(assertThrows(IOException.class, () -> read(declaredLength(type, 100, new byte[0]), limits))
@@ -149,7 +179,7 @@ class ResourceLimitsTest
     }
 
     @Test
-    void compoundLimitIsCheckedBeforeReadingAnotherChildPayload() throws IOException
+    void compoundLimitIsCheckedBeforeReadingAnotherChildPayload()
     {
         byte[] headerOnly = {10, 0, 0, 12}; // Empty root name, then a long-array type without a payload.
         NBTLimits limits = limits(2, 4096, 4096, 10, 0, 4096);
@@ -158,7 +188,7 @@ class ResourceLimitsTest
     }
 
     @Test
-    void declaredListReservesRemainingTagBudget() throws IOException
+    void declaredListReservesRemainingTagBudget()
     {
         NBTLimits limits = limits(2, 4096, 4096, 5, 100, 4096);
         assertTrue(assertThrows(IOException.class, () -> read(declaredLength(9, 4, new byte[0]), limits))
@@ -214,10 +244,16 @@ class ResourceLimitsTest
         {
             output.write(fixture);
         }
-        assertNotNull(new NBTReader(file.toFile()).read());
+        try (NBTReader reader = new NBTReader(file.toFile()))
+        {
+            assertNotNull(reader.read());
+        }
         NBTLimits limits = limits(2, 100, 100_000, 10, 10000, 4096);
-        assertTrue(assertThrows(IOException.class, () -> new NBTReader(file.toFile(), limits).read())
-                .getMessage().contains("byte limit"));
+        try (NBTReader reader = new NBTReader(file.toFile(), limits))
+        {
+            assertTrue(assertThrows(IOException.class, reader::read)
+                    .getMessage().contains("byte limit"));
+        }
     }
 
     @ParameterizedTest
@@ -228,13 +264,17 @@ class ResourceLimitsTest
         Path backup = tempDir.resolve("save.dat.bak");
         Files.writeString(file, "original");
         Files.writeString(backup, "backup");
-        NBTWriter writer = new NBTWriter(file.toFile(), compression, depthLimit(1));
-        assertThrows(IOException.class, () -> writer.write(nestedTree(2, false)));
+        try (NBTWriter writer = new NBTWriter(file.toFile(), compression, depthLimit(1)))
+        {
+            assertThrows(IOException.class, () -> writer.write(nestedTree(2, false)));
+        }
         assertEquals("original", Files.readString(file));
         assertEquals("backup", Files.readString(backup));
         Path absent = tempDir.resolve("absent.dat");
-        assertThrows(IOException.class, () -> new NBTWriter(absent.toFile(), compression, depthLimit(1))
-                .write(nestedTree(2, false)));
+        try (NBTWriter writer = new NBTWriter(absent.toFile(), compression, depthLimit(1)))
+        {
+            assertThrows(IOException.class, () -> writer.write(nestedTree(2, false)));
+        }
         assertFalse(Files.exists(absent));
     }
 
@@ -310,8 +350,11 @@ class ResourceLimitsTest
             compressed.write(bytes.toByteArray());
         }
         NBTLimits limits = limits(2, 1000, 100_000, 100, 100, 4096);
-        assertTrue(assertThrows(IOException.class, () -> new NBTReader(file.toFile(), limits).read())
-                .getMessage().contains("byte limit"));
+        try (NBTReader reader = new NBTReader(file.toFile(), limits))
+        {
+            assertTrue(assertThrows(IOException.class, reader::read)
+                    .getMessage().contains("byte limit"));
+        }
     }
 
     @Test
@@ -339,41 +382,18 @@ class ResourceLimitsTest
         {
             assertTrue(process.waitFor(20, TimeUnit.SECONDS), "Resource probe timed out");
             assertEquals(0, process.exitValue(), () -> {
-                try { return Files.readString(log); }
-                catch (IOException e) { throw new UncheckedIOException(e); }
+                try
+                {
+                    return Files.readString(log);
+                } catch (IOException e)
+                {
+                    throw new UncheckedIOException(e);
+                }
             });
             assertTrue(Files.readString(log).contains("PROBES PASSED"));
         } finally
         {
             if (process.isAlive()) process.destroyForcibly();
         }
-    }
-
-    private static OutputStream compressed(Path file, Compression_Types compression) throws IOException
-    {
-        return switch (compression)
-        {
-            case NONE -> Files.newOutputStream(file);
-            case GZIP -> new GZIPOutputStream(Files.newOutputStream(file));
-            case ZLIB -> new DeflaterOutputStream(Files.newOutputStream(file));
-            default -> throw new IllegalArgumentException();
-        };
-    }
-
-    private static void assertBinaryOutputRejected(Tag_Compound tree, NBTLimits limits, String message)
-    {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        IOException error = assertThrows(IOException.class,
-                () -> new NBTWriter(new DataOutputStream(bytes), limits).write(tree));
-        assertTrue(error.getMessage().contains(message), error::getMessage);
-        assertEquals(0, bytes.size());
-    }
-
-    private static void assertOutputRejected(Tag_Compound tree, NBTLimits limits, String message)
-    {
-        assertBinaryOutputRejected(tree, limits, message);
-        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
-                () -> new SNBTSerializer(limits).serialize(tree));
-        assertTrue(error.getMessage().contains(message), error::getMessage);
     }
 }

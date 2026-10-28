@@ -117,7 +117,7 @@ public class TypeSafetyAndValidationExample
         System.out.println("Cleanup completed");
     }
 
-    
+
     // These are application rules. The NBT library does not enforce player stat ranges.
     private static boolean validatePlayer(ICompoundTag player)
     {

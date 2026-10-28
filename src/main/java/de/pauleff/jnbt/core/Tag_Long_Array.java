@@ -3,15 +3,18 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
- *  An NBT long array tag.
+ * An NBT long array tag.
  *
  * @since 0.1
  */
 public class Tag_Long_Array extends Tag<long[]>
 {
-    /** Creates a tag initialized to a new empty array. */
+    /**
+     * Creates a tag initialized to a new empty array.
+     */
     public Tag_Long_Array()
     {
         super(NBTTags.Tag_Long_Array.getId());
@@ -39,10 +42,12 @@ public class Tag_Long_Array extends Tag<long[]>
         super(NBTTags.Tag_Long_Array.getId(), name, data);
     }
 
-    /** Returns a string with the stored values. */
+    /**
+     * Returns a string with the stored values.
+     */
     @Override
     public String toString()
     {
-        return NBTTags.getById(getId()).getName() + "(\"" + getName() + "\"): " + Arrays.toString(getData());
+        return Objects.requireNonNull(NBTTags.getById(getId()), "Invalid NBT type ID").getName() + "(\"" + getName() + "\"): " + Arrays.toString(getData());
     }
 }

@@ -10,6 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class SNBTTagNameTest
 {
+    private static void assertKeys(ICompoundTag compound)
+    {
+        assertEquals(3, compound.getData().size());
+        assertEquals(1, compound.getInt(""));
+        assertEquals(2, compound.getInt("null"));
+        assertEquals(3, compound.getInt(" "));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"{\"\":1,\"null\":2,\" \":3}", "{'':1,'null':2,' ':3}"})
     void preservesEmptyLiteralNullAndWhitespaceKeys(String input) throws SNBTException
@@ -24,13 +32,5 @@ class SNBTTagNameTest
                 .addInt("", 1).addInt("null", 2).addInt(" ", 3).build();
         assertKeys(assertInstanceOf(ICompoundTag.class,
                 new SNBTParser(new SNBTSerializer().serialize(built)).parse()));
-    }
-
-    private static void assertKeys(ICompoundTag compound)
-    {
-        assertEquals(3, compound.getData().size());
-        assertEquals(1, compound.getInt(""));
-        assertEquals(2, compound.getInt("null"));
-        assertEquals(3, compound.getInt(" "));
     }
 }

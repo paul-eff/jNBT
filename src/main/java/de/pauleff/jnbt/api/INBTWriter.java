@@ -1,7 +1,5 @@
 package de.pauleff.jnbt.api;
 
-import de.pauleff.jnbt.formats.binary.Compression_Types;
-
 import java.io.IOException;
 
 /**

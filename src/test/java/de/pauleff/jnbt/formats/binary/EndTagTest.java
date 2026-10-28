@@ -7,11 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -37,6 +33,42 @@ class EndTagTest
             out.writeByte(0);
         }
         return bytes.toByteArray();
+    }
+
+    private static Stream<Collection_Tag> invalidContainers()
+    {
+        Collection_Tag child = withUncheckedChild(new Tag_Compound("child"), new Tag_End());
+        return Stream.of(
+                withUncheckedChild(new Tag_Compound("compound"), new Tag_End()),
+                withUncheckedChild(new Tag_List("endList", 0), new Tag_End()),
+                withUncheckedChild(new Tag_List("intList", 3), new Tag_End()),
+                withUncheckedChild(new Tag_List("nested", 10), child),
+                withUncheckedChild(new Tag_List("wrongPayload", 0), new Tag_Int("", 1)));
+    }
+
+    private static Collection_Tag withUncheckedChild(Collection_Tag parent, Tag<?> child)
+    {
+        if (parent instanceof Tag_List list)
+        {
+            // Deliberately corrupt subclass storage to exercise the writer's final checks.
+            return new Tag_List(list.getName(), list.getListTypeID())
+            {
+                {
+                    data.add(child);
+                }
+            };
+        }
+        return new Tag_Compound(parent.getName())
+        {
+            {
+                data.add(child);
+            }
+        };
+    }
+
+    private static ICompoundTag read(byte[] bytes) throws IOException
+    {
+        return new NBTReader(new DataInputStream(new ByteArrayInputStream(bytes))).read();
     }
 
     @Test
@@ -79,33 +111,6 @@ class EndTagTest
         assertInstanceOf(Tag_Int.class, integers.getData().getFirst());
     }
 
-    private static Stream<Collection_Tag> invalidContainers()
-    {
-        Collection_Tag child = withUncheckedChild(new Tag_Compound("child"), new Tag_End());
-        return Stream.of(
-                withUncheckedChild(new Tag_Compound("compound"), new Tag_End()),
-                withUncheckedChild(new Tag_List("endList", 0), new Tag_End()),
-                withUncheckedChild(new Tag_List("intList", 3), new Tag_End()),
-                withUncheckedChild(new Tag_List("nested", 10), child),
-                withUncheckedChild(new Tag_List("wrongPayload", 0), new Tag_Int("", 1)));
-    }
-
-    private static Collection_Tag withUncheckedChild(Collection_Tag parent, Tag<?> child)
-    {
-        if (parent instanceof Tag_List list)
-        {
-            // Deliberately corrupt subclass storage to exercise the writer's final checks.
-            return new Tag_List(list.getName(), list.getListTypeID())
-            {
-                { data.add(child); }
-            };
-        }
-        return new Tag_Compound(parent.getName())
-        {
-            { data.add(child); }
-        };
-    }
-
     @ParameterizedTest
     @MethodSource("invalidContainers")
     void writerRejectsInvalidContainersBeforeOutput(Collection_Tag container)
@@ -141,10 +146,5 @@ class EndTagTest
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         new NBTWriter(new DataOutputStream(bytes)).write(root);
         assertArrayEquals(fixture, bytes.toByteArray());
-    }
-
-    private static ICompoundTag read(byte[] bytes) throws IOException
-    {
-        return new NBTReader(new DataInputStream(new ByteArrayInputStream(bytes))).read();
     }
 }

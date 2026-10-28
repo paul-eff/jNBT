@@ -42,7 +42,7 @@ class BuilderNameTest
     @Test
     void stillRejectsNullNames()
     {
-        assertThrows(IllegalArgumentException.class, () -> NBTBuilder.compound((String) null));
+        assertThrows(IllegalArgumentException.class, () -> NBTBuilder.compound(null));
         assertThrows(IllegalArgumentException.class, () -> NBTBuilder.list(null, NBTTags.Tag_Int));
         assertThrows(IllegalArgumentException.class, () -> NBTBuilder.integer(null, 1));
         assertThrows(IllegalArgumentException.class, () -> NBTBuilder.compound("").addInt(null, 1));

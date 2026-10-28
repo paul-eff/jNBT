@@ -7,13 +7,12 @@ package de.pauleff.jnbt.api;
  * Allocation accounting estimates operation storage; it is not an exact JVM heap measurement.
  * Increase byte, allocation, or count limits only for trusted data and an appropriately sized heap.
  *
- * @param maxDepth maximum number of nested containers, from 1 to 512
- * @param maxBytes maximum uncompressed binary bytes, including headers
- * @param maxAllocationBytes maximum estimated operation allocation bytes
- * @param maxTags maximum visited values, including temporary SNBT array elements
+ * @param maxDepth            maximum number of nested containers, from 1 to 512
+ * @param maxBytes            maximum uncompressed binary bytes, including headers
+ * @param maxAllocationBytes  maximum estimated operation allocation bytes
+ * @param maxTags             maximum visited values, including temporary SNBT array elements
  * @param maxCollectionLength maximum elements in any list, compound, or array
- * @param maxTextLength maximum SNBT input or output length in UTF-16 code units
- *
+ * @param maxTextLength       maximum SNBT input or output length in UTF-16 code units
  * @since 2.0
  */
 public record NBTLimits(int maxDepth, long maxBytes, long maxAllocationBytes, long maxTags,
@@ -38,19 +37,12 @@ public record NBTLimits(int maxDepth, long maxBytes, long maxAllocationBytes, lo
      * @throws IllegalArgumentException if depth is outside 1–512, a budget is not positive,
      *                                  or collection length is negative
      */
-    public NBTLimits(int maxDepth, long maxBytes, long maxAllocationBytes, long maxTags,
-                     int maxCollectionLength, int maxTextLength)
+    public NBTLimits
     {
         if (maxDepth < 1 || maxDepth > 512 || maxBytes < 1 || maxAllocationBytes < 1 || maxTags < 1
                 || maxCollectionLength < 0 || maxTextLength < 1)
         {
             throw new IllegalArgumentException("Invalid NBT limits: depth must be 1–512 and budgets must be positive");
         }
-        this.maxDepth = maxDepth;
-        this.maxBytes = maxBytes;
-        this.maxAllocationBytes = maxAllocationBytes;
-        this.maxTags = maxTags;
-        this.maxCollectionLength = maxCollectionLength;
-        this.maxTextLength = maxTextLength;
     }
 }

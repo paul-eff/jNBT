@@ -12,11 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -287,8 +283,10 @@ class CompoundKeyTest
         Path file = directory.resolve("save.nbt");
         byte[] original = {10, 0, 0, 0};
         Files.write(file, original);
-        assertThrows(IOException.class, () -> new NBTWriter(file.toFile(), Compression_Types.NONE)
-                .write(corruptCompound("root", "x")));
+        try (NBTWriter writer = new NBTWriter(file.toFile(), Compression_Types.NONE))
+        {
+            assertThrows(IOException.class, () -> writer.write(corruptCompound("root", "x")));
+        }
         assertArrayEquals(original, Files.readAllBytes(file));
         assertFalse(Files.exists(directory.resolve("save.nbt.bak")));
     }

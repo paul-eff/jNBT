@@ -20,6 +20,14 @@ class NBTFileBoundaryTest
     @TempDir
     Path tempDir;
 
+    private static Stream<Arguments> missingPathParents()
+    {
+        return Stream.of(
+                Arguments.of("{wrapper:{a:{x:1}}}", "a.x"),
+                Arguments.of("{wrapper:{a:{x:1}},a:5}", "a.x"),
+                Arguments.of("{a:{hidden:{b:{x:1}}}}", "a.b.x"));
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void pathOperationsTouchOnlyTheSpecifiedParent(boolean remove) throws IOException
@@ -41,14 +49,6 @@ class NBTFileBoundaryTest
         {
             assertEquals(9, root.getCompound("a").getInt("x"));
         }
-    }
-
-    private static Stream<Arguments> missingPathParents()
-    {
-        return Stream.of(
-                Arguments.of("{wrapper:{a:{x:1}}}", "a.x"),
-                Arguments.of("{wrapper:{a:{x:1}},a:5}", "a.x"),
-                Arguments.of("{a:{hidden:{b:{x:1}}}}", "a.b.x"));
     }
 
     @ParameterizedTest

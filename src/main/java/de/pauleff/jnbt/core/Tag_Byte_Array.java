@@ -3,15 +3,18 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
- *  An NBT byte array tag.
+ * An NBT byte array tag.
  *
  * @since 0.1
  */
 public class Tag_Byte_Array extends Tag<byte[]>
 {
-    /** Creates a tag initialized to a new empty array. */
+    /**
+     * Creates a tag initialized to a new empty array.
+     */
     public Tag_Byte_Array()
     {
         super(NBTTags.Tag_Byte_Array.getId());
@@ -39,10 +42,12 @@ public class Tag_Byte_Array extends Tag<byte[]>
         super(NBTTags.Tag_Byte_Array.getId(), name, data);
     }
 
-    /** Returns a string with the stored values. */
+    /**
+     * Returns a string with the stored values.
+     */
     @Override
     public String toString()
     {
-        return NBTTags.getById(getId()).getName() + "(\"" + getName() + "\"): " + Arrays.toString(getData());
+        return Objects.requireNonNull(NBTTags.getById(getId()), "Invalid NBT type ID").getName() + "(\"" + getName() + "\"): " + Arrays.toString(getData());
     }
 }

@@ -11,12 +11,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.UTFDataFormatException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -77,7 +72,7 @@ class UTFLengthTest
 
     @ParameterizedTest
     @ValueSource(strings = {"root", "key", "value", "listValue", "nestedKey"})
-    void findsOversizedFieldsBeforeWritingAnyBytes(String field) throws IOException
+    void findsOversizedFieldsBeforeWritingAnyBytes(String field)
     {
         String oversized = "\u0000".repeat(32768);
         Tag_Compound root = new Tag_Compound("");
@@ -136,26 +131,38 @@ class UTFLengthTest
         Tag_Compound invalid = new Tag_Compound("");
         invalid.addString("bad", "x".repeat(65536));
 
-        NBTWriter writer = new NBTWriter(file.toFile(), compression);
-        assertArrayEquals(original, Files.readAllBytes(file));
-        assertArrayEquals(originalBackup, Files.readAllBytes(backup));
-        assertThrows(UTFDataFormatException.class, () -> writer.write(invalid));
+        try (NBTWriter writer = new NBTWriter(file.toFile(), compression))
+        {
+            assertArrayEquals(original, Files.readAllBytes(file));
+            assertArrayEquals(originalBackup, Files.readAllBytes(backup));
+            assertThrows(UTFDataFormatException.class, () -> writer.write(invalid));
+        }
         assertArrayEquals(original, Files.readAllBytes(file));
         assertArrayEquals(originalBackup, Files.readAllBytes(backup));
 
-        assertThrows(UTFDataFormatException.class,
-                () -> new NBTWriter(file.toFile()).write(invalid));
+        try (NBTWriter writer = new NBTWriter(file.toFile()))
+        {
+            assertThrows(UTFDataFormatException.class, () -> writer.write(invalid));
+        }
         assertArrayEquals(original, Files.readAllBytes(file));
         assertArrayEquals(originalBackup, Files.readAllBytes(backup));
 
         Path missing = tempDir.resolve("missing.dat");
-        assertThrows(UTFDataFormatException.class,
-                () -> new NBTWriter(missing.toFile(), compression).write(invalid));
+        try (NBTWriter writer = new NBTWriter(missing.toFile(), compression))
+        {
+            assertThrows(UTFDataFormatException.class, () -> writer.write(invalid));
+        }
         assertFalse(Files.exists(missing));
 
-        new NBTWriter(file.toFile(), compression).write(new Tag_Compound(""));
+        try (NBTWriter writer = new NBTWriter(file.toFile(), compression))
+        {
+            writer.write(new Tag_Compound(""));
+        }
         assertArrayEquals(original, Files.readAllBytes(backup));
-        assertEquals("", new NBTReader(file.toFile()).read().getName());
+        try (NBTReader reader = new NBTReader(file.toFile()))
+        {
+            assertEquals("", reader.read().getName());
+        }
     }
 
     @Test

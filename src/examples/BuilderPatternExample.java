@@ -106,7 +106,7 @@ public class BuilderPatternExample
         System.out.println("\nCleanup completed");
     }
 
-    
+
     private static IListTag createInventoryList()
     {
         // Keep the parent builder in a variable when the return value of end() is not needed.
