@@ -10,10 +10,11 @@ import java.io.IOException;
 public interface INBTWriter extends AutoCloseable
 {
     /**
-     * Writes a compound as the file root.
+     * Writes the root compound.
      *
-     * @param root the {@link ICompoundTag} to write as the file root
-     * @throws IOException              if an error occurs during file writing
+     * @param root the root compound
+     * @throws NBTSaveCleanupException   if saving succeeded but backup deletion failed
+     * @throws IOException              if validation or writing fails
      * @throws IllegalArgumentException if root is null
      */
     void write(ICompoundTag root) throws IOException;
@@ -21,7 +22,7 @@ public interface INBTWriter extends AutoCloseable
     /**
      * Closes the writer.
      *
-     * @throws IOException if an error occurs during resource cleanup
+     * @throws IOException if closing fails
      */
     @Override
     void close() throws IOException;

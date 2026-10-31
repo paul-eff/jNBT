@@ -2,6 +2,7 @@ package de.pauleff.jnbt.formats.binary;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -17,9 +18,9 @@ public class NBTFileHandler
     /**
      * Opens a binary NBT stream with automatic decompression. The caller must close it.
      *
-     * @param file the target file.
-     * @return the file as {@link DataInputStream}.
-     * @throws IOException when encountering an error while reading the file to a {@link DataInputStream}.
+     * @param file the source file
+     * @return the decompressed input stream
+     * @throws IOException if opening or decompression initialization fails
      */
     public static DataInputStream loadNBTToReader(File file) throws IOException
     {
@@ -53,13 +54,15 @@ public class NBTFileHandler
     }
 
     /**
-     * Opens a binary NBT output stream and backs up an existing file to {@code .bak}. The caller must
-     * close the stream.
+     * Opens direct file output, copying an existing file to {@code .bak} first.
+     * Truncates the destination and retains the backup. The caller must close the
+     * stream. Use {@link NBTWriter} for atomic file saves.
      *
-     * @param file        the target file.
-     * @param compression the compression type of the file.
-     * @return the file as {@link DataOutputStream}.
-     * @throws IOException when encountering an error while reading the file to a {@link DataOutputStream}.
+     * @param file        the destination file
+     * @param compression the output compression
+     * @return the output stream
+     * @throws IOException if backup creation or opening fails
+     * @throws IllegalArgumentException if compression is unsupported
      */
     public static DataOutputStream loadNBTToWriter(File file, Compression_Types compression) throws IOException
     {
@@ -78,27 +81,45 @@ public class NBTFileHandler
             }
         }
 
-        OutputStream fileStream = switch (compression)
-        {
-            case NONE ->
-            {
-                System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.NONE.getName());
-                yield new FileOutputStream(file);
-            }
-            case GZIP ->
-            {
-                System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.GZIP.getName());
-                yield new GZIPOutputStream(new FileOutputStream(file));
-            }
-            case ZLIB ->
-            {
-                System.out.printf("Compression type for writing %s set to %s%n", file.getName(), Compression_Types.ZLIB.getName());
-                yield new DeflaterOutputStream(new FileOutputStream(file));
-            }
-            default -> throw new IllegalArgumentException(String.format("The compression type %s is not supported!", compression));
-        };
+        return openOutput(file.toPath(), compression);
+    }
 
-        return new DataOutputStream(fileStream);
+    /**
+     * Opens compressed output without creating a backup.
+     *
+     * @param path the file to open or truncate
+     * @param compression the supported output compression
+     * @return the output stream, owned by the caller
+     * @throws IOException if opening or compression initialization fails
+     */
+    static DataOutputStream openOutput(Path path, Compression_Types compression) throws IOException
+    {
+        if (compression != Compression_Types.NONE && compression != Compression_Types.GZIP
+                && compression != Compression_Types.ZLIB)
+        {
+            throw new IllegalArgumentException("Unsupported output compression: " + compression);
+        }
+        OutputStream raw = new BufferedOutputStream(Files.newOutputStream(path));
+        try
+        {
+            return new DataOutputStream(switch (compression)
+            {
+                case NONE -> raw;
+                case GZIP -> new GZIPOutputStream(raw);
+                case ZLIB -> new DeflaterOutputStream(raw);
+                default -> throw new IllegalArgumentException("Unsupported output compression: " + compression);
+            });
+        } catch (IOException | RuntimeException | Error e)
+        {
+            try
+            {
+                raw.close();
+            } catch (IOException closeFailure)
+            {
+                e.addSuppressed(closeFailure);
+            }
+            throw e;
+        }
     }
 
     /**

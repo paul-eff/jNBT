@@ -158,7 +158,7 @@ class UTFLengthTest
         {
             writer.write(new Tag_Compound(""));
         }
-        assertArrayEquals(original, Files.readAllBytes(backup));
+        assertFalse(Files.exists(backup));
         try (NBTReader reader = new NBTReader(file.toFile()))
         {
             assertEquals("", reader.read().getName());

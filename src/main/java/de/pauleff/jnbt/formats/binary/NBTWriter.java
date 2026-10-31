@@ -9,8 +9,8 @@ import java.nio.file.Files;
 import java.util.*;
 
 /**
- * Writes binary NBT after validating the tag tree. Uses {@link NBTLimits#DEFAULT}
- * unless limits are supplied to the constructor.
+ * Writes validated binary NBT to a file or stream. Uses {@link NBTLimits#DEFAULT}
+ * unless explicit limits are supplied.
  *
  * @since 0.1
  */
@@ -23,10 +23,9 @@ public class NBTWriter implements INBTWriter
     private boolean closed;
 
     /**
-     * Creates a writer by passing it the target NBT file. Target file must already exist to determine the
-     * compression type.
+     * Creates a file writer with compression detected from the existing file.
      *
-     * @param nbtFile the target NBT file.
+     * @param nbtFile the existing destination file
      * @throws FileNotFoundException if the file does not exist
      */
     public NBTWriter(File nbtFile) throws FileNotFoundException
@@ -35,7 +34,7 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Creates a writer that detects existing file compression and uses configurable limits.
+     * Creates a file writer with detected compression and explicit limits.
      *
      * @param nbtFile the existing target file
      * @param limits  the limits for this operation
@@ -54,10 +53,10 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Creates a writer by passing it the target NBT file and how to compress it.
+     * Creates a file writer with explicit compression.
      *
-     * @param nbtFile     the target NBT file.
-     * @param compression the compression type of the file.
+     * @param nbtFile     the destination file
+     * @param compression the output compression
      */
     public NBTWriter(File nbtFile, Compression_Types compression)
     {
@@ -65,10 +64,10 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Creates a file writer with explicit compression and configurable limits.
+     * Creates a file writer with explicit compression and limits.
      *
-     * @param nbtFile     the target file, opened only after validation succeeds
-     * @param compression the compression type
+     * @param nbtFile     the destination file, replaced only after writing succeeds
+     * @param compression the output compression
      * @param limits      the limits for this operation
      * @throws NullPointerException if limits is null
      */
@@ -80,9 +79,9 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Creates a writer by passing it the target NBT file as a {@link DataOutputStream}.
+     * Creates a writer for the supplied output stream.
      *
-     * @param dos a {@link DataOutputStream} containing a NBT file.
+     * @param dos the output stream, closed after writing
      */
     public NBTWriter(DataOutputStream dos)
     {
@@ -90,7 +89,7 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * Creates a stream writer with configurable limits on the uncompressed NBT data.
+     * Creates a stream writer with explicit limits.
      *
      * @param dos    the binary output stream, closed after writing or validation failure
      * @param limits the limits for this operation
@@ -105,29 +104,40 @@ public class NBTWriter implements INBTWriter
     }
 
     /**
-     * {@inheritDoc}
+     * Closes the writer and its output stream. Repeated calls have no effect.
+     * Closing an unused file writer does not create a file.
      *
-     * <p>Closing an unused file writer does not create a file.</p>
+     * @throws IOException if closing the stream fails
      */
     public void close() throws IOException
     {
         closed = true;
-        if (stream != null)
+        DataOutputStream output = stream;
+        stream = null;
+        if (output != null)
         {
-            stream.close();
+            output.close();
         }
     }
 
     /**
-     * {@inheritDoc}
+     * Validates and writes the root compound. Closes this writer after the operation.
+     * Do not modify the tag tree during writing.
      *
-     * <p>Validates names and strings against the 65,535-byte modified UTF-8 limit
-     * before opening the file. Rejects END values, invalid lists, duplicate keys, cycles, and exceeded limits.
-     * Do not change the tree during writing. Closes the writer after validation
-     * or writing fails, and after a successful write.</p>
+     * <p>File saves finish temporary output before atomically replacing the destination.
+     * Existing files are copied to {@code .bak} before writing; the backup is deleted
+     * on success and retained on failure. New files leave existing backups untouched.
+     * Unsupported atomic moves fail without fallback.</p>
      *
-     * @throws IOException              if writing fails, the data is invalid, or a configured limit is exceeded
-     * @throws IllegalArgumentException {@inheritDoc}
+     * <p>Destination and backup paths must be regular files, not symbolic links.
+     * Callers must coordinate concurrent access. Replacement does not preserve file
+     * identity or all metadata, or guarantee power-loss durability.
+     * Supplied streams are written directly and closed.</p>
+     *
+     * @param root the root compound
+     * @throws NBTSaveCleanupException   if saving succeeded but backup deletion failed
+     * @throws IOException              if validation, writing, or closing fails
+     * @throws IllegalArgumentException if root is null
      */
     public void write(ICompoundTag root) throws IOException
     {
@@ -135,7 +145,7 @@ public class NBTWriter implements INBTWriter
         {
             throw new IllegalArgumentException("Root compound tag cannot be null");
         }
-        try
+        try (this)
         {
             if (closed)
             {
@@ -143,20 +153,19 @@ public class NBTWriter implements INBTWriter
             }
             validateForWrite(root, true, 0, new NBTBudget(limits),
                     Collections.newSetFromMap(new IdentityHashMap<>()));
-            if (stream == null)
+            if (file != null)
             {
-                stream = NBTFileHandler.loadNBTToWriter(file, compression);
+                NBTFileSave.write(file.toPath(), compression, output -> writeNBTTag(root, output));
+            } else
+            {
+                writeNBTTag(root, stream);
             }
-            writeNBTTag(root);
         } catch (IOException e)
         {
             throw e;
         } catch (Exception e)
         {
             throw new IOException("Failed to write NBT data: " + e.getMessage(), e);
-        } finally
-        {
-            this.close();
         }
     }
 
@@ -276,7 +285,7 @@ public class NBTWriter implements INBTWriter
     /**
      * Writes a tag with its type ID, name, and payload.
      */
-    private void writeNBTTag(ITag<?> tag) throws IOException
+    private void writeNBTTag(ITag<?> tag, DataOutputStream stream) throws IOException
     {
         if (tag.getId() == 0)
         {
@@ -285,13 +294,13 @@ public class NBTWriter implements INBTWriter
         stream.writeByte(tag.getId());
         stream.writeUTF(tag.getName());
 
-        writeNBTPayload(tag);
+        writeNBTPayload(tag, stream);
     }
 
     /**
      * Writes a tag payload without a type or name header.
      */
-    private void writeNBTPayload(ITag<?> tag) throws IOException
+    private void writeNBTPayload(ITag<?> tag, DataOutputStream stream) throws IOException
     {
         switch (NBTTags.getById(tag.getId()))
         {
@@ -318,14 +327,14 @@ public class NBTWriter implements INBTWriter
                 stream.writeInt(size);
                 for (int i = 0; i < size; i++)
                 {
-                    writeNBTPayload(listTags.get(i));
+                    writeNBTPayload(listTags.get(i), stream);
                 }
             }
             case Tag_Compound ->
             {
                 for (ITag<?> compTag : ((ICompoundTag) tag).getData())
                 {
-                    writeNBTTag(compTag);
+                    writeNBTTag(compTag, stream);
                 }
 
                 // A zero type ID ends the compound.

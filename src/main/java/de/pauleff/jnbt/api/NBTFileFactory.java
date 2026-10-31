@@ -42,12 +42,12 @@ public class NBTFileFactory
     }
 
     /**
-     * Creates a writer that preserves the original file's compression format. File must exist to detect
-     * compression type.
+     * Creates a writer with compression detected from an existing file.
      *
-     * @param nbtFile the file to write NBT data to
-     * @return new {@link INBTWriter} ready to write data
-     * @throws FileNotFoundException if the target file doesn't exist for compression detection
+     * @param nbtFile the existing destination file
+     * @return the file writer
+     * @throws FileNotFoundException if the destination does not exist
+     * @see NBTWriter#write(ICompoundTag)
      */
     public static INBTWriter createWriter(File nbtFile) throws FileNotFoundException
     {
@@ -55,11 +55,12 @@ public class NBTFileFactory
     }
 
     /**
-     * Creates a writer with explicit compression settings.
+     * Creates a file writer with explicit compression.
      *
-     * @param nbtFile     the file to write NBT data to
-     * @param compression the {@link Compression_Types} to apply
-     * @return new {@link INBTWriter} ready to write compressed data
+     * @param nbtFile     the destination file
+     * @param compression the output compression
+     * @return the file writer
+     * @see NBTWriter#write(ICompoundTag)
      */
     public static INBTWriter createWriter(File nbtFile, Compression_Types compression)
     {
@@ -82,35 +83,41 @@ public class NBTFileFactory
     }
 
     /**
-     * Writes a compound to a file. Existing files are backed up. Without an explicit compression type,
-     * keeps the existing compression or uses no compression for a new file.
+     * Saves a root compound, preserving existing compression or using no compression
+     * for a new file. Retains {@code .bak} on failure and deletes it on success.
      *
      * @param nbtFile the file to write to
-     * @param root    the {@link ICompoundTag} to write
-     * @throws IOException if the file cannot be written
+     * @param root    the root compound
+     * @throws NBTSaveCleanupException if saving succeeded but backup deletion failed
+     * @throws IOException if writing fails
+     * @see NBTWriter#write(ICompoundTag)
      */
     public static void writeNBTFile(File nbtFile, ICompoundTag root) throws IOException
     {
-        try (INBTWriter writer = createWriter(nbtFile))
+        INBTWriter selectedWriter;
+        try
         {
-            writer.write(root);
+            selectedWriter = createWriter(nbtFile);
         } catch (FileNotFoundException e)
         {
-            try (INBTWriter writer = createWriter(nbtFile, Compression_Types.NONE))
-            {
-                writer.write(root);
-            }
+            selectedWriter = createWriter(nbtFile, Compression_Types.NONE);
+        }
+        try (INBTWriter writer = selectedWriter)
+        {
+            writer.write(root);
         }
     }
 
     /**
-     * Writes a compound to a file. Existing files are backed up. Without an explicit compression type,
-     * keeps the existing compression or uses no compression for a new file.
+     * Saves a root compound with explicit compression. Retains {@code .bak} on
+     * failure and deletes it on success.
      *
      * @param nbtFile     the file to write to
-     * @param root        the {@link ICompoundTag} to write
-     * @param compression the {@link Compression_Types} to use
-     * @throws IOException if the file cannot be written
+     * @param root        the root compound
+     * @param compression the output compression
+     * @throws NBTSaveCleanupException if saving succeeded but backup deletion failed
+     * @throws IOException if writing fails
+     * @see NBTWriter#write(ICompoundTag)
      */
     public static void writeNBTFile(File nbtFile, ICompoundTag root, Compression_Types compression) throws IOException
     {
