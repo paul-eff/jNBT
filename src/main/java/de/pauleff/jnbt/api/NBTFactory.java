@@ -17,6 +17,11 @@ import java.util.ArrayList;
  */
 public class NBTFactory
 {
+    /** Static factory. */
+    private NBTFactory()
+    {
+    }
+
     /**
      * Creates an empty compound tag.
      *

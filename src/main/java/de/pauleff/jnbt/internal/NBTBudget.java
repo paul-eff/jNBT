@@ -8,6 +8,7 @@ import java.util.Objects;
  * Internal per-operation accounting shared by the binary and SNBT implementations.
  *
  * @since 2.0
+ * @hidden
  */
 public final class NBTBudget
 {

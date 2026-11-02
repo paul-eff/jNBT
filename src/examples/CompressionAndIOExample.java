@@ -1,6 +1,5 @@
 import de.pauleff.jnbt.api.*;
 import de.pauleff.jnbt.formats.binary.Compression_Types;
-import de.pauleff.jnbt.formats.binary.NBTFileHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +30,9 @@ public class CompressionAndIOExample
         System.out.println("  NONE: " + noneFile.length() + " bytes");
 
         // Readers detect compression from the file header.
-        Compression_Types gzipDetected = NBTFileHandler.getCompressionType(gzipFile);
-        Compression_Types zlibDetected = NBTFileHandler.getCompressionType(zlibFile);
-        Compression_Types noneDetected = NBTFileHandler.getCompressionType(noneFile);
+        Compression_Types gzipDetected = NBTFileFactory.getCompressionType(gzipFile);
+        Compression_Types zlibDetected = NBTFileFactory.getCompressionType(zlibFile);
+        Compression_Types noneDetected = NBTFileFactory.getCompressionType(noneFile);
 
         System.out.println("\nDetected compression:");
         System.out.println("  GZIP file: " + gzipDetected.getName());
@@ -65,7 +64,7 @@ public class CompressionAndIOExample
 
         // Without an explicit type, writing keeps the existing file compression.
         NBTFileFactory.writeNBTFile(gzipFile, modifiedData);
-        Compression_Types afterModification = NBTFileHandler.getCompressionType(gzipFile);
+        Compression_Types afterModification = NBTFileFactory.getCompressionType(gzipFile);
         System.out.println("  After modification: " + afterModification.getName());
 
         // Opening a missing file wraps the I/O error in a RuntimeException.

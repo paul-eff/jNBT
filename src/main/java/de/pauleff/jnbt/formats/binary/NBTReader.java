@@ -3,6 +3,7 @@ package de.pauleff.jnbt.formats.binary;
 import de.pauleff.jnbt.api.ICompoundTag;
 import de.pauleff.jnbt.api.INBTReader;
 import de.pauleff.jnbt.api.NBTLimits;
+import de.pauleff.jnbt.api.NBTFileFactory;
 import de.pauleff.jnbt.core.*;
 import de.pauleff.jnbt.internal.NBTBudget;
 import de.pauleff.jnbt.util.NBTTags;
@@ -49,7 +50,7 @@ public class NBTReader implements INBTReader
         this.budget = new NBTBudget(limits);
         try
         {
-            DataInputStream baseStream = NBTFileHandler.loadNBTToReader(nbtFile);
+            DataInputStream baseStream = NBTFileFactory.loadNBTToReader(nbtFile);
             this.stream = new PositionTrackingDataInputStream(baseStream, limits.maxBytes());
         } catch (IOException e)
         {
@@ -82,15 +83,14 @@ public class NBTReader implements INBTReader
     }
 
     /**
-     * Wraps a byte array in an input stream that counts bytes read.
+     * Wraps already-decompressed bytes in a standard data input stream.
      *
      * @param chunkData the byte array to convert
-     * @return a {@link PositionTrackingDataInputStream} with a byte count
+     * @return the data input stream
      */
-    public static PositionTrackingDataInputStream byteArrayToDataInputStream(byte[] chunkData)
+    public static DataInputStream byteArrayToDataInputStream(byte[] chunkData)
     {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(chunkData);
-        return new PositionTrackingDataInputStream(byteArrayInputStream);
+        return new DataInputStream(new ByteArrayInputStream(chunkData));
     }
 
     /**

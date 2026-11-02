@@ -3,22 +3,75 @@ package de.pauleff.jnbt.api;
 import de.pauleff.jnbt.core.Tag;
 import de.pauleff.jnbt.core.Tag_Compound;
 import de.pauleff.jnbt.formats.binary.Compression_Types;
-import de.pauleff.jnbt.formats.binary.NBTFileHandler;
 import de.pauleff.jnbt.formats.binary.NBTReader;
 import de.pauleff.jnbt.formats.binary.NBTWriter;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 /**
- * Reads, writes, copies, and updates binary NBT files.
+ * Reads, writes, and updates binary NBT files.
  *
  * @since 1.3
  */
 public class NBTFileFactory
 {
+    /** Static factory. */
+    private NBTFileFactory()
+    {
+    }
+
+    /**
+     * Opens a decompressed NBT input stream. The caller must close it.
+     *
+     * @param file the source file
+     * @return the decompressed input stream
+     * @throws IOException if opening or decompression initialization fails
+     */
+    public static DataInputStream loadNBTToReader(File file) throws IOException
+    {
+        if (Files.notExists(file.toPath()))
+        {
+            throw new FileNotFoundException(String.format("The file %s doesn't exist!", file.getPath()));
+        }
+
+        InputStream fileStream = switch (getCompressionType(file))
+        {
+            case NONE ->
+            {
+                System.out.printf("The file %s was uncompressed.%n", file.getName());
+                yield new FileInputStream(file);
+            }
+            case GZIP ->
+            {
+                System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.GZIP.getName());
+                yield new GZIPInputStream(new FileInputStream(file));
+            }
+            case ZLIB ->
+            {
+                System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.ZLIB.getName());
+                yield new InflaterInputStream(new FileInputStream(file));
+            }
+            default -> throw new IllegalArgumentException("Unsupported compression: " + file.getName());
+        };
+        return new DataInputStream(fileStream);
+    }
+
+    /**
+     * Detects compression from the file header. Returns {@code NONE} if detection fails.
+     *
+     * @param file the source file
+     * @return the detected compression
+     */
+    public static Compression_Types getCompressionType(File file)
+    {
+        if (isGzipped(file)) return Compression_Types.GZIP;
+        if (isZlibed(file)) return Compression_Types.ZLIB;
+        return Compression_Types.NONE;
+    }
+
     /**
      * Creates a reader that automatically detects compression format.
      *
@@ -128,20 +181,6 @@ public class NBTFileFactory
     }
 
     /**
-     * Copies an NBT file to a new location, preserving compression format.
-     *
-     * @param source      the source {@link java.io.File} to copy from
-     * @param destination the destination {@link java.io.File} to copy to
-     * @throws IOException if the copy operation fails
-     */
-    public static void copyNBTFile(File source, File destination) throws IOException
-    {
-        ICompoundTag data = readNBTFile(source);
-        Compression_Types compression = NBTFileHandler.getCompressionType(source);
-        writeNBTFile(destination, data, compression);
-    }
-
-    /**
      * Checks whether the whole file can be read as NBT.
      *
      * @param nbtFile the file to validate
@@ -192,20 +231,6 @@ public class NBTFileFactory
     }
 
     /**
-     * Creates a backup of an NBT file before modification.
-     *
-     * @param original the original {@link java.io.File}
-     * @return the backup {@link java.io.File}
-     * @throws IOException if the backup operation fails
-     */
-    public static File createBackup(File original) throws IOException
-    {
-        File backup = new File(original.getParent(), original.getName() + ".backup");
-        copyNBTFile(original, backup);
-        return backup;
-    }
-
-    /**
      * Merges files and keeps the base file's compression. Matching compound children are merged
      * recursively. Other matching children are replaced.
      *
@@ -221,7 +246,7 @@ public class NBTFileFactory
 
         mergeCompounds(base, merge);
 
-        Compression_Types compression = NBTFileHandler.getCompressionType(baseFile);
+        Compression_Types compression = getCompressionType(baseFile);
         writeNBTFile(outputFile, base, compression);
     }
 
@@ -303,6 +328,59 @@ public class NBTFileFactory
                     target.setTag(sourceTag);
                 }
             }
+        }
+    }
+
+    /**
+     * Checks for a GZIP header. Returns false on read errors.
+     *
+     * @param file the target file to check
+     * @return {@code true} if the file has GZIP magic bytes, {@code false} otherwise
+     */
+    private static boolean isGzipped(File file)
+    {
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
+        {
+            if (raf.length() < 2) return false;
+            int magic = raf.read() & 0xff | (raf.read() << 8) & 0xff00;
+            return magic == GZIPInputStream.GZIP_MAGIC;
+        } catch (IOException e)
+        {
+            System.err.printf("Warning: Could not check GZIP magic for file %s: %s%n",
+                    file.getName(), e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Checks for a ZLIB header. Returns false on read errors.
+     *
+     * @param file the target file to check
+     * @return {@code true} if the file has ZLIB magic bytes, {@code false} otherwise
+     */
+    private static boolean isZlibed(File file)
+    {
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
+        {
+            if (raf.length() < 2) return false;
+
+            byte[] header = new byte[2];
+            raf.readFully(header);
+
+            // Check zlib header: first two bytes form a 16-bit value that must be divisible by 31
+            int headerValue = ((header[0] & 0xFF) << 8) | (header[1] & 0xFF);
+
+            if (headerValue % 31 != 0)
+            {
+                return false;
+            }
+
+            // The low four bits hold the compression method. Method 8 is DEFLATE.
+            int compressionMethod = header[0] & 0x0F;
+            return compressionMethod == 8;
+        } catch (IOException e)
+        {
+            return false;
         }
     }
 }

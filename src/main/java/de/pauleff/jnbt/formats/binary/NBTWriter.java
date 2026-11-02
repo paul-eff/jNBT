@@ -49,7 +49,7 @@ public class NBTWriter implements INBTWriter
             throw new FileNotFoundException(String.format("The file %s doesn't exist. It's needed to determine the compression type!", nbtFile.getPath()));
         }
         this.file = nbtFile;
-        this.compression = NBTFileHandler.getCompressionType(nbtFile);
+        this.compression = NBTFileFactory.getCompressionType(nbtFile);
     }
 
     /**

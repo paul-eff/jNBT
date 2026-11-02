@@ -10,7 +10,7 @@ import java.io.InputStream;
  *
  * @since 1.5
  */
-public class PositionTrackingDataInputStream
+class PositionTrackingDataInputStream
 {
     private final DataInputStream dataStream;
     private final long maxBytes;
@@ -24,7 +24,7 @@ public class PositionTrackingDataInputStream
      *
      * @param in the input stream to wrap
      */
-    public PositionTrackingDataInputStream(InputStream in)
+    PositionTrackingDataInputStream(InputStream in)
     {
         this(in, Long.MAX_VALUE);
     }
@@ -36,7 +36,7 @@ public class PositionTrackingDataInputStream
      * @param maxBytes the maximum bytes that may be read
      * @throws IllegalArgumentException if maxBytes is not positive
      */
-    public PositionTrackingDataInputStream(InputStream in, long maxBytes)
+    PositionTrackingDataInputStream(InputStream in, long maxBytes)
     {
         if (maxBytes < 1) throw new IllegalArgumentException("Byte limit must be positive");
         this.maxBytes = maxBytes;
@@ -53,7 +53,7 @@ public class PositionTrackingDataInputStream
      * @param b the destination array
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public void readFully(byte[] b) throws IOException
+    void readFully(byte[] b) throws IOException
     {
         checkAvailable(b.length);
         dataStream.readFully(b);
@@ -68,7 +68,7 @@ public class PositionTrackingDataInputStream
      * @param len the number of bytes to read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public void readFully(byte[] b, int off, int len) throws IOException
+    void readFully(byte[] b, int off, int len) throws IOException
     {
         checkAvailable(len);
         dataStream.readFully(b, off, len);
@@ -81,7 +81,7 @@ public class PositionTrackingDataInputStream
      * @return the value read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public byte readByte() throws IOException
+    byte readByte() throws IOException
     {
         checkAvailable(1);
         byte result = dataStream.readByte();
@@ -95,7 +95,7 @@ public class PositionTrackingDataInputStream
      * @return the value read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public int readUnsignedByte() throws IOException
+    int readUnsignedByte() throws IOException
     {
         checkAvailable(1);
         int result = dataStream.readUnsignedByte();
@@ -109,7 +109,7 @@ public class PositionTrackingDataInputStream
      * @return the value read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public short readShort() throws IOException
+    short readShort() throws IOException
     {
         checkAvailable(2);
         short result = dataStream.readShort();
@@ -123,7 +123,7 @@ public class PositionTrackingDataInputStream
      * @return the value read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public int readUnsignedShort() throws IOException
+    int readUnsignedShort() throws IOException
     {
         checkAvailable(2);
         int result = dataStream.readUnsignedShort();
@@ -137,7 +137,7 @@ public class PositionTrackingDataInputStream
      * @return the decoded string
      * @throws IOException if the field is truncated, malformed, or exceeds the remaining byte budget
      */
-    public String readUTF() throws IOException
+    String readUTF() throws IOException
     {
         return readUTF(readUnsignedShort());
     }
@@ -166,7 +166,7 @@ public class PositionTrackingDataInputStream
      * @return the value read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public int readInt() throws IOException
+    int readInt() throws IOException
     {
         checkAvailable(4);
         int result = dataStream.readInt();
@@ -180,7 +180,7 @@ public class PositionTrackingDataInputStream
      * @return the value read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public long readLong() throws IOException
+    long readLong() throws IOException
     {
         checkAvailable(8);
         long result = dataStream.readLong();
@@ -194,7 +194,7 @@ public class PositionTrackingDataInputStream
      * @return the value read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public float readFloat() throws IOException
+    float readFloat() throws IOException
     {
         checkAvailable(4);
         float result = dataStream.readFloat();
@@ -208,7 +208,7 @@ public class PositionTrackingDataInputStream
      * @return the value read
      * @throws IOException if the stream cannot be read or the byte limit is exceeded
      */
-    public double readDouble() throws IOException
+    double readDouble() throws IOException
     {
         checkAvailable(8);
         double result = dataStream.readDouble();
@@ -235,7 +235,7 @@ public class PositionTrackingDataInputStream
      *
      * @throws IOException if closing the stream fails
      */
-    public void close() throws IOException
+    void close() throws IOException
     {
         dataStream.close();
     }
@@ -245,7 +245,7 @@ public class PositionTrackingDataInputStream
      *
      * @return Number of bytes read so far
      */
-    public long getBytesRead()
+    long getBytesRead()
     {
         return bytesRead;
     }
@@ -255,7 +255,7 @@ public class PositionTrackingDataInputStream
      *
      * @return Current tag depth (0 = root)
      */
-    public int getTagDepth()
+    int getTagDepth()
     {
         return tagDepth;
     }
@@ -267,7 +267,7 @@ public class PositionTrackingDataInputStream
      * @param tagName the tag name
      * @param tagType the NBT type ID
      */
-    public void setCurrentContext(int depth, String tagName, int tagType)
+    void setCurrentContext(int depth, String tagName, int tagType)
     {
         this.tagDepth = depth;
         this.currentTagName = tagName;
@@ -280,7 +280,7 @@ public class PositionTrackingDataInputStream
      * @param baseMessage the base error message
      * @return the message with stream position and tag context
      */
-    public String createContextualError(String baseMessage)
+    String createContextualError(String baseMessage)
     {
         StringBuilder error = new StringBuilder(baseMessage);
         error.append(String.format(" [Position: %d bytes", bytesRead));
