@@ -5,11 +5,11 @@ import de.pauleff.jnbt.core.Tag_Compound;
 import de.pauleff.jnbt.formats.binary.Compression_Types;
 import de.pauleff.jnbt.formats.binary.NBTReader;
 import de.pauleff.jnbt.formats.binary.NBTWriter;
+import de.pauleff.jnbt.internal.StandaloneCompressedInputStream;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.InflaterInputStream;
 
 /**
  * Reads, writes, and updates binary NBT files.
@@ -24,7 +24,9 @@ public class NBTFileFactory
     }
 
     /**
-     * Opens a decompressed NBT input stream. The caller must close it.
+     * Opens a decompressed NBT input stream. The caller must close it. Reading to EOF
+     * validates one GZIP member or ZLIB stream, including its checksum, and rejects
+     * trailing compressed bytes or additional members. Closing alone does not validate it.
      *
      * @param file the source file
      * @return the decompressed input stream
@@ -37,26 +39,28 @@ public class NBTFileFactory
             throw new FileNotFoundException(String.format("The file %s doesn't exist!", file.getPath()));
         }
 
-        InputStream fileStream = switch (getCompressionType(file))
+        Compression_Types compression = getCompressionType(file);
+        InputStream fileStream = new FileInputStream(file);
+        try
         {
-            case NONE ->
+            return new DataInputStream(switch (compression)
             {
-                System.out.printf("The file %s was uncompressed.%n", file.getName());
-                yield new FileInputStream(file);
-            }
-            case GZIP ->
+                case NONE -> fileStream;
+                case GZIP -> new StandaloneCompressedInputStream(fileStream, true);
+                case ZLIB -> new StandaloneCompressedInputStream(fileStream, false);
+                default -> throw new IllegalArgumentException("Unsupported compression: " + file.getName());
+            });
+        } catch (IOException | RuntimeException | Error e)
+        {
+            try
             {
-                System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.GZIP.getName());
-                yield new GZIPInputStream(new FileInputStream(file));
-            }
-            case ZLIB ->
+                fileStream.close();
+            } catch (IOException closeError)
             {
-                System.out.printf("The file %s was compressed with %s, decompressing...%n", file.getName(), Compression_Types.ZLIB.getName());
-                yield new InflaterInputStream(new FileInputStream(file));
+                e.addSuppressed(closeError);
             }
-            default -> throw new IllegalArgumentException("Unsupported compression: " + file.getName());
-        };
-        return new DataInputStream(fileStream);
+            throw e;
+        }
     }
 
     /**
@@ -73,7 +77,8 @@ public class NBTFileFactory
     }
 
     /**
-     * Creates a reader that automatically detects compression format.
+     * Creates a standalone-file reader that automatically detects compression format.
+     * Reading requires exactly one root compound and validates the complete file.
      *
      * @param nbtFile the file to read NBT data from
      * @return new {@link INBTReader} ready to parse the file
@@ -84,7 +89,8 @@ public class NBTFileFactory
     }
 
     /**
-     * Creates a reader from an existing data stream.
+     * Creates a reader from an existing decompressed data stream. Reads one root compound
+     * without checking for trailing data. The stream is closed after reading.
      *
      * @param dis the stream containing NBT data
      * @return new {@link INBTReader} ready to parse the stream
@@ -121,7 +127,8 @@ public class NBTFileFactory
     }
 
     /**
-     * Reads an NBT file completely and returns the root compound tag.
+     * Reads exactly one root compound and validates the complete standalone file.
+     * Trailing bytes, additional roots, and additional compression members are rejected.
      *
      * @param nbtFile the file to read
      * @return the root {@link ICompoundTag} containing all NBT data
@@ -184,7 +191,7 @@ public class NBTFileFactory
      * Checks whether the whole file can be read as NBT.
      *
      * @param nbtFile the file to validate
-     * @return {@code true} if the file appears to be valid NBT, {@code false} otherwise
+     * @return {@code true} if the complete standalone file is valid, {@code false} otherwise
      */
     public static boolean isValidNBTFile(File nbtFile)
     {

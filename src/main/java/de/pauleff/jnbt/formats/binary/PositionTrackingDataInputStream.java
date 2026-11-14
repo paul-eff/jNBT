@@ -231,6 +231,20 @@ class PositionTrackingDataInputStream
     }
 
     /**
+     * Probes EOF after a standalone root, forcing compression trailer validation.
+     * The probe permits EOF at the exact byte limit and never drains trailing payloads.
+     *
+     * @throws IOException if trailing data exists or compression validation fails
+     */
+    void requireEnd() throws IOException
+    {
+        if (dataStream.read() != -1)
+        {
+            throw new IOException(createContextualError("Trailing data after NBT root"));
+        }
+    }
+
+    /**
      * Closes the wrapped input stream.
      *
      * @throws IOException if closing the stream fails

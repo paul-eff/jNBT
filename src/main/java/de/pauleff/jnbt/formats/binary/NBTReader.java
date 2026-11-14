@@ -26,6 +26,7 @@ public class NBTReader implements INBTReader
 {
     private final PositionTrackingDataInputStream stream;
     private final NBTBudget budget;
+    private final boolean standaloneFile;
 
     /**
      * Creates a reader by passing it the target NBT file.
@@ -38,7 +39,8 @@ public class NBTReader implements INBTReader
     }
 
     /**
-     * Creates a file reader with configurable limits applied after decompression.
+     * Creates a standalone-file reader with configurable limits applied after decompression.
+     * Reading validates compression integrity and rejects trailing data or additional members.
      *
      * @param nbtFile the target NBT file
      * @param limits  the limits for this operation
@@ -48,6 +50,7 @@ public class NBTReader implements INBTReader
     public NBTReader(File nbtFile, NBTLimits limits)
     {
         this.budget = new NBTBudget(limits);
+        this.standaloneFile = true;
         try
         {
             DataInputStream baseStream = NBTFileFactory.loadNBTToReader(nbtFile);
@@ -71,6 +74,7 @@ public class NBTReader implements INBTReader
 
     /**
      * Creates a stream reader with configurable limits. The input must already be decompressed.
+     * Reads one root compound without checking for trailing data or compression integrity.
      *
      * @param dis    the binary NBT input stream, closed after reading
      * @param limits the limits for this operation
@@ -79,6 +83,7 @@ public class NBTReader implements INBTReader
     public NBTReader(DataInputStream dis, NBTLimits limits)
     {
         this.budget = new NBTBudget(limits);
+        this.standaloneFile = false;
         this.stream = new PositionTrackingDataInputStream(dis, limits.maxBytes());
     }
 
@@ -110,18 +115,17 @@ public class NBTReader implements INBTReader
      */
     public ICompoundTag read() throws IOException
     {
-        try
+        try (this)
         {
-            return (Tag_Compound) readNBTTag(0, -1);
+            Tag_Compound root = (Tag_Compound) readNBTTag(0, -1);
+            if (standaloneFile) stream.requireEnd();
+            return root;
         } catch (IOException e)
         {
             throw e;
         } catch (Exception e)
         {
             throw new IOException(stream.createContextualError("Failed to parse NBT data: " + e.getMessage()), e);
-        } finally
-        {
-            this.close();
         }
     }
 
