@@ -67,13 +67,13 @@ public class CompressionAndIOExample
         Compression_Types afterModification = NBTFileFactory.getCompressionType(gzipFile);
         System.out.println("  After modification: " + afterModification.getName());
 
-        // Opening a missing file wraps the I/O error in a RuntimeException.
+        // Opening a missing file reports a checked I/O error.
         File invalidFile = new File("./invalid.dat");
         try
         {
             NBTFileFactory.readNBTFile(invalidFile);
             System.out.println("Should not reach here");
-        } catch (RuntimeException e)
+        } catch (IOException e)
         {
             System.out.println("  Correctly caught error: " + e.getMessage().substring(0, Math.min(50, e.getMessage().length())) + "...");
         }

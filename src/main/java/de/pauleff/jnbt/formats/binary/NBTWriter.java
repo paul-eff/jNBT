@@ -93,12 +93,12 @@ public class NBTWriter implements INBTWriter
      *
      * @param dos    the binary output stream, closed after writing or validation failure
      * @param limits the limits for this operation
-     * @throws NullPointerException if limits is null
+     * @throws NullPointerException if dos or limits is null
      */
     public NBTWriter(DataOutputStream dos, NBTLimits limits)
     {
         this.limits = java.util.Objects.requireNonNull(limits, "limits");
-        this.stream = dos;
+        this.stream = Objects.requireNonNull(dos, "dos");
         this.file = null;
         this.compression = null;
     }
@@ -141,31 +141,35 @@ public class NBTWriter implements INBTWriter
      */
     public void write(ICompoundTag root) throws IOException
     {
-        if (root == null)
-        {
-            throw new IllegalArgumentException("Root compound tag cannot be null");
-        }
         try (this)
         {
             if (closed)
             {
                 throw new IOException("NBT writer is closed");
             }
-            validateForWrite(root, true, 0, new NBTBudget(limits),
-                    Collections.newSetFromMap(new IdentityHashMap<>()));
-            if (file != null)
+            if (root == null)
             {
-                NBTFileSave.write(file.toPath(), compression, output -> writeNBTTag(root, output));
-            } else
-            {
-                writeNBTTag(root, stream);
+                throw new IllegalArgumentException("Root compound tag cannot be null");
             }
-        } catch (IOException e)
-        {
-            throw e;
-        } catch (Exception e)
-        {
-            throw new IOException("Failed to write NBT data: " + e.getMessage(), e);
+            try
+            {
+                validateForWrite(root, true, 0, new NBTBudget(limits),
+                        Collections.newSetFromMap(new IdentityHashMap<>()));
+                if (file != null)
+                {
+                    NBTFileSave.write(file.toPath(), compression, output -> writeNBTTag(root, output));
+                } else
+                {
+                    writeNBTTag(root, stream);
+                }
+            } catch (IOException e)
+            {
+                throw e;
+            } catch (Exception e)
+            {
+                throw new IOException("Failed to write NBT data: " +
+                        (e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()), e);
+            }
         }
     }
 

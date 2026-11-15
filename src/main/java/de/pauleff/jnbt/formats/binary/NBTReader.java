@@ -27,13 +27,15 @@ public class NBTReader implements INBTReader
     private final PositionTrackingDataInputStream stream;
     private final NBTBudget budget;
     private final boolean standaloneFile;
+    private boolean closed;
 
     /**
      * Creates a reader by passing it the target NBT file.
      *
      * @param nbtFile the target NBT file.
+     * @throws IOException if opening or decompression initialization fails
      */
-    public NBTReader(File nbtFile)
+    public NBTReader(File nbtFile) throws IOException
     {
         this(nbtFile, NBTLimits.DEFAULT);
     }
@@ -44,22 +46,15 @@ public class NBTReader implements INBTReader
      *
      * @param nbtFile the target NBT file
      * @param limits  the limits for this operation
-     * @throws NullPointerException if limits is null
-     * @throws RuntimeException     if the file stream or decompression wrapper cannot be opened
+     * @throws NullPointerException if nbtFile or limits is null
+     * @throws IOException if the file stream or decompression wrapper cannot be opened
      */
-    public NBTReader(File nbtFile, NBTLimits limits)
+    public NBTReader(File nbtFile, NBTLimits limits) throws IOException
     {
         this.budget = new NBTBudget(limits);
         this.standaloneFile = true;
-        try
-        {
-            DataInputStream baseStream = NBTFileFactory.loadNBTToReader(nbtFile);
-            this.stream = new PositionTrackingDataInputStream(baseStream, limits.maxBytes());
-        } catch (IOException e)
-        {
-            throw new RuntimeException("Failed to initialize NBT reader for file: " +
-                    nbtFile.getAbsolutePath(), e);
-        }
+        DataInputStream baseStream = NBTFileFactory.loadNBTToReader(nbtFile);
+        this.stream = new PositionTrackingDataInputStream(baseStream, limits.maxBytes());
     }
 
     /**
@@ -78,7 +73,7 @@ public class NBTReader implements INBTReader
      *
      * @param dis    the binary NBT input stream, closed after reading
      * @param limits the limits for this operation
-     * @throws NullPointerException if limits is null
+     * @throws NullPointerException if dis or limits is null
      */
     public NBTReader(DataInputStream dis, NBTLimits limits)
     {
@@ -99,10 +94,15 @@ public class NBTReader implements INBTReader
     }
 
     /**
-     * {@inheritDoc}
+     * Closes the reader and its input stream. Repeated calls have no effect, even
+     * if the first close failed.
+     *
+     * @throws IOException if closing the stream fails
      */
     public void close() throws IOException
     {
+        if (closed) return;
+        closed = true;
         stream.close();
     }
 
@@ -117,15 +117,20 @@ public class NBTReader implements INBTReader
     {
         try (this)
         {
-            Tag_Compound root = (Tag_Compound) readNBTTag(0, -1);
-            if (standaloneFile) stream.requireEnd();
-            return root;
-        } catch (IOException e)
-        {
-            throw e;
-        } catch (Exception e)
-        {
-            throw new IOException(stream.createContextualError("Failed to parse NBT data: " + e.getMessage()), e);
+            if (closed) throw new IOException("NBT reader is closed");
+            try
+            {
+                Tag_Compound root = (Tag_Compound) readNBTTag(0, -1);
+                if (standaloneFile) stream.requireEnd();
+                return root;
+            } catch (IOException e)
+            {
+                throw e;
+            } catch (Exception e)
+            {
+                throw new IOException(stream.createContextualError("Failed to parse NBT data: " +
+                        (e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage())), e);
+            }
         }
     }
 
@@ -172,9 +177,19 @@ public class NBTReader implements INBTReader
     {
         try
         {
-            int type = stream.readByte();
+            stream.setCurrentContext(depth, "", -1);
+            int type = stream.readUnsignedByte();
             String name = "";
             stream.setCurrentContext(depth, name, type);
+
+            if (depth == 0 && type != NBTTags.Tag_Compound.getId())
+            {
+                throw new IOException(stream.createContextualError("NBT root must be a compound tag; found type " + type));
+            }
+            if (NBTTags.getById(type) == null)
+            {
+                throw new IOException(stream.createContextualError("Unknown tag type: " + type));
+            }
 
             if (type != NBTTags.Tag_End.getId())
             {
@@ -190,7 +205,8 @@ public class NBTReader implements INBTReader
             {
                 throw e;
             }
-            throw new IOException(stream.createContextualError("Failed to read NBT tag: " + e.getMessage()), e);
+            throw new IOException(stream.createContextualError("Failed to read NBT tag: " +
+                    (e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage())), e);
         }
     }
 
@@ -247,7 +263,7 @@ public class NBTReader implements INBTReader
             case Tag_String:
                 return new Tag_String(name, readString());
             case Tag_List:
-                int listType = stream.readByte();
+                int listType = stream.readUnsignedByte();
                 if (NBTTags.getById(listType) == null && listType != 0) // 0 is valid for empty lists
                 {
                     throw new IOException(stream.createContextualError(
@@ -265,8 +281,11 @@ public class NBTReader implements INBTReader
                 ArrayList<Tag<?>> tagList = new ArrayList<>(Math.min(arrayLength, 1000)); // Limit the initial allocation for large lists.
                 for (int i = 0; i < arrayLength; i++)
                 {
+                    stream.enterListElement(name, i);
                     tagList.add(readNBTPayload(listType, "", depth + 1));
+                    stream.exitListElement();
                 }
+                stream.setCurrentContext(depth, name, type);
                 return new Tag_List(name, listType, tagList);
             case Tag_Compound:
                 tagList = new ArrayList<>(16);
@@ -275,6 +294,7 @@ public class NBTReader implements INBTReader
                 {
                     Tag<?> tag = readNBTTag(depth + 1, tagList.size());
                     if (tag.getId() == NBTTags.Tag_End.getId()) break;
+                    stream.setCurrentContext(depth, name, type);
                     budget.allocate(64);
                     if (!names.add(tag.getName()))
                     {
@@ -283,6 +303,7 @@ public class NBTReader implements INBTReader
                     }
                     tagList.add(tag);
                 }
+                stream.setCurrentContext(depth, name, type);
                 return new Tag_Compound(name, tagList);
             case Tag_Int_Array:
                 arrayLength = stream.readInt();

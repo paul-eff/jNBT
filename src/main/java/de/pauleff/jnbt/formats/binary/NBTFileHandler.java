@@ -33,7 +33,19 @@ class NBTFileHandler
         {
             throw new IllegalArgumentException("Unsupported output compression: " + compression);
         }
-        OutputStream raw = new BufferedOutputStream(Files.newOutputStream(path));
+        return wrapOutput(new BufferedOutputStream(Files.newOutputStream(path)), compression);
+    }
+
+    /**
+     * Wraps output with compression, taking ownership of the raw stream even on failure.
+     *
+     * @param raw the raw output
+     * @param compression the output compression
+     * @return the compressed data output, owned by the caller
+     * @throws IOException if compression initialization fails
+     */
+    static DataOutputStream wrapOutput(OutputStream raw, Compression_Types compression) throws IOException
+    {
         try
         {
             return new DataOutputStream(switch (compression)
@@ -48,7 +60,7 @@ class NBTFileHandler
             try
             {
                 raw.close();
-            } catch (IOException closeFailure)
+            } catch (IOException | RuntimeException | Error closeFailure)
             {
                 e.addSuppressed(closeFailure);
             }

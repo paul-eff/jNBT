@@ -3,10 +3,13 @@ package de.pauleff.jnbt.formats.binary;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.FilterInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Objects;
 
 /**
- * Wraps a data input stream and counts bytes from completed reads for error messages.
+ * Wraps a data input stream and counts consumed bytes, including partial reads for error messages.
  *
  * @since 1.5
  */
@@ -18,6 +21,7 @@ class PositionTrackingDataInputStream
     private int tagDepth;
     private String currentTagName;
     private int currentTagType;
+    private final ArrayList<String> listPath = new ArrayList<>();
 
     /**
      * Creates a position tracking input stream.
@@ -40,7 +44,24 @@ class PositionTrackingDataInputStream
     {
         if (maxBytes < 1) throw new IllegalArgumentException("Byte limit must be positive");
         this.maxBytes = maxBytes;
-        this.dataStream = (in instanceof DataInputStream) ? (DataInputStream) in : new DataInputStream(in);
+        this.dataStream = new DataInputStream(new FilterInputStream(Objects.requireNonNull(in, "in"))
+        {
+            @Override
+            public int read() throws IOException
+            {
+                int value = in.read();
+                if (value >= 0) bytesRead++;
+                return value;
+            }
+
+            @Override
+            public int read(byte[] bytes, int offset, int length) throws IOException
+            {
+                int count = in.read(bytes, offset, length);
+                if (count > 0) bytesRead += count;
+                return count;
+            }
+        });
         this.bytesRead = 0;
         this.tagDepth = 0;
         this.currentTagName = "";
@@ -57,7 +78,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(b.length);
         dataStream.readFully(b);
-        bytesRead += b.length;
     }
 
     /**
@@ -72,7 +92,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(len);
         dataStream.readFully(b, off, len);
-        bytesRead += len;
     }
 
     /**
@@ -85,7 +104,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(1);
         byte result = dataStream.readByte();
-        bytesRead++;
         return result;
     }
 
@@ -99,7 +117,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(1);
         int result = dataStream.readUnsignedByte();
-        bytesRead++;
         return result;
     }
 
@@ -113,7 +130,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(2);
         short result = dataStream.readShort();
-        bytesRead += 2;
         return result;
     }
 
@@ -127,7 +143,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(2);
         int result = dataStream.readUnsignedShort();
-        bytesRead += 2;
         return result;
     }
 
@@ -170,7 +185,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(4);
         int result = dataStream.readInt();
-        bytesRead += 4;
         return result;
     }
 
@@ -184,7 +198,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(8);
         long result = dataStream.readLong();
-        bytesRead += 8;
         return result;
     }
 
@@ -198,7 +211,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(4);
         float result = dataStream.readFloat();
-        bytesRead += 4;
         return result;
     }
 
@@ -212,7 +224,6 @@ class PositionTrackingDataInputStream
     {
         checkAvailable(8);
         double result = dataStream.readDouble();
-        bytesRead += 8;
         return result;
     }
 
@@ -289,6 +300,23 @@ class PositionTrackingDataInputStream
     }
 
     /**
+     * Adds a zero-based list element to the current parse path.
+     *
+     * @param name the list name, empty for unnamed nested lists
+     * @param index the element index
+     */
+    void enterListElement(String name, int index)
+    {
+        listPath.add((name.isEmpty() ? "" : "'" + name + "'") + "[" + index + "]");
+    }
+
+    /** Removes a successfully parsed list element from the current path. */
+    void exitListElement()
+    {
+        listPath.removeLast();
+    }
+
+    /**
      * Creates a detailed error message with current parsing context.
      *
      * @param baseMessage the base error message
@@ -307,6 +335,11 @@ class PositionTrackingDataInputStream
         if (!currentTagName.isEmpty())
         {
             error.append(String.format(", Tag: '%s'", currentTagName));
+        }
+
+        if (!listPath.isEmpty())
+        {
+            error.append(", List path: ").append(String.join("", listPath));
         }
 
         if (currentTagType >= 0)

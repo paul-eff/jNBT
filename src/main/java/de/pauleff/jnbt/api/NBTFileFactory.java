@@ -41,26 +41,13 @@ public class NBTFileFactory
 
         Compression_Types compression = getCompressionType(file);
         InputStream fileStream = new FileInputStream(file);
-        try
+        return new DataInputStream(switch (compression)
         {
-            return new DataInputStream(switch (compression)
-            {
-                case NONE -> fileStream;
-                case GZIP -> new StandaloneCompressedInputStream(fileStream, true);
-                case ZLIB -> new StandaloneCompressedInputStream(fileStream, false);
-                default -> throw new IllegalArgumentException("Unsupported compression: " + file.getName());
-            });
-        } catch (IOException | RuntimeException | Error e)
-        {
-            try
-            {
-                fileStream.close();
-            } catch (IOException closeError)
-            {
-                e.addSuppressed(closeError);
-            }
-            throw e;
-        }
+            case NONE -> fileStream;
+            case GZIP -> new StandaloneCompressedInputStream(fileStream, true);
+            case ZLIB -> new StandaloneCompressedInputStream(fileStream, false);
+            default -> throw new IllegalArgumentException("Unsupported compression: " + file.getName());
+        });
     }
 
     /**
@@ -82,8 +69,9 @@ public class NBTFileFactory
      *
      * @param nbtFile the file to read NBT data from
      * @return new {@link INBTReader} ready to parse the file
+     * @throws IOException if opening or decompression initialization fails
      */
-    public static INBTReader createReader(File nbtFile)
+    public static INBTReader createReader(File nbtFile) throws IOException
     {
         return new NBTReader(nbtFile);
     }

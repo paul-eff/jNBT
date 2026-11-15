@@ -21,9 +21,11 @@ public final class StandaloneCompressedInputStream extends InflaterInputStream
     private final CRC32 crc = new CRC32();
     private boolean verified;
     private int remainingOffset;
+    private boolean closed;
 
     /**
-     * Opens a single compressed stream. The caller owns input cleanup if construction fails.
+     * Opens a single compressed stream and takes ownership of the input.
+     * Closes the input if header initialization fails.
      *
      * @param input the compressed source
      * @param gzip true for GZIP, false for ZLIB
@@ -39,6 +41,13 @@ public final class StandaloneCompressedInputStream extends InflaterInputStream
         } catch (IOException | RuntimeException | Error e)
         {
             inf.end();
+            try
+            {
+                input.close();
+            } catch (IOException | RuntimeException | Error closeFailure)
+            {
+                e.addSuppressed(closeFailure);
+            }
             throw e;
         }
     }
@@ -47,6 +56,7 @@ public final class StandaloneCompressedInputStream extends InflaterInputStream
     @Override
     public int read(byte[] bytes, int offset, int length) throws IOException
     {
+        if (closed) throw new IOException("Compressed input stream is closed");
         int count = super.read(bytes, offset, length);
         if (count > 0 && gzip) crc.update(bytes, offset, count);
         if (count == -1 && !verified)
@@ -74,6 +84,8 @@ public final class StandaloneCompressedInputStream extends InflaterInputStream
     @Override
     public void close() throws IOException
     {
+        if (closed) return;
+        closed = true;
         try
         {
             super.close();
