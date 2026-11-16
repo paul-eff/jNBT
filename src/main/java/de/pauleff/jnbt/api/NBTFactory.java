@@ -438,7 +438,8 @@ public class NBTFactory
     }
 
     /**
-     * Parses SNBT (Stringified NBT) text into an NBT tag structure.
+     * Parses SNBT (Stringified NBT) text into an NBT tag structure. Mixed lists use compound-list
+     * storage with empty-key wrappers as described by {@link SNBTParser}.
      *
      * @param snbt the SNBT string to parse
      * @return the parsed NBT tag structure
@@ -473,7 +474,8 @@ public class NBTFactory
     }
 
     /**
-     * Parses SNBT text into a list tag.
+     * Parses SNBT text into a list tag. Mixed lists expose the compound-wrapper storage form
+     * described by {@link SNBTParser}.
      *
      * @param snbt the SNBT string to parse (must represent a list)
      * @return the parsed list tag

@@ -121,6 +121,17 @@ class ResourceLimitsProbe
                 rejected(() -> new SNBTSerializer().serialize(root), "depth limit");
             }
         }
+        // Only 257 textual containers, but storage wrappers bring the compound root to depth 512.
+        String mixed = "[0,".repeat(255) + "[]" + "]".repeat(255);
+        Tag_Compound mixedRoot = (Tag_Compound) new SNBTParser("{x:" + mixed + "}").parse();
+        ByteArrayOutputStream mixedBytes = new ByteArrayOutputStream();
+        new NBTWriter(new DataOutputStream(mixedBytes)).write(mixedRoot);
+        read(mixedBytes.toByteArray(), NBTLimits.DEFAULT);
+        new SNBTParser(new SNBTSerializer().serialize(mixedRoot)).parse();
+        rejected(() -> new SNBTParser("[0," + mixed + "]").parse(), "depth limit");
+        // A mismatch after a deep homogeneous subtree must also account for the new wrapper.
+        String deepList = "[".repeat(511) + "0" + "]".repeat(511);
+        rejected(() -> new SNBTParser("[" + deepList + ",{}]").parse(), "depth limit");
         rejected(() -> new SNBTParser("[I;".repeat(20_000) + "1" + "]".repeat(20_000)).parse(), "scalar value");
         for (int type : new int[]{7, 9, 11, 12})
         {

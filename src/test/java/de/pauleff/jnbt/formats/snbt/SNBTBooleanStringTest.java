@@ -98,10 +98,29 @@ class SNBTBooleanStringTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"['true',false]", "[true,'false']", "[B;'true']", "[B;\"false\"]"})
+    @ValueSource(strings = {"[B;'true']", "[B;\"false\"]"})
     void quotedBooleansCannotBeUsedAsBytes(String input)
     {
         assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT(input));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"['true',false]", "[true,'false']"})
+    void quotedAndUnquotedBooleansUseSeparateStorageWrappers(String input) throws SNBTException
+    {
+        IListTag list = NBTFactory.parseListFromSNBT(input);
+        assertEquals(NBTTags.Tag_Compound.getId(), list.getListTypeID());
+        ICompoundTag first = assertInstanceOf(ICompoundTag.class, list.get(0));
+        ICompoundTag second = assertInstanceOf(ICompoundTag.class, list.get(1));
+        if (input.startsWith("['"))
+        {
+            assertEquals("true", first.getString(""));
+            assertEquals((byte) 0, second.getByte(""));
+        } else
+        {
+            assertEquals((byte) 1, first.getByte(""));
+            assertEquals("false", second.getString(""));
+        }
     }
 
     @ParameterizedTest

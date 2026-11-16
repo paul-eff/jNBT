@@ -12,7 +12,8 @@ import java.util.List;
 
 /**
  * Parses SNBT strings into NBT tags. Uses {@link NBTLimits#DEFAULT}
- * unless limits are supplied to the constructor.
+ * unless limits are supplied to the constructor. Mixed lists become homogeneous compound lists:
+ * each non-compound element is stored in a compound under an empty key.
  *
  * @since 1.6.0
  */
@@ -23,6 +24,8 @@ public class SNBTParser
     private Token currentToken;
     private NBTBudget budget;
     private int depth;
+    // Container height of the last parsed value, including generated storage wrappers.
+    private int valueDepth;
 
     /**
      * Creates a parser for the given SNBT input string.
@@ -88,27 +91,28 @@ public class SNBTParser
     private ITag<?> parseValue() throws SNBTException
     {
         budget.tag();
-        switch (currentToken.type())
+        valueDepth = 0;
+        ITag<?> value = switch (currentToken.type())
         {
-            case LBRACE:
+            case LBRACE ->
+            {
                 budget.depth(++depth);
                 try
                 {
-                    return parseCompound();
+                    yield parseCompound();
                 } finally
                 {
                     depth--;
                 }
-            case LBRACKET:
-                return parseListOrArray();
-            case STRING:
-                return parseStringValue();
-            case NUMBER:
-                return parseNumber();
-            default:
-                throw new SNBTException("Unexpected token: " + currentToken.type(),
+            }
+            case LBRACKET -> parseListOrArray();
+            case STRING -> parseStringValue();
+            case NUMBER -> parseNumber();
+            default -> throw new SNBTException("Unexpected token: " + currentToken.type(),
                         currentToken.position(), tokenizer.getInput());
-        }
+        };
+        budget.depth(depth + valueDepth);
+        return value;
     }
 
     /**
@@ -122,10 +126,12 @@ public class SNBTParser
         expect(TokenType.LBRACE);
         ICompoundTag compound = NBTFactory.createCompound();
         int children = 0;
+        int childDepth = 0;
 
         if (currentToken.type() == TokenType.RBRACE)
         {
             advance();
+            valueDepth = 1;
             return compound;
         }
 
@@ -149,6 +155,7 @@ public class SNBTParser
             budget.length(++children);
             budget.allocate(64);
             ITag<?> value = parseValue();
+            childDepth = Math.max(childDepth, valueDepth);
             value.setName(key);
             ((Collection_Tag) compound).addTag(value);
 
@@ -166,6 +173,7 @@ public class SNBTParser
         } while (currentToken.type() != TokenType.RBRACE);
 
         expect(TokenType.RBRACE);
+        valueDepth = childDepth + 1;
         return compound;
     }
 
@@ -394,10 +402,10 @@ public class SNBTParser
     }
 
     /**
-     * Parses a list with one element type. Empty lists use compound type.
+     * Parses a list, wrapping non-compound elements if types differ. Empty lists use compound type.
      *
      * @return the parsed list tag
-     * @throws SNBTException if parsing fails or mixed types are found
+     * @throws SNBTException if parsing fails or a configured limit is exceeded
      */
     private IListTag parseList() throws SNBTException
     {
@@ -407,6 +415,7 @@ public class SNBTParser
         {
             advance();
             // Empty list defaults to compound type
+            valueDepth = 1;
             return NBTFactory.createList("", NBTTags.Tag_Compound.getId());
         }
 
@@ -414,7 +423,10 @@ public class SNBTParser
         budget.allocate(32);
         ITag<?> firstValue = parseValue();
         values.add(firstValue);
-        int listType = getTagTypeId(firstValue);
+        int compoundType = NBTTags.Tag_Compound.getId();
+        int listType = firstValue.getId();
+        int compoundDepth = listType == compoundType ? valueDepth : 0;
+        int nonCompoundDepth = listType == compoundType ? -1 : valueDepth;
 
         while (currentToken.type() == TokenType.COMMA)
         {
@@ -428,26 +440,41 @@ public class SNBTParser
             budget.length(values.size() + 1);
             budget.allocate(32);
             ITag<?> value = parseValue();
-            int valueType = getTagTypeId(value);
+            int valueType = value.getId();
 
             if (valueType != listType)
             {
-                throw new SNBTException("Mixed types in list not allowed. Expected type " +
-                        listType + " but got " + valueType,
-                        currentToken.position(), tokenizer.getInput());
+                listType = compoundType;
             }
+            if (valueType == compoundType) compoundDepth = Math.max(compoundDepth, valueDepth);
+            else nonCompoundDepth = Math.max(nonCompoundDepth, valueDepth);
 
             values.add(value);
         }
 
         expect(TokenType.RBRACKET);
 
+        // Wrapping a list adds a container above its entire subtree. Track stored height rather
+        // than syntax depth so a later mismatch cannot bypass the configured nesting limit.
+        boolean wrap = listType == compoundType && nonCompoundDepth >= 0;
+        int childDepth = Math.max(compoundDepth, nonCompoundDepth + (wrap ? 1 : 0));
+        budget.depth(depth + childDepth);
         IListTag list = NBTFactory.createList("", listType);
         for (ITag<?> value : values)
         {
+            if (wrap && value.getId() != compoundType)
+            {
+                budget.tag();
+                budget.allocate(64);
+                ICompoundTag wrapper = NBTFactory.createCompound("");
+                value.setName("");
+                ((Collection_Tag) wrapper).addTag(value);
+                value = wrapper;
+            }
             ((Collection_Tag) list).addTag(value);
         }
 
+        valueDepth = childDepth + 1;
         return list;
     }
 
@@ -549,32 +576,6 @@ public class SNBTParser
         double result = Double.parseDouble(value);
         if (!Double.isFinite(result)) throw new NumberFormatException("Non-finite SNBT double");
         return result;
-    }
-
-    /**
-     * Returns the NBT type ID for a tag based on its data type.
-     *
-     * @param tag the tag to get the type ID for
-     * @return the NBT type ID as defined in {@link NBTTags}
-     */
-    private int getTagTypeId(ITag<?> tag)
-    {
-        Object value = tag.getData();
-
-        if (value instanceof Byte) return NBTTags.Tag_Byte.getId();
-        if (value instanceof Short) return NBTTags.Tag_Short.getId();
-        if (value instanceof Integer) return NBTTags.Tag_Int.getId();
-        if (value instanceof Long) return NBTTags.Tag_Long.getId();
-        if (value instanceof Float) return NBTTags.Tag_Float.getId();
-        if (value instanceof Double) return NBTTags.Tag_Double.getId();
-        if (value instanceof String) return NBTTags.Tag_String.getId();
-        if (value instanceof byte[]) return NBTTags.Tag_Byte_Array.getId();
-        if (value instanceof int[]) return NBTTags.Tag_Int_Array.getId();
-        if (value instanceof long[]) return NBTTags.Tag_Long_Array.getId();
-        if (tag instanceof IListTag) return NBTTags.Tag_List.getId();
-        if (tag instanceof ICompoundTag) return NBTTags.Tag_Compound.getId();
-
-        return NBTTags.Tag_End.getId();
     }
 
     /**

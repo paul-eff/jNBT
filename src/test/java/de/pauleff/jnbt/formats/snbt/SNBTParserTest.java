@@ -72,7 +72,7 @@ public class SNBTParserTest
     public void testErrorCases()
     {
         assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("{invalid"));
-        assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("[1, \"mixed\"]"));
+        assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("[1,, \"mixed\"]"));
         assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("\"unterminated"));
     }
 }

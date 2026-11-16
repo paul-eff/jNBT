@@ -10,7 +10,7 @@ package de.pauleff.jnbt.api;
  * @param maxDepth            maximum number of nested containers, from 1 to 512
  * @param maxBytes            maximum uncompressed binary bytes, including headers
  * @param maxAllocationBytes  maximum estimated operation allocation bytes
- * @param maxTags             maximum visited values, including temporary SNBT array elements
+ * @param maxTags             maximum visited values, including temporary SNBT array elements and generated list wrappers
  * @param maxCollectionLength maximum elements in any list, compound, or array
  * @param maxTextLength       maximum SNBT input or output length in UTF-16 code units
  * @since 2.0
@@ -31,7 +31,7 @@ public record NBTLimits(int maxDepth, long maxBytes, long maxAllocationBytes, lo
      * @param maxDepth            maximum number of nested containers, from 1 to 512
      * @param maxBytes            maximum uncompressed binary bytes, including headers
      * @param maxAllocationBytes  maximum estimated operation allocation bytes
-     * @param maxTags             maximum visited values, including temporary SNBT array elements
+     * @param maxTags             maximum visited values, including temporary SNBT array elements and generated list wrappers
      * @param maxCollectionLength maximum elements in any list, compound, or array
      * @param maxTextLength       maximum SNBT input or output length in UTF-16 code units
      * @throws IllegalArgumentException if depth is outside 1–512, a budget is not positive,

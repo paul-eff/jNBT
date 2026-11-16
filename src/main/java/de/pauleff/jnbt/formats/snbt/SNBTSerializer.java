@@ -16,6 +16,7 @@ import java.util.*;
  * Converts NBT tags to SNBT strings. Uses {@link NBTLimits#DEFAULT}
  * unless limits are supplied to the constructor. NaN, infinities, and invalid
  * tag payloads are rejected with {@link IllegalArgumentException}.
+ * Compound wrappers used for mixed-list storage are emitted as ordinary compounds with empty keys.
  *
  * @since 1.6.0
  */
