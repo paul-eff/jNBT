@@ -106,7 +106,7 @@ public class SNBTTokenizer
             if (c == quote)
             {
                 position++;
-                return new Token(TokenType.STRING, sb.toString(), tokenStart);
+                return new Token(TokenType.STRING, sb.toString(), tokenStart, true);
             } else if (c == '\\')
             {
                 position++;
@@ -321,11 +321,16 @@ public class SNBTTokenizer
     }
 
     /**
-         * An SNBT token with its input position.
+         * An SNBT token with its input position and quote information.
+         *
+         * @param type     the token type
+         * @param value    the decoded token value
+         * @param position the starting position in the input
+         * @param quoted   whether the token was read from a quoted string
          *
          * @since 1.6.0
          */
-        public record Token(TokenType type, String value, int position)
+        public record Token(TokenType type, String value, int position, boolean quoted)
         {
             /**
              * Creates a token.
@@ -333,9 +338,22 @@ public class SNBTTokenizer
              * @param type     the token type
              * @param value    the token value
              * @param position the position in the input where this token starts
+             * @param quoted   whether the token was read from a quoted string
              */
             public Token
             {
+            }
+
+            /**
+             * Creates an unquoted token.
+             *
+             * @param type     the token type
+             * @param value    the token value
+             * @param position the starting position in the input
+             */
+            public Token(TokenType type, String value, int position)
+            {
+                this(type, value, position, false);
             }
 
             /**
@@ -377,7 +395,7 @@ public class SNBTTokenizer
             @Override
             public String toString()
             {
-                return String.format("Token{%s, '%s', pos=%d}", type, value, position);
+                return String.format("Token{%s, '%s', pos=%d, quoted=%s}", type, value, position, quoted);
             }
         }
 }

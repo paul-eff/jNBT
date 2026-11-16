@@ -452,7 +452,7 @@ public class SNBTParser
     }
 
     /**
-     * Parses a string. The values "true" and "false" become bytes 1 and 0.
+     * Parses a string. Only unquoted "true" and "false" become bytes 1 and 0.
      *
      * @return the parsed string or byte tag
      * @throws SNBTException if parsing fails
@@ -460,12 +460,13 @@ public class SNBTParser
     private ITag<?> parseStringValue() throws SNBTException
     {
         String value = currentToken.value();
+        boolean quoted = currentToken.quoted();
         advance();
 
-        if ("true".equals(value))
+        if (!quoted && "true".equals(value))
         {
             return NBTFactory.createByte("", (byte) 1);
-        } else if ("false".equals(value))
+        } else if (!quoted && "false".equals(value))
         {
             return NBTFactory.createByte("", (byte) 0);
         }
