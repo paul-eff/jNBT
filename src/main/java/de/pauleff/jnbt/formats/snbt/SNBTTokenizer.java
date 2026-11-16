@@ -1,7 +1,8 @@
 package de.pauleff.jnbt.formats.snbt;
 
 /**
- * Splits SNBT input into tokens.
+ * Splits SNBT input into tokens. Quoted strings support the modern SNBT escapes.
+ * Unknown or malformed escapes are rejected.
  *
  * @since 1.6.0
  */
@@ -101,78 +102,112 @@ public class SNBTTokenizer
 
         while (position < length)
         {
-            char c = input.charAt(position);
+            char c = input.charAt(position++);
 
             if (c == quote)
             {
-                position++;
                 return new Token(TokenType.STRING, sb.toString(), tokenStart, true);
-            } else if (c == '\\')
-            {
-                position++;
-                if (position >= length)
-                {
-                    throw new SNBTException("Unterminated escape sequence", position, input);
-                }
-
-                char escaped = input.charAt(position);
-                switch (escaped)
-                {
-                    case '"':
-                        sb.append('"');
-                        break;
-                    case '\'':
-                        sb.append('\'');
-                        break;
-                    case '\\':
-                        sb.append('\\');
-                        break;
-                    case 'n':
-                        sb.append('\n');
-                        break;
-                    case 't':
-                        sb.append('\t');
-                        break;
-                    case 'r':
-                        sb.append('\r');
-                        break;
-                    case 'b':
-                        sb.append('\b');
-                        break;
-                    case 'f':
-                        sb.append('\f');
-                        break;
-                    case 'u':
-                        // Unicode escape sequence \\uXXXX
-                        if (position + 4 >= length)
-                        {
-                            throw new SNBTException("Incomplete unicode escape sequence", position, input);
-                        }
-                        try
-                        {
-                            String hex = input.substring(position + 1, position + 5);
-                            int codePoint = Integer.parseInt(hex, 16);
-                            sb.append((char) codePoint);
-                            position += 4;
-                        } catch (NumberFormatException e)
-                        {
-                            throw new SNBTException("Invalid unicode escape sequence", position, input, e);
-                        }
-                        break;
-                    default:
-                        // Unknown escape - include literally
-                        sb.append(escaped);
-                        break;
-                }
-                position++;
-            } else
+            } else if (c != '\\')
             {
                 sb.append(c);
-                position++;
+                continue;
+            }
+
+            int escapeStart = position - 1;
+            if (position >= length)
+            {
+                throw new SNBTException("Unterminated escape sequence", escapeStart, input);
+            }
+
+            char escaped = input.charAt(position++);
+            switch (escaped)
+            {
+                case '"', '\'', '\\' -> sb.append(escaped);
+                case 'n' -> sb.append('\n');
+                case 't' -> sb.append('\t');
+                case 'r' -> sb.append('\r');
+                case 'b' -> sb.append('\b');
+                case 'f' -> sb.append('\f');
+                case 's' -> sb.append(' ');
+                case 'x' -> sb.appendCodePoint(parseHexEscape(2, escapeStart));
+                case 'u' -> sb.appendCodePoint(parseHexEscape(4, escapeStart));
+                case 'U' -> sb.appendCodePoint(parseHexEscape(8, escapeStart));
+                case 'N' -> sb.appendCodePoint(parseNamedEscape(quote, escapeStart));
+                default -> throw new SNBTException("Unknown escape sequence: \\" + escaped, escapeStart, input);
             }
         }
 
         throw new SNBTException("Unterminated string", tokenStart, input);
+    }
+
+    /**
+     * Reads exactly the required number of ASCII hexadecimal digits after an escape prefix.
+     * Four-digit escapes preserve UTF-16 code units, including surrogates.
+     *
+     * @param digits      the number of digits to consume (2, 4, or 8)
+     * @param escapeStart the position of the escape's backslash
+     * @return the decoded code point, in the range 0 through 0x10FFFF
+     * @throws SNBTException if digits are missing or invalid, or the value is out of range
+     */
+    private int parseHexEscape(int digits, int escapeStart) throws SNBTException
+    {
+        if (length - position < digits)
+        {
+            throw new SNBTException("Incomplete hexadecimal escape", escapeStart, input);
+        }
+        long value = 0;
+        for (int i = 0; i < digits; i++)
+        {
+            char c = input.charAt(position++);
+            int digit;
+            if (c >= '0' && c <= '9') digit = c - '0';
+            else if (c >= 'a' && c <= 'f') digit = c - 'a' + 10;
+            else if (c >= 'A' && c <= 'F') digit = c - 'A' + 10;
+            else throw new SNBTException("Invalid hexadecimal digit in escape", escapeStart, input);
+            value = (value << 4) | digit;
+        }
+        if (value > Character.MAX_CODE_POINT)
+        {
+            throw new SNBTException("Unicode escape code point out of range", escapeStart, input);
+        }
+        return (int) value;
+    }
+
+    /**
+     * Reads a braced Unicode character name after the named-escape prefix.
+     *
+     * @param quote       the enclosing string's quote character
+     * @param escapeStart the position of the escape's backslash
+     * @return the code point from the runtime's Unicode name database
+     * @throws SNBTException if braces are missing or the character name is invalid
+     */
+    private int parseNamedEscape(char quote, int escapeStart) throws SNBTException
+    {
+        if (position >= length || input.charAt(position) != '{')
+        {
+            throw new SNBTException("Expected '{' after named Unicode escape", escapeStart, input);
+        }
+        int nameStart = ++position;
+        while (position < length && input.charAt(position) != '}')
+        {
+            if (input.charAt(position) == quote || input.charAt(position) == '\\')
+            {
+                throw new SNBTException("Invalid named Unicode escape", escapeStart, input);
+            }
+            position++;
+        }
+        if (position >= length)
+        {
+            throw new SNBTException("Unterminated named Unicode escape", escapeStart, input);
+        }
+        String name = input.substring(nameStart, position++);
+        try
+        {
+            return Character.codePointOf(name);
+        } catch (IllegalArgumentException e)
+        {
+            throw new SNBTException("Unknown Unicode character name: " + name, escapeStart, input, e);
+        }
     }
 
     /**
