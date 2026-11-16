@@ -494,6 +494,8 @@ public class NBTFactory
      *
      * @param tag the NBT tag to serialize
      * @return the SNBT string representation
+     * @throws IllegalArgumentException if the tag graph or a payload is invalid, a number is
+     *                                  non-finite, or a serialization limit is exceeded
      */
     public static String toSNBT(ITag<?> tag)
     {
@@ -507,6 +509,8 @@ public class NBTFactory
      * @param tag  the NBT tag to write
      * @param file the output file
      * @throws IOException if writing to the file fails
+     * @throws IllegalArgumentException if the tag graph or a payload is invalid, a number is
+     *                                  non-finite, or a serialization limit is exceeded
      */
     public static void writeToSNBTFile(ITag<?> tag, File file) throws IOException
     {

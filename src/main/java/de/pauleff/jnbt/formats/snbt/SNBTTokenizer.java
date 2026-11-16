@@ -72,7 +72,7 @@ public class SNBTTokenizer
             case '\'':
                 return parseQuotedString('\'', tokenStart);
             default:
-                if (Character.isDigit(current) || current == '-' || current == '+')
+                if ((current >= '0' && current <= '9') || current == '-' || current == '+' || current == '.')
                 {
                     return parseNumber(tokenStart);
                 } else if (Character.isLetter(current) || current == '_')
@@ -176,7 +176,7 @@ public class SNBTTokenizer
     }
 
     /**
-     * Parses a numeric value with optional type suffix.
+     * Parses a decimal number with an optional exponent and type suffix.
      *
      * @param tokenStart the starting position of the token
      * @return the parsed number token
@@ -193,13 +193,15 @@ public class SNBTTokenizer
         }
 
         boolean hasDecimal = false;
+        boolean hasDigits = false;
 
         while (position < length)
         {
             char c = input.charAt(position);
 
-            if (Character.isDigit(c))
+            if (c >= '0' && c <= '9')
             {
+                hasDigits = true;
                 sb.append(c);
                 position++;
             } else if (c == '.' && !hasDecimal)
@@ -213,6 +215,29 @@ public class SNBTTokenizer
             }
         }
 
+        if (!hasDigits)
+        {
+            throw new SNBTException("Invalid number format", tokenStart, input);
+        }
+
+        if (position < length && (input.charAt(position) == 'e' || input.charAt(position) == 'E'))
+        {
+            sb.append(input.charAt(position++));
+            if (position < length && (input.charAt(position) == '-' || input.charAt(position) == '+'))
+            {
+                sb.append(input.charAt(position++));
+            }
+            int exponentStart = position;
+            while (position < length && input.charAt(position) >= '0' && input.charAt(position) <= '9')
+            {
+                sb.append(input.charAt(position++));
+            }
+            if (position == exponentStart)
+            {
+                throw new SNBTException("Expected digits in numeric exponent", tokenStart, input);
+            }
+        }
+
         if (position < length)
         {
             char suffix = input.charAt(position);
@@ -223,13 +248,7 @@ public class SNBTTokenizer
             }
         }
 
-        String numberStr = sb.toString();
-        if (numberStr.isEmpty() || numberStr.equals("-") || numberStr.equals("+"))
-        {
-            throw new SNBTException("Invalid number format", tokenStart, input);
-        }
-
-        return new Token(TokenType.NUMBER, numberStr, tokenStart);
+        return new Token(TokenType.NUMBER, sb.toString(), tokenStart);
     }
 
     /**

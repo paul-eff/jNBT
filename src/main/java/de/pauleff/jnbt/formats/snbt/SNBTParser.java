@@ -475,8 +475,8 @@ public class SNBTParser
     }
 
     /**
-     * Parses a number with an optional b, s, l, f, or d suffix. Without a suffix, decimals use double and
-     * whole numbers use int.
+     * Parses a finite number with an optional b, s, l, f, or d suffix. Without a suffix,
+     * decimals and exponent forms use double. Whole numbers use int.
      *
      * @return the parsed numeric tag
      * @throws SNBTException if parsing fails or number format is invalid
@@ -484,6 +484,7 @@ public class SNBTParser
     private ITag<?> parseNumber() throws SNBTException
     {
         String numberStr = currentToken.value();
+        int numberPosition = currentToken.position();
         advance();
 
         try
@@ -500,16 +501,16 @@ public class SNBTParser
                     case 'b' -> NBTFactory.createByte("", Byte.parseByte(numPart));
                     case 's' -> NBTFactory.createShort("", Short.parseShort(numPart));
                     case 'l' -> NBTFactory.createLong("", Long.parseLong(numPart));
-                    case 'f' -> NBTFactory.createFloat("", Float.parseFloat(numPart));
-                    case 'd' -> NBTFactory.createDouble("", Double.parseDouble(numPart));
+                    case 'f' -> NBTFactory.createFloat("", parseFiniteFloat(numPart));
+                    case 'd' -> NBTFactory.createDouble("", parseFiniteDouble(numPart));
                     default -> throw new SNBTException("Unknown numeric suffix: " + suffix,
-                            currentToken.position(), tokenizer.getInput());
+                            numberPosition, tokenizer.getInput());
                 };
             } else
             {
-                if (numberStr.contains("."))
+                if (numberStr.contains(".") || numberStr.contains("e") || numberStr.contains("E"))
                 {
-                    return NBTFactory.createDouble("", Double.parseDouble(numberStr));
+                    return NBTFactory.createDouble("", parseFiniteDouble(numberStr));
                 } else
                 {
                     return NBTFactory.createInt("", Integer.parseInt(numberStr));
@@ -518,8 +519,36 @@ public class SNBTParser
         } catch (NumberFormatException e)
         {
             throw new SNBTException("Invalid number format: " + numberStr,
-                    currentToken.position(), tokenizer.getInput(), e);
+                    numberPosition, tokenizer.getInput(), e);
         }
+    }
+
+    /**
+     * Parses a float and rejects overflow to infinity.
+     *
+     * @param value the numeric text without a type suffix
+     * @return the finite float value
+     * @throws NumberFormatException if the text is invalid or the result is non-finite
+     */
+    private float parseFiniteFloat(String value)
+    {
+        float result = Float.parseFloat(value);
+        if (!Float.isFinite(result)) throw new NumberFormatException("Non-finite SNBT float");
+        return result;
+    }
+
+    /**
+     * Parses a double and rejects overflow to infinity.
+     *
+     * @param value the numeric text without a type suffix
+     * @return the finite double value
+     * @throws NumberFormatException if the text is invalid or the result is non-finite
+     */
+    private double parseFiniteDouble(String value)
+    {
+        double result = Double.parseDouble(value);
+        if (!Double.isFinite(result)) throw new NumberFormatException("Non-finite SNBT double");
+        return result;
     }
 
     /**

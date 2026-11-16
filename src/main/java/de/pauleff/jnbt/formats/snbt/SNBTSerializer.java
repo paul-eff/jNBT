@@ -14,7 +14,8 @@ import java.util.*;
 
 /**
  * Converts NBT tags to SNBT strings. Uses {@link NBTLimits#DEFAULT}
- * unless limits are supplied to the constructor.
+ * unless limits are supplied to the constructor. NaN, infinities, and invalid
+ * tag payloads are rejected with {@link IllegalArgumentException}.
  *
  * @since 1.6.0
  */
@@ -54,7 +55,8 @@ public class SNBTSerializer
      *
      * @param tag the NBT tag to serialize
      * @return the SNBT string representation
-     * @throws IllegalArgumentException if keys are duplicated, the graph is cyclic, or a limit is exceeded
+     * @throws IllegalArgumentException if a tag or payload is invalid, a number is non-finite,
+     *                                  keys are duplicated, the graph is cyclic, or a limit is exceeded
      */
     public String serialize(ITag<?> tag)
     {
@@ -75,7 +77,8 @@ public class SNBTSerializer
      * @param tag  the NBT tag to serialize
      * @param file the file to write to
      * @throws IOException              if writing fails
-     * @throws IllegalArgumentException if keys are duplicated, the graph is cyclic, or a limit is exceeded
+     * @throws IllegalArgumentException if a tag or payload is invalid, a number is non-finite,
+     *                                  keys are duplicated, the graph is cyclic, or a limit is exceeded
      */
     public void writeToFile(ITag<?> tag, File file) throws IOException
     {
@@ -99,115 +102,49 @@ public class SNBTSerializer
      */
     private void serializeTag(ITag<?> tag, LimitedText sb, int depth)
     {
+        if (tag == null) throw new IllegalArgumentException("Null collection child");
         sb.budget.tag();
-        boolean container = tag instanceof ICompoundTag || tag instanceof IListTag;
+        int tagId = tag.getId();
+        Object data = tag.getData();
+        boolean valid = switch (tagId)
+        {
+            case 1 -> data instanceof Byte;
+            case 2 -> data instanceof Short;
+            case 3 -> data instanceof Integer;
+            case 4 -> data instanceof Long;
+            case 5 -> data instanceof Float;
+            case 6 -> data instanceof Double;
+            case 7 -> data instanceof byte[];
+            case 8 -> data instanceof String;
+            case 9 -> tag instanceof IListTag && data instanceof List<?>;
+            case 10 -> tag instanceof ICompoundTag && data instanceof List<?>;
+            case 11 -> data instanceof int[];
+            case 12 -> data instanceof long[];
+            case 0 -> throw new IllegalArgumentException("TAG_End is a structural marker, not a value");
+            default -> throw new IllegalArgumentException("Unsupported SNBT tag type: " + tagId);
+        };
+        if (!valid) throw new IllegalArgumentException("Invalid payload for NBT type " + tagId);
+
+        boolean container = tagId == 9 || tagId == 10;
         if (container)
         {
             sb.budget.depth(depth + 1);
             if (!sb.active.add(tag)) throw new IllegalArgumentException("Cyclic NBT collection graph");
         }
-        if (tag instanceof ICompoundTag)
+        switch (tagId)
         {
-            serializeCompound((ICompoundTag) tag, sb, depth);
-        } else if (tag instanceof IListTag)
-        {
-            serializeList((IListTag) tag, sb, depth);
-        } else
-        {
-            Object data = tag.getData();
-
-            int tagId = tag.getId();
-
-            switch (tagId)
-            {
-                case 1: // NBT_Byte
-                    if (data instanceof Byte)
-                    {
-                        serializeByte((Byte) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_byte\"");
-                    }
-                    break;
-                case 2: // NBT_Short
-                    if (data instanceof Short)
-                    {
-                        serializeShort((Short) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_short\"");
-                    }
-                    break;
-                case 3: // NBT_Int
-                    if (data instanceof Integer)
-                    {
-                        serializeInt((Integer) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_int\"");
-                    }
-                    break;
-                case 4: // NBT_Long
-                    if (data instanceof Long)
-                    {
-                        serializeLong((Long) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_long\"");
-                    }
-                    break;
-                case 5: // NBT_Float
-                    if (data instanceof Float)
-                    {
-                        serializeFloat((Float) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_float\"");
-                    }
-                    break;
-                case 6: // NBT_Double
-                    if (data instanceof Double)
-                    {
-                        serializeDouble((Double) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_double\"");
-                    }
-                    break;
-                case 7: // NBT_Byte_Array
-                    if (data instanceof byte[])
-                    {
-                        serializeByteArray((byte[]) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_byte_array\"");
-                    }
-                    break;
-                case 8: // NBT_String
-                    serializeString((String) data, sb);
-                    break;
-                case 11: // NBT_Int_Array
-                    if (data instanceof int[])
-                    {
-                        serializeIntArray((int[]) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_int_array\"");
-                    }
-                    break;
-                case 12: // NBT_Long_Array
-                    if (data instanceof long[])
-                    {
-                        serializeLongArray((long[]) data, sb);
-                    } else
-                    {
-                        sb.append("\"invalid_long_array\"");
-                    }
-                    break;
-                default:
-                    sb.append("\"unknown_type_").append(tagId).append("\"");
-                    break;
-            }
+            case 1 -> serializeByte((Byte) data, sb);
+            case 2 -> serializeShort((Short) data, sb);
+            case 3 -> serializeInt((Integer) data, sb);
+            case 4 -> serializeLong((Long) data, sb);
+            case 5 -> serializeFloat((Float) data, sb);
+            case 6 -> serializeDouble((Double) data, sb);
+            case 7 -> serializeByteArray((byte[]) data, sb);
+            case 8 -> serializeString((String) data, sb);
+            case 9 -> serializeList((IListTag) tag, sb, depth);
+            case 10 -> serializeCompound((ICompoundTag) tag, sb, depth);
+            case 11 -> serializeIntArray((int[]) data, sb);
+            case 12 -> serializeLongArray((long[]) data, sb);
         }
         if (container) sb.active.remove(tag);
     }
@@ -257,64 +194,41 @@ public class SNBTSerializer
     }
 
     /**
-     * Writes a float, NaN, or Infinity with an f suffix.
+     * Writes a finite float with an f suffix.
      *
      * @param value the float value
      * @param sb    the string builder to append to
+     * @throws IllegalArgumentException if the value is NaN or infinite
      */
     private void serializeFloat(Float value, LimitedText sb)
     {
-        if (Float.isNaN(value))
-        {
-            sb.append("NaNf");
-        } else if (Float.isInfinite(value))
-        {
-            sb.append(value > 0 ? "Infinityf" : "-Infinityf");
-        } else
-        {
-            sb.append(value).append('f');
-        }
+        if (!Float.isFinite(value)) throw new IllegalArgumentException("Non-finite SNBT float: " + value);
+        sb.append(value).append('f');
     }
 
     /**
-     * Writes a double, NaN, or Infinity. Doubles have no suffix by default.
+     * Writes a finite double. Doubles have no suffix by default.
      *
      * @param value the double value
      * @param sb    the string builder to append to
+     * @throws IllegalArgumentException if the value is NaN or infinite
      */
     private void serializeDouble(Double value, LimitedText sb)
     {
-        if (Double.isNaN(value))
-        {
-            sb.append("NaN");
-        } else if (Double.isInfinite(value))
-        {
-            sb.append(value > 0 ? "Infinity" : "-Infinity");
-        } else
-        {
-            if (EXPLICIT_DOUBLE_TYPE)
-            {
-                sb.append(value).append('d');
-            } else
-            {
-                sb.append(value);
-            }
-        }
+        if (!Double.isFinite(value)) throw new IllegalArgumentException("Non-finite SNBT double: " + value);
+        sb.append(value);
+        if (EXPLICIT_DOUBLE_TYPE) sb.append('d');
     }
 
     /**
-     * Writes a string with quotes and escapes when needed. Null becomes an empty quoted string.
+     * Writes a non-null string with quotes and escapes when needed.
      *
      * @param value the string value
      * @param sb    the string builder to append to
      */
     private void serializeString(String value, LimitedText sb)
     {
-        if (value == null)
-        {
-            sb.append("\"\"");
-            return;
-        }
+        if (value == null) throw new IllegalArgumentException("SNBT string cannot be null");
 
         sb.checkLength(value.length());
         if (needsQuoting(value))
@@ -329,7 +243,8 @@ public class SNBTSerializer
     }
 
     /**
-     * Determines if a string needs to be quoted based on SNBT rules.
+     * Quotes strings outside a conservative ASCII identifier subset, and literals
+     * that could be interpreted as numbers or booleans.
      *
      * @param value the string to check
      * @return true if the string must be quoted
@@ -346,13 +261,8 @@ public class SNBTSerializer
             return true;
         }
 
-        if (looksLikeNumber(value))
-        {
-            return true;
-        }
-
         char first = value.charAt(0);
-        if (Character.isDigit(first) || first == '-' || first == '.' || first == '+')
+        if ((first >= '0' && first <= '9') || first == '-' || first == '.' || first == '+')
         {
             return true;
         }
@@ -360,30 +270,13 @@ public class SNBTSerializer
         for (int i = 0; i < value.length(); i++)
         {
             char c = value.charAt(i);
-            if (!Character.isLetterOrDigit(c) && c != '_')
+            if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') && !(c >= '0' && c <= '9') && c != '_')
             {
                 return true;
             }
         }
 
         return ALWAYS_QUOTE_STRINGS;
-    }
-
-    /**
-     * Checks whether a string starts like a number.
-     *
-     * @param value the string to check
-     * @return true if the string looks like a number
-     */
-    private boolean looksLikeNumber(String value)
-    {
-        if (value.isEmpty())
-        {
-            return false;
-        }
-
-        char first = value.charAt(0);
-        return Character.isDigit(first) || first == '-' || first == '+';
     }
 
     /**
@@ -540,6 +433,7 @@ public class SNBTSerializer
         Set<String> names = new HashSet<>();
         for (Tag<?> child : tags)
         {
+            if (child == null) throw new IllegalArgumentException("Null compound child");
             if (!names.add(child.getName()))
             {
                 throw new IllegalArgumentException("Duplicate compound key: " + child.getName());
@@ -587,6 +481,18 @@ public class SNBTSerializer
         sb.budget.requireTags(list.size());
         sb.budget.allocate(32L * list.size());
         List<Tag<?>> tags = list.getData();
+        int listType = list.getListTypeID();
+        if (listType < 0 || listType > 12 || (listType == 0 && !tags.isEmpty()))
+        {
+            throw new IllegalArgumentException("Invalid list element type: " + listType);
+        }
+        for (Tag<?> child : tags)
+        {
+            if (child == null || child.getId() != listType)
+            {
+                throw new IllegalArgumentException("Invalid collection child or list element type mismatch");
+            }
+        }
 
         sb.append('[');
 
