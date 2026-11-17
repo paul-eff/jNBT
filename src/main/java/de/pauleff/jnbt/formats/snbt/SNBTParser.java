@@ -14,6 +14,7 @@ import java.util.List;
  * Parses SNBT into NBT tags using {@link NBTLimits#DEFAULT} unless limits are supplied.
  * Mixed lists use compounds with empty-key wrappers. Decimal integers default to signed ranges,
  * while hexadecimal/binary integers default to unsigned ranges. Unsigned values retain their NBT bits.
+ * Typed arrays infer missing integer suffixes and accept smaller integer types.
  *
  * @since 1.6.0
  */
@@ -226,7 +227,7 @@ public class SNBTParser
     }
 
     /**
-     * Parses a byte array in the format [B; 1b, 2b, 3b].
+     * Parses a byte array, inferring missing byte suffixes.
      *
      * @return the parsed byte array tag
      * @throws SNBTException if parsing fails or values are not bytes
@@ -246,13 +247,7 @@ public class SNBTParser
         {
             budget.length(values.size() + 1);
             budget.allocate(1);
-            ITag<?> value = parseArrayElement();
-            if (!(value.getData() instanceof Byte))
-            {
-                throw new SNBTException("Expected byte value in byte array",
-                        currentToken.position(), tokenizer.getInput());
-            }
-            values.add((Byte) value.getData());
+            values.add((byte) parseArrayElement('b'));
 
             if (currentToken.type() == TokenType.COMMA)
             {
@@ -279,7 +274,7 @@ public class SNBTParser
     }
 
     /**
-     * Parses an int array in the format [I; 1, 2, 3].
+     * Parses an int array, inferring missing suffixes and widening bytes and shorts.
      *
      * @return the parsed int array tag
      * @throws SNBTException if parsing fails or values are not integers
@@ -299,13 +294,7 @@ public class SNBTParser
         {
             budget.length(values.size() + 1);
             budget.allocate(4);
-            ITag<?> value = parseArrayElement();
-            if (!(value.getData() instanceof Integer))
-            {
-                throw new SNBTException("Expected int value in int array",
-                        currentToken.position(), tokenizer.getInput());
-            }
-            values.add((Integer) value.getData());
+            values.add((int) parseArrayElement('i'));
 
             if (currentToken.type() == TokenType.COMMA)
             {
@@ -332,7 +321,7 @@ public class SNBTParser
     }
 
     /**
-     * Parses a long array in the format [L; 1l, 2l, 3l].
+     * Parses a long array, inferring missing suffixes and widening smaller integers.
      *
      * @return the parsed long array tag
      * @throws SNBTException if parsing fails or values are not longs
@@ -352,13 +341,7 @@ public class SNBTParser
         {
             budget.length(values.size() + 1);
             budget.allocate(8);
-            ITag<?> value = parseArrayElement();
-            if (!(value.getData() instanceof Long))
-            {
-                throw new SNBTException("Expected long value in long array",
-                        currentToken.position(), tokenizer.getInput());
-            }
-            values.add((Long) value.getData());
+            values.add(parseArrayElement('l'));
 
             if (currentToken.type() == TokenType.COMMA)
             {
@@ -385,20 +368,47 @@ public class SNBTParser
     }
 
     /**
-     * Rejects nested containers in typed arrays before entering another recursive parse.
+     * Parses a compatible integer and preserves its signed value when widening.
      *
-     * @return the parsed scalar array element
-     * @throws SNBTException            if the next value is a container or is not a valid scalar
-     * @throws IllegalArgumentException if a configured limit is exceeded
+     * @throws SNBTException if the element is invalid, incompatible, or out of range
      */
-    private ITag<?> parseArrayElement() throws SNBTException
+    private long parseArrayElement(char arrayType) throws SNBTException
     {
-        if (currentToken.type() != TokenType.NUMBER && currentToken.type() != TokenType.STRING)
+        if (currentToken.type() != TokenType.NUMBER)
         {
-            throw new SNBTException("Expected scalar value in typed array",
+            throw new SNBTException("Expected integer scalar value in typed array",
                     currentToken.position(), tokenizer.getInput());
         }
-        return parseValue();
+        budget.tag();
+        String literal = currentToken.value();
+        int position = currentToken.position();
+        try
+        {
+            SNBTNumber number = SNBTNumber.parse(literal, arrayType);
+            boolean compatible = switch (number.type())
+            {
+                case 'b' -> true;
+                case 's', 'i' -> arrayType != 'b';
+                case 'l' -> arrayType == 'l';
+                default -> false;
+            };
+            if (!compatible)
+                throw new SNBTException("Incompatible integer type in typed array", position, tokenizer.getInput());
+            long value = number.integerValue();
+            // Narrow to the source type before widening, including unsigned source bit patterns.
+            long result = switch (number.type())
+            {
+                case 'b' -> (byte) value;
+                case 's' -> (short) value;
+                case 'i' -> (int) value;
+                default -> value;
+            };
+            advance();
+            return result;
+        } catch (NumberFormatException e)
+        {
+            throw new SNBTException("Invalid number format: " + literal, position, tokenizer.getInput(), e);
+        }
     }
 
     /**

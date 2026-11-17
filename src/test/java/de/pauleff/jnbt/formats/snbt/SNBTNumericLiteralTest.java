@@ -187,10 +187,9 @@ class SNBTNumericLiteralTest
                 (int[]) NBTFactory.parseFromSNBT("[I;0xFF,0b101,1_000i,4294967295ui]").getData());
         assertArrayEquals(new long[]{-1, Long.MIN_VALUE},
                 (long[]) NBTFactory.parseFromSNBT("[L;18446744073709551615ul,-0x8000000000000000sl]").getData());
-        // Inference and widening remain a separate UPDATE-01 change.
-        assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("[B;1]"));
-        assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("[I;1b]"));
-        assertThrows(SNBTException.class, () -> NBTFactory.parseFromSNBT("[L;1]"));
+        assertArrayEquals(new byte[]{1}, (byte[]) NBTFactory.parseFromSNBT("[B;1]").getData());
+        assertArrayEquals(new int[]{1}, (int[]) NBTFactory.parseFromSNBT("[I;1b]").getData());
+        assertArrayEquals(new long[]{1}, (long[]) NBTFactory.parseFromSNBT("[L;1]").getData());
     }
 
     static Stream<Arguments> binaryFixtures()

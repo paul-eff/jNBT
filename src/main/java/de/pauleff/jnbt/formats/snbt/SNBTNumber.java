@@ -13,6 +13,14 @@ record SNBTNumber(String literal, int digitsStart, int digitsEnd, int radix, cha
      */
     static SNBTNumber parse(String literal)
     {
+        return parse(literal, 'i');
+    }
+
+    /**
+     * Uses the supplied integer type when no suffix is present.
+     */
+    static SNBTNumber parse(String literal, char defaultIntegerType)
+    {
         int length = literal.length();
         int start = 0;
         boolean negative = literal.charAt(start) == '-';
@@ -52,7 +60,7 @@ record SNBTNumber(String literal, int digitsStart, int digitsEnd, int radix, cha
         }
 
         int suffixStart = end;
-        char type = floating ? 'd' : 'i';
+        char type = floating ? 'd' : defaultIntegerType;
         boolean unsigned = radix != 10;
         if (end < length)
         {
