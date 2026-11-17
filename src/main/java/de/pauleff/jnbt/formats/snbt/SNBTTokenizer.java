@@ -68,6 +68,12 @@ public class SNBTTokenizer
             case ';':
                 position++;
                 return new Token(TokenType.SEMICOLON, ";", tokenStart);
+            case '(':
+                position++;
+                return new Token(TokenType.LPAREN, "(", tokenStart);
+            case ')':
+                position++;
+                return new Token(TokenType.RPAREN, ")", tokenStart);
             case '"':
                 return parseQuotedString('"', tokenStart);
             case '\'':
@@ -305,7 +311,9 @@ public class SNBTTokenizer
         NUMBER,
         ARRAY_PREFIX,
         EOF,
-        UNKNOWN
+        UNKNOWN,
+        LPAREN,
+        RPAREN
     }
 
     /**

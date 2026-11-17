@@ -9,12 +9,14 @@ import de.pauleff.jnbt.util.NBTTags;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Parses SNBT into NBT tags using {@link NBTLimits#DEFAULT} unless limits are supplied.
  * Mixed lists use compounds with empty-key wrappers. Decimal integers default to signed ranges,
  * while hexadecimal/binary integers default to unsigned ranges. Unsigned values retain their NBT bits.
  * Typed arrays infer missing integer suffixes and accept smaller integer types.
+ * Converts bool() to bytes and uuid() to four-int arrays.
  *
  * @since 1.6.0
  */
@@ -489,26 +491,110 @@ public class SNBTParser
     }
 
     /**
-     * Parses a string. Only unquoted "true" and "false" become bytes 1 and 0.
-     *
-     * @return the parsed string or byte tag
-     * @throws SNBTException if parsing fails
+     * Parses a string, boolean literal, or conversion call.
      */
     private ITag<?> parseStringValue() throws SNBTException
     {
-        String value = currentToken.value();
-        boolean quoted = currentToken.quoted();
+        Token token = currentToken;
         advance();
+        if (!token.quoted() && currentToken.type() == TokenType.LPAREN)
+            return parseConversion(token.value(), token.position());
+        return stringValue(token);
+    }
 
-        if (!quoted && "true".equals(value))
+    /**
+     * Creates a string tag, converting only unquoted boolean literals to bytes.
+     */
+    private ITag<?> stringValue(Token token)
+    {
+        if (!token.quoted() && "true".equals(token.value()))
         {
             return NBTFactory.createByte("", (byte) 1);
-        } else if (!quoted && "false".equals(value))
+        } else if (!token.quoted() && "false".equals(token.value()))
         {
             return NBTFactory.createByte("", (byte) 0);
         }
+        return NBTFactory.createString("", token.value());
+    }
 
-        return NBTFactory.createString("", value);
+    /**
+     * Parses nested conversion calls iteratively to avoid Java stack growth.
+     */
+    private ITag<?> parseConversion(String name, int position) throws SNBTException
+    {
+        List<Conversion> calls = new ArrayList<>();
+        ITag<?> value;
+        while (true)
+        {
+            if (!name.equals("bool") && !name.equals("uuid"))
+                throw new SNBTException("Unknown conversion: " + name, position, tokenizer.getInput());
+            budget.allocate(32);
+            calls.add(new Conversion(name, position));
+            expect(TokenType.LPAREN);
+            budget.tag();
+            if (currentToken.type() == TokenType.STRING)
+            {
+                Token argument = currentToken;
+                advance();
+                if (!argument.quoted() && currentToken.type() == TokenType.LPAREN)
+                {
+                    name = argument.value();
+                    position = argument.position();
+                    continue;
+                }
+                value = stringValue(argument);
+            } else if (currentToken.type() == TokenType.NUMBER)
+            {
+                value = parseNumber();
+            } else
+            {
+                throw new SNBTException("Expected a scalar conversion argument",
+                        currentToken.position(), tokenizer.getInput());
+            }
+            break;
+        }
+        for (int index = calls.size() - 1; index >= 0; index--)
+        {
+            if (currentToken.type() == TokenType.COMMA) advance();
+            expect(TokenType.RPAREN);
+            value = applyConversion(calls.get(index), value);
+        }
+        return value;
+    }
+
+    /**
+     * Evaluates bool() or uuid() and checks the result's allocation limits.
+     */
+    private ITag<?> applyConversion(Conversion call, ITag<?> argument) throws SNBTException
+    {
+        if (call.name().equals("bool"))
+        {
+            if (!(argument.getData() instanceof Number number))
+                throw new SNBTException("bool() requires a number or boolean", call.position(), tokenizer.getInput());
+            return NBTFactory.createByte("", (byte) (number.doubleValue() != 0 ? 1 : 0));
+        }
+        if (!(argument.getData() instanceof String text))
+            throw new SNBTException("uuid() requires a UUID string", call.position(), tokenizer.getInput());
+        budget.length(4);
+        budget.allocate(16);
+        try
+        {
+            UUID uuid = UUID.fromString(text);
+            long most = uuid.getMostSignificantBits();
+            long least = uuid.getLeastSignificantBits();
+            return NBTFactory.createIntArray("", new int[]{(int) (most >>> 32), (int) most,
+                    (int) (least >>> 32), (int) least});
+        } catch (IllegalArgumentException e)
+        {
+            throw new SNBTException("Invalid UUID", call.position(), tokenizer.getInput(), e);
+        }
+    }
+
+    /**
+     * A pending conversion and its input position.
+     */
+    private record Conversion(String name, int position)
+    {
     }
 
     /**

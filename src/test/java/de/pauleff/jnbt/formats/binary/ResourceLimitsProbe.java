@@ -147,6 +147,12 @@ class ResourceLimitsProbe
         NBTLimits numericAllocation = limits(1, 4096, 4L * separatedFloat.length() + 64,
                 1, 1, separatedFloat.length());
         rejected(() -> new SNBTParser(separatedFloat, numericAllocation).parse(), "allocation limit");
+        String conversions = "bool(".repeat(20_000) + "1" + ")".repeat(20_000);
+        if (!new SNBTParser(conversions).parse().getData().equals((byte) 1))
+            throw new AssertionError("Nested conversion value changed");
+        new SNBTParser("{x:".repeat(512) + conversions + "}".repeat(512)).parse();
+        NBTLimits conversionTags = limits(1, 4096, 1_000_000, 100, 0, conversions.length());
+        rejected(() -> new SNBTParser(conversions, conversionTags).parse(), "tag count limit");
         rejected(() -> new SNBTParser("[I;".repeat(20_000) + "1" + "]".repeat(20_000)).parse(), "scalar value");
         for (int type : new int[]{7, 9, 11, 12})
         {
