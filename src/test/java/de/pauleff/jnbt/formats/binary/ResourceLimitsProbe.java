@@ -13,6 +13,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * ResourceLimitsTest runs these stress checks in a separate JVM with memory and time limits.
+ * The first argument is a temporary directory for file checks.
+ */
 class ResourceLimitsProbe
 {
     static NBTLimits limits(int depth, long bytes, long allocation, long tags, int length, int text)
@@ -132,6 +136,17 @@ class ResourceLimitsProbe
         // A mismatch after a deep homogeneous subtree must also account for the new wrapper.
         String deepList = "[".repeat(511) + "0" + "]".repeat(511);
         rejected(() -> new SNBTParser("[" + deepList + ",{}]").parse(), "depth limit");
+        // Long numeric runs stay linear and use fixed-width integer accumulation.
+        String paddedHex = "0x" + "0".repeat(200_000) + "1";
+        if (!new SNBTParser(paddedHex).parse().getData().equals(1))
+            throw new AssertionError("Padded hexadecimal value changed");
+        rejected(() -> new SNBTParser("9".repeat(200_000)).parse(), "Invalid number format");
+        rejected(() -> new SNBTParser("1" + "_".repeat(200_000)).parse(), "Invalid number format");
+        String separatedFloat = "0." + "0_".repeat(100_000) + "1";
+        new SNBTParser(separatedFloat).parse(); // Finite underflow to zero remains accepted.
+        NBTLimits numericAllocation = limits(1, 4096, 4L * separatedFloat.length() + 64,
+                1, 1, separatedFloat.length());
+        rejected(() -> new SNBTParser(separatedFloat, numericAllocation).parse(), "allocation limit");
         rejected(() -> new SNBTParser("[I;".repeat(20_000) + "1" + "]".repeat(20_000)).parse(), "scalar value");
         for (int type : new int[]{7, 9, 11, 12})
         {

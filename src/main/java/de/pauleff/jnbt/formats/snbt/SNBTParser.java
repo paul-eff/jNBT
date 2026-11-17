@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Parses SNBT strings into NBT tags. Uses {@link NBTLimits#DEFAULT}
- * unless limits are supplied to the constructor. Mixed lists become homogeneous compound lists:
- * each non-compound element is stored in a compound under an empty key.
+ * Parses SNBT into NBT tags using {@link NBTLimits#DEFAULT} unless limits are supplied.
+ * Mixed lists use compounds with empty-key wrappers. Decimal integers default to signed ranges,
+ * while hexadecimal/binary integers default to unsigned ranges. Unsigned values retain their NBT bits.
  *
  * @since 1.6.0
  */
@@ -502,11 +502,9 @@ public class SNBTParser
     }
 
     /**
-     * Parses a finite number with an optional b, s, l, f, or d suffix. Without a suffix,
-     * decimals and exponent forms use double. Whole numbers use int.
+     * Parses the current numeric token with range and finite-value checks.
      *
-     * @return the parsed numeric tag
-     * @throws SNBTException if parsing fails or number format is invalid
+     * @throws SNBTException if the number is invalid or out of range
      */
     private ITag<?> parseNumber() throws SNBTException
     {
@@ -516,33 +514,27 @@ public class SNBTParser
 
         try
         {
-            char lastChar = numberStr.charAt(numberStr.length() - 1);
-
-            if (Character.isLetter(lastChar))
+            SNBTNumber number = SNBTNumber.parse(numberStr);
+            if (number.type() == 'f' || number.type() == 'd')
             {
-                String numPart = numberStr.substring(0, numberStr.length() - 1);
-                char suffix = Character.toLowerCase(lastChar);
-
-                return switch (suffix)
+                String digits = numberStr.substring(0, number.digitsEnd());
+                if (digits.indexOf('_') >= 0)
                 {
-                    case 'b' -> NBTFactory.createByte("", Byte.parseByte(numPart));
-                    case 's' -> NBTFactory.createShort("", Short.parseShort(numPart));
-                    case 'l' -> NBTFactory.createLong("", Long.parseLong(numPart));
-                    case 'f' -> NBTFactory.createFloat("", parseFiniteFloat(numPart));
-                    case 'd' -> NBTFactory.createDouble("", parseFiniteDouble(numPart));
-                    default -> throw new SNBTException("Unknown numeric suffix: " + suffix,
-                            numberPosition, tokenizer.getInput());
-                };
-            } else
-            {
-                if (numberStr.contains(".") || numberStr.contains("e") || numberStr.contains("E"))
-                {
-                    return NBTFactory.createDouble("", parseFiniteDouble(numberStr));
-                } else
-                {
-                    return NBTFactory.createInt("", Integer.parseInt(numberStr));
+                    budget.allocate(2L * digits.length());
+                    digits = digits.replace("_", "");
                 }
+                if (number.type() == 'f') return NBTFactory.createFloat("", parseFiniteFloat(digits));
+                return NBTFactory.createDouble("", parseFiniteDouble(digits));
             }
+            long value = number.integerValue();
+            return switch (number.type())
+            {
+                case 'b' -> NBTFactory.createByte("", (byte) value);
+                case 's' -> NBTFactory.createShort("", (short) value);
+                case 'i' -> NBTFactory.createInt("", (int) value);
+                case 'l' -> NBTFactory.createLong("", value);
+                default -> throw new NumberFormatException("Unsupported numeric type");
+            };
         } catch (NumberFormatException e)
         {
             throw new SNBTException("Invalid number format: " + numberStr,

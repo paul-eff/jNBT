@@ -1,8 +1,8 @@
 package de.pauleff.jnbt.formats.snbt;
 
 /**
- * Splits SNBT input into tokens. Quoted strings support the modern SNBT escapes.
- * Unknown or malformed escapes are rejected.
+ * Splits SNBT into tokens with positions and quote information.
+ * Rejects malformed numbers and invalid escapes.
  *
  * @since 1.6.0
  */
@@ -211,79 +211,28 @@ public class SNBTTokenizer
     }
 
     /**
-     * Parses a decimal number with an optional exponent and type suffix.
+     * Reads a numeric token, preserving its original text and position.
      *
-     * @param tokenStart the starting position of the token
-     * @return the parsed number token
      * @throws SNBTException if the number format is invalid
      */
     private Token parseNumber(int tokenStart) throws SNBTException
     {
-        StringBuilder sb = new StringBuilder();
-
-        if (position < length && (input.charAt(position) == '-' || input.charAt(position) == '+'))
-        {
-            sb.append(input.charAt(position));
-            position++;
-        }
-
-        boolean hasDecimal = false;
-        boolean hasDigits = false;
-
+        // Include malformed continuations in the same token, so errors point to this literal.
         while (position < length)
         {
             char c = input.charAt(position);
-
-            if (c >= '0' && c <= '9')
-            {
-                hasDigits = true;
-                sb.append(c);
-                position++;
-            } else if (c == '.' && !hasDecimal)
-            {
-                sb.append(c);
-                hasDecimal = true;
-                position++;
-            } else
-            {
-                break;
-            }
+            if (!Character.isLetterOrDigit(c) && c != '_' && c != '.' && c != '+' && c != '-') break;
+            position++;
         }
-
-        if (!hasDigits)
+        String literal = input.substring(tokenStart, position);
+        try
         {
-            throw new SNBTException("Invalid number format", tokenStart, input);
-        }
-
-        if (position < length && (input.charAt(position) == 'e' || input.charAt(position) == 'E'))
+            SNBTNumber.parse(literal);
+        } catch (NumberFormatException e)
         {
-            sb.append(input.charAt(position++));
-            if (position < length && (input.charAt(position) == '-' || input.charAt(position) == '+'))
-            {
-                sb.append(input.charAt(position++));
-            }
-            int exponentStart = position;
-            while (position < length && input.charAt(position) >= '0' && input.charAt(position) <= '9')
-            {
-                sb.append(input.charAt(position++));
-            }
-            if (position == exponentStart)
-            {
-                throw new SNBTException("Expected digits in numeric exponent", tokenStart, input);
-            }
+            throw new SNBTException("Invalid number format: " + literal, tokenStart, input, e);
         }
-
-        if (position < length)
-        {
-            char suffix = input.charAt(position);
-            if (isTypeSuffix(suffix))
-            {
-                sb.append(suffix);
-                position++;
-            }
-        }
-
-        return new Token(TokenType.NUMBER, sb.toString(), tokenStart);
+        return new Token(TokenType.NUMBER, literal, tokenStart);
     }
 
     /**
@@ -326,21 +275,6 @@ public class SNBTTokenizer
         }
 
         return new Token(TokenType.STRING, value, tokenStart);
-    }
-
-    /**
-     * Checks if a character is a valid numeric type suffix.
-     *
-     * @param c the character to check
-     * @return true if the character is a valid type suffix (b, s, l, f, d)
-     */
-    private boolean isTypeSuffix(char c)
-    {
-        return c == 'b' || c == 'B' ||
-                c == 's' || c == 'S' ||
-                c == 'l' || c == 'L' ||
-                c == 'f' || c == 'F' ||
-                c == 'd' || c == 'D';
     }
 
     /**
