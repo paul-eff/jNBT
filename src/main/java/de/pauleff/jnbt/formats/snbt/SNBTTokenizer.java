@@ -2,6 +2,8 @@ package de.pauleff.jnbt.formats.snbt;
 
 /**
  * Splits SNBT into tokens with positions and quote information.
+ * Unquoted strings use ASCII letters, digits, underscores, periods, and signs.
+ * Values starting with a digit, sign, or period must be numeric literals.
  * Rejects malformed numbers and invalid escapes.
  *
  * @since 1.6.0
@@ -25,12 +27,28 @@ public class SNBTTokenizer
     }
 
     /**
-     * Returns the next token from the input stream.
+     * Returns the next token, interpreting unquoted text with the value grammar.
      *
      * @return the next token
      * @throws SNBTException if tokenization fails due to invalid syntax
      */
     public Token nextToken() throws SNBTException
+    {
+        return nextToken(false);
+    }
+
+    /**
+     * Reads a compound key without interpreting numeric-looking text as a number.
+     */
+    Token nextKeyToken() throws SNBTException
+    {
+        return nextToken(true);
+    }
+
+    /**
+     * Reads a token using the key or value grammar at the current position.
+     */
+    private Token nextToken(boolean key) throws SNBTException
     {
         while (position < length && Character.isWhitespace(input.charAt(position)))
         {
@@ -79,10 +97,14 @@ public class SNBTTokenizer
             case '\'':
                 return parseQuotedString('\'', tokenStart);
             default:
+                if (key && isUnquotedCharacter(current))
+                {
+                    return parseUnquotedString(tokenStart);
+                }
                 if ((current >= '0' && current <= '9') || current == '-' || current == '+' || current == '.')
                 {
                     return parseNumber(tokenStart);
-                } else if (Character.isLetter(current) || current == '_')
+                } else if (isUnquotedCharacter(current))
                 {
                     return parseUnquotedString(tokenStart);
                 } else
@@ -91,6 +113,15 @@ public class SNBTTokenizer
                     return new Token(TokenType.UNKNOWN, String.valueOf(current), tokenStart);
                 }
         }
+    }
+
+    /**
+     * Checks the ASCII alphabet shared by unquoted keys and string values.
+     */
+    private static boolean isUnquotedCharacter(char c)
+    {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+                || c == '_' || c == '.' || c == '-' || c == '+';
     }
 
     /**
@@ -255,7 +286,7 @@ public class SNBTTokenizer
         {
             char c = input.charAt(position);
 
-            if (Character.isLetterOrDigit(c) || c == '_' || c == '.' || c == '-')
+            if (isUnquotedCharacter(c))
             {
                 sb.append(c);
                 position++;

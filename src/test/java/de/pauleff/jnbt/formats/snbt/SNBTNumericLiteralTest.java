@@ -162,7 +162,7 @@ class SNBTNumericLiteralTest
         for (String text : new String[]{"_1", "NaN", "Infinity", "ordinary"})
             assertEquals(text, NBTFactory.parseFromSNBT(text).getData());
         assertEquals(1, NBTFactory.parseCompoundFromSNBT("{'0xFF':1}").getInt("0xFF"));
-        assertThrows(SNBTException.class, () -> NBTFactory.parseCompoundFromSNBT("{0xFF:1}"));
+        assertEquals(1, NBTFactory.parseCompoundFromSNBT("{0xFF:1}").getInt("0xFF"));
     }
 
     @ParameterizedTest

@@ -17,6 +17,8 @@ import java.util.UUID;
  * while hexadecimal/binary integers default to unsigned ranges. Unsigned values retain their NBT bits.
  * Typed arrays infer missing integer suffixes and accept smaller integer types.
  * Converts bool() to bytes and uuid() to four-int arrays.
+ * Unquoted keys retain literal ASCII text, including numeric-looking names.
+ * Unquoted boolean values are case-insensitive; quoted values remain strings.
  *
  * @since 1.6.0
  */
@@ -126,7 +128,7 @@ public class SNBTParser
      */
     private ICompoundTag parseCompound() throws SNBTException
     {
-        expect(TokenType.LBRACE);
+        advanceKey();
         ICompoundTag compound = NBTFactory.createCompound();
         int children = 0;
         int childDepth = 0;
@@ -164,7 +166,7 @@ public class SNBTParser
 
             if (currentToken.type() == TokenType.COMMA)
             {
-                advance();
+                advanceKey();
             } else if (currentToken.type() == TokenType.RBRACE)
             {
                 break;
@@ -507,10 +509,10 @@ public class SNBTParser
      */
     private ITag<?> stringValue(Token token)
     {
-        if (!token.quoted() && "true".equals(token.value()))
+        if (!token.quoted() && "true".equalsIgnoreCase(token.value()))
         {
             return NBTFactory.createByte("", (byte) 1);
-        } else if (!token.quoted() && "false".equals(token.value()))
+        } else if (!token.quoted() && "false".equalsIgnoreCase(token.value()))
         {
             return NBTFactory.createByte("", (byte) 0);
         }
@@ -674,6 +676,14 @@ public class SNBTParser
     private void advance() throws SNBTException
     {
         currentToken = tokenizer.nextToken();
+    }
+
+    /**
+     * Advances after a compound's opening brace or separator, where a key is expected.
+     */
+    private void advanceKey() throws SNBTException
+    {
+        currentToken = tokenizer.nextKeyToken();
     }
 
     /**

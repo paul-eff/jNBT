@@ -257,7 +257,7 @@ public class SNBTSerializer
             return true;
         }
 
-        if (value.equals("true") || value.equals("false"))
+        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))
         {
             return true;
         }
