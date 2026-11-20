@@ -19,6 +19,7 @@ import java.util.UUID;
  * Converts bool() to bytes and uuid() to four-int arrays.
  * Unquoted keys retain literal ASCII text, including numeric-looking names.
  * Unquoted boolean values are case-insensitive; quoted values remain strings.
+ * Numeric components allow whitespace, but digit runs and their separators remain contiguous.
  *
  * @since 1.6.0
  */
@@ -615,12 +616,7 @@ public class SNBTParser
             SNBTNumber number = SNBTNumber.parse(numberStr);
             if (number.type() == 'f' || number.type() == 'd')
             {
-                String digits = numberStr.substring(0, number.digitsEnd());
-                if (digits.indexOf('_') >= 0)
-                {
-                    budget.allocate(2L * digits.length());
-                    digits = digits.replace("_", "");
-                }
+                String digits = floatingDigits(numberStr.substring(0, number.digitsEnd()));
                 if (number.type() == 'f') return NBTFactory.createFloat("", parseFiniteFloat(digits));
                 return NBTFactory.createDouble("", parseFiniteDouble(digits));
             }
@@ -638,6 +634,29 @@ public class SNBTParser
             throw new SNBTException("Invalid number format: " + numberStr,
                     numberPosition, tokenizer.getInput(), e);
         }
+    }
+
+    /**
+     * Removes validated digit separators and component whitespace before Java float parsing.
+     * Reserves normalization storage before allocating it.
+     */
+    private String floatingDigits(String literal)
+    {
+        for (int index = 0; index < literal.length(); index++)
+        {
+            char c = literal.charAt(index);
+            if (c != '_' && !Character.isWhitespace(c)) continue;
+            budget.allocate(2L * literal.length());
+            StringBuilder normalized = new StringBuilder(literal.length());
+            normalized.append(literal, 0, index);
+            for (; index < literal.length(); index++)
+            {
+                c = literal.charAt(index);
+                if (c != '_' && !Character.isWhitespace(c)) normalized.append(c);
+            }
+            return normalized.toString();
+        }
+        return literal;
     }
 
     /**

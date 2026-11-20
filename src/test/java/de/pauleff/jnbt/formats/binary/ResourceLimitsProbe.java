@@ -147,6 +147,15 @@ class ResourceLimitsProbe
         NBTLimits numericAllocation = limits(1, 4096, 4L * separatedFloat.length() + 64,
                 1, 1, separatedFloat.length());
         rejected(() -> new SNBTParser(separatedFloat, numericAllocation).parse(), "allocation limit");
+        // Component whitespace stays linear without joining separate digit runs.
+        String longSpace = " ".repeat(200_000);
+        if (!new SNBTParser("-" + longSpace + "1").parse().getData().equals(-1))
+            throw new AssertionError("Whitespace-separated sign value changed");
+        if (!new SNBTParser("0xA" + longSpace + "b").parse().getData().equals((byte) 10))
+            throw new AssertionError("Whitespace-separated hexadecimal suffix value changed");
+        new SNBTParser("1" + longSpace + "e - 1").parse();
+        rejected(() -> new SNBTParser("1 ".repeat(100_000)).parse(), "Invalid number format");
+        rejected(() -> new SNBTParser("0xA" + longSpace + "F").parse(), "Invalid number format");
         String conversions = "bool(".repeat(20_000) + "1" + ")".repeat(20_000);
         if (!new SNBTParser(conversions).parse().getData().equals((byte) 1))
             throw new AssertionError("Nested conversion value changed");

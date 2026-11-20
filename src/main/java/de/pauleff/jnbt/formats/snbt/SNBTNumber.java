@@ -7,7 +7,8 @@ record SNBTNumber(String literal, int digitsStart, int digitsEnd, int radix, cha
                   boolean unsigned, boolean negative)
 {
     /**
-     * Validates a contiguous numeric literal and identifies its type and range.
+     * Validates a numeric literal and identifies its type and range. Whitespace is allowed
+     * between grammar components, but digit runs and their separators stay contiguous.
      *
      * @throws NumberFormatException if the syntax is invalid
      */
@@ -24,51 +25,61 @@ record SNBTNumber(String literal, int digitsStart, int digitsEnd, int radix, cha
         int length = literal.length();
         int start = 0;
         boolean negative = literal.charAt(start) == '-';
-        if (negative || literal.charAt(start) == '+') start++;
+        if (negative || literal.charAt(start) == '+') start = skipWhitespace(literal, start + 1);
 
         int radix = 10;
-        if (start + 1 < length && literal.charAt(start) == '0')
+        int prefix = skipWhitespace(literal, start + 1);
+        if (start < length && literal.charAt(start) == '0' && prefix < length)
         {
-            char prefix = lowerCase(literal.charAt(start + 1));
-            if (prefix == 'x') radix = 16;
+            char marker = lowerCase(literal.charAt(prefix));
+            int numeral = skipWhitespace(literal, prefix + 1);
+            if (marker == 'x') radix = 16;
             // Bare 0b is byte zero, including in the serializer's output.
-            else if (prefix == 'b' && start + 2 < length) radix = 2;
-            if (radix != 10) start += 2;
+            else if (marker == 'b' && numeral < length) radix = 2;
+            if (radix != 10) start = numeral;
         }
 
         int end = digitRun(literal, start, radix, radix != 10);
         int wholeEnd = end;
+        int digitsEnd = end;
+        end = skipWhitespace(literal, end);
         boolean floating = false;
         if (radix == 10)
         {
-            boolean hasDigits = end > start;
+            boolean hasDigits = wholeEnd > start;
             if (end < length && literal.charAt(end) == '.')
             {
                 floating = true;
-                int fractionStart = ++end;
-                end = digitRun(literal, end, 10, false);
+                int fractionStart = skipWhitespace(literal, end + 1);
+                end = digitRun(literal, fractionStart, 10, false);
                 hasDigits |= end > fractionStart;
+                digitsEnd = end;
+                end = skipWhitespace(literal, end);
             }
             if (!hasDigits) throw new NumberFormatException("Expected numeric digits");
             if (end < length && (literal.charAt(end) == 'e' || literal.charAt(end) == 'E'))
             {
                 floating = true;
-                end++;
-                if (end < length && (literal.charAt(end) == '+' || literal.charAt(end) == '-')) end++;
+                end = skipWhitespace(literal, end + 1);
+                if (end < length && (literal.charAt(end) == '+' || literal.charAt(end) == '-'))
+                    end = skipWhitespace(literal, end + 1);
                 end = digitRun(literal, end, 10, true);
+                digitsEnd = end;
+                end = skipWhitespace(literal, end);
             }
         }
 
-        int suffixStart = end;
         char type = floating ? 'd' : defaultIntegerType;
         boolean unsigned = radix != 10;
         if (end < length)
         {
-            char suffix = lowerCase(literal.charAt(end++));
+            char suffix = lowerCase(literal.charAt(end));
+            end = skipWhitespace(literal, end + 1);
             if ((suffix == 's' || suffix == 'u') && end < length)
             {
                 unsigned = suffix == 'u';
-                suffix = lowerCase(literal.charAt(end++));
+                suffix = lowerCase(literal.charAt(end));
+                end = skipWhitespace(literal, end + 1);
                 if (!isIntegerType(suffix)) throw new NumberFormatException("Expected integer type after range prefix");
             }
             if (isIntegerType(suffix))
@@ -87,7 +98,16 @@ record SNBTNumber(String literal, int digitsStart, int digitsEnd, int radix, cha
         if (end != length) throw new NumberFormatException("Invalid numeric continuation");
         if (!floating && radix == 10 && wholeEnd - start > 1 && literal.charAt(start) == '0')
             throw new NumberFormatException("Leading zeros in decimal integer");
-        return new SNBTNumber(literal, start, suffixStart, radix, type, unsigned, negative);
+        return new SNBTNumber(literal, start, digitsEnd, radix, type, unsigned, negative);
+    }
+
+    /**
+     * Skips the same whitespace accepted between SNBT tokens.
+     */
+    private static int skipWhitespace(String literal, int position)
+    {
+        while (position < literal.length() && Character.isWhitespace(literal.charAt(position))) position++;
+        return position;
     }
 
     /**

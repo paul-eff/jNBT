@@ -4,6 +4,7 @@ package de.pauleff.jnbt.formats.snbt;
  * Splits SNBT into tokens with positions and quote information.
  * Unquoted strings use ASCII letters, digits, underscores, periods, and signs.
  * Values starting with a digit, sign, or period must be numeric literals.
+ * Numeric components may be separated by whitespace; digit runs stay contiguous.
  * Rejects malformed numbers and invalid escapes.
  *
  * @since 1.6.0
@@ -248,19 +249,27 @@ public class SNBTTokenizer
     }
 
     /**
-     * Reads a numeric token, preserving its original text and position.
+     * Reads a numeric token, preserving its internal whitespace and original position.
      *
      * @throws SNBTException if the number format is invalid
      */
     private Token parseNumber(int tokenStart) throws SNBTException
     {
-        // Include malformed continuations in the same token, so errors point to this literal.
+        // Include malformed continuations and split digit runs, so errors point to this literal.
+        int tokenEnd = position;
         while (position < length)
         {
             char c = input.charAt(position);
+            if (Character.isWhitespace(c))
+            {
+                position++;
+                continue;
+            }
             if (!Character.isLetterOrDigit(c) && c != '_' && c != '.' && c != '+' && c != '-') break;
             position++;
+            tokenEnd = position;
         }
+        position = tokenEnd;
         String literal = input.substring(tokenStart, position);
         try
         {
