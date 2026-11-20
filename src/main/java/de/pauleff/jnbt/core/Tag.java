@@ -5,6 +5,7 @@ import de.pauleff.jnbt.util.NBTTags;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -233,6 +234,7 @@ public abstract class Tag<T> implements ITag<T>
 
     /**
      * Compares the tag class, type ID, name, and data.
+     * Byte, int, and long array tags compare their elements in order.
      *
      * @param obj the object to compare against
      * @return true if the tags match
@@ -246,16 +248,30 @@ public abstract class Tag<T> implements ITag<T>
         Tag<?> tag = (Tag<?>) obj;
         return id == tag.id &&
                 Objects.equals(name, tag.name) &&
-                Objects.equals(data, tag.data);
+                switch (id)
+                {
+                    case 7 -> Arrays.equals((byte[]) data, (byte[]) tag.data);
+                    case 11 -> Arrays.equals((int[]) data, (int[]) tag.data);
+                    case 12 -> Arrays.equals((long[]) data, (long[]) tag.data);
+                    default -> Objects.equals(data, tag.data);
+                };
     }
 
     /**
      * Returns a hash of the tag type, name, and data.
+     * Array tags use their current element contents. Changing a tag or its payload can change its hash.
      */
     @Override
     public int hashCode()
     {
-        return Objects.hash(id, name, data);
+        int dataHash = switch (id)
+        {
+            case 7 -> Arrays.hashCode((byte[]) data);
+            case 11 -> Arrays.hashCode((int[]) data);
+            case 12 -> Arrays.hashCode((long[]) data);
+            default -> Objects.hashCode(data);
+        };
+        return Objects.hash(id, name, dataHash);
     }
 
     /**
