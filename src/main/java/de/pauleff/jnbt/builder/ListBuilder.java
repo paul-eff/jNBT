@@ -15,6 +15,7 @@ public class ListBuilder extends NBTBuilder
 {
     private final Tag_List list;
     private final NBTTags listType;
+    private boolean attached;
 
     /**
      * Creates a list builder with a fixed element type.
@@ -225,22 +226,19 @@ public class ListBuilder extends NBTBuilder
     @Override
     public NBTBuilder end()
     {
+        if (parent == null)
+        {
+            throw new IllegalStateException("Cannot end root builder - call build() instead");
+        }
+        if (attached) return parent;
         switch (parent)
         {
-            case null -> throw new IllegalStateException("Cannot end root builder - call build() instead");
-            case CompoundBuilder parentCompound ->
-            {
-                parentCompound.getCompound().addTag(list);
-                return parentCompound;
-            }
-            case ListBuilder parentList ->
-            {
-                parentList.addBuiltTag(list);
-                return parentList;
-            }
+            case CompoundBuilder parentCompound -> parentCompound.getCompound().addTag(list);
+            case ListBuilder parentList -> parentList.addBuiltTag(list);
             default -> throw new IllegalStateException("Unknown parent builder type");
         }
-
+        attached = true;
+        return parent;
     }
 
     /**
@@ -260,7 +258,8 @@ public class ListBuilder extends NBTBuilder
     }
 
     /**
-     * Adds this tag to its parent and returns the compound parent builder.
+     * Completes this builder and returns the compound parent. Checks the parent type before
+     * attachment. Repeated successful completion does not reinsert the tag.
      *
      * @return the parent as a CompoundBuilder
      * @throws IllegalStateException if parent is not a CompoundBuilder
@@ -268,16 +267,17 @@ public class ListBuilder extends NBTBuilder
      */
     public CompoundBuilder endCompound()
     {
-        NBTBuilder parent = end();
-        if (parent instanceof CompoundBuilder compound)
+        if (!(parent instanceof CompoundBuilder compound))
         {
-            return compound;
+            throw new IllegalStateException("Parent is not a CompoundBuilder");
         }
-        throw new IllegalStateException("Parent is not a CompoundBuilder");
+        end();
+        return compound;
     }
 
     /**
-     * Adds this tag to its parent and returns the list parent builder.
+     * Completes this builder and returns the list parent. Checks the parent type before
+     * attachment. Repeated successful completion does not reinsert the tag.
      *
      * @return the parent as a ListBuilder
      * @throws IllegalStateException if parent is not a ListBuilder
@@ -285,12 +285,12 @@ public class ListBuilder extends NBTBuilder
      */
     public ListBuilder endList()
     {
-        NBTBuilder parent = end();
-        if (parent instanceof ListBuilder parentList)
+        if (!(parent instanceof ListBuilder parentList))
         {
-            return parentList;
+            throw new IllegalStateException("Parent is not a ListBuilder");
         }
-        throw new IllegalStateException("Parent is not a ListBuilder");
+        end();
+        return parentList;
     }
 
     /**

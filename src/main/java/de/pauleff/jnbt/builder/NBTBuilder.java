@@ -10,7 +10,8 @@ import de.pauleff.jnbt.util.NBTTags;
 /**
  * Builds NBT tags with chained method calls. Names cannot be null. Empty names and whitespace are
  * kept. Call {@link #build()} on root builders and {@link #end()} on nested builders. Binary NBT does
- * not store list element names.
+ * not store list element names. Completion attaches each nested builder once. Builders remain
+ * editable after completion or building, and built tags share their live data with the builders.
  *
  * @since 1.3
  */
@@ -204,7 +205,8 @@ public abstract class NBTBuilder
     }
 
     /**
-     * Returns the built tag. Only root builders can call this method.
+     * Returns the live tag. Only root builders can call this method. Repeated calls return the same
+     * object. Pending children appear only after their own {@link #end()} calls succeed.
      *
      * @return the built tag
      * @throws IllegalStateException if called on a nested builder. Call {@link #end()} first.
@@ -212,7 +214,9 @@ public abstract class NBTBuilder
     public abstract ITag<?> build();
 
     /**
-     * Adds this tag to its parent and returns the parent builder.
+     * Attaches this tag to its parent once and returns the parent builder. Repeated calls after
+     * success return the parent without reinserting the tag, including after removal from the parent.
+     * A failed attachment can be retried after correcting its cause.
      *
      * @return parent builder for continued chaining
      * @throws IllegalStateException if called on a root builder. Call {@link #build()} instead.
