@@ -6,6 +6,7 @@ import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.api.NBTLimits;
 import de.pauleff.jnbt.core.Tag;
 import de.pauleff.jnbt.internal.NBTBudget;
+import de.pauleff.jnbt.internal.NBTModel;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,6 +18,7 @@ import java.util.*;
  * unless limits are supplied to the constructor. NaN, infinities, and invalid
  * tag payloads are rejected with {@link IllegalArgumentException}.
  * Compound wrappers used for mixed-list storage are emitted as ordinary compounds with empty keys.
+ * Tags must use the core hierarchy described by {@link ITag}; independent implementations are rejected.
  *
  * @since 1.6.0
  */
@@ -104,6 +106,7 @@ public class SNBTSerializer
     private void serializeTag(ITag<?> tag, LimitedText sb, int depth)
     {
         if (tag == null) throw new IllegalArgumentException("Null collection child");
+        NBTModel.requireTag(tag);
         sb.budget.tag();
         int tagId = tag.getId();
         Object data = tag.getData();
@@ -430,11 +433,11 @@ public class SNBTSerializer
         sb.budget.length(compound.size());
         sb.budget.requireTags(compound.size());
         sb.budget.allocate(64L * compound.size());
-        List<Tag<?>> tags = compound.getData();
+        List<?> tags = compound.getData();
         Set<String> names = new HashSet<>();
-        for (Tag<?> child : tags)
+        for (Object value : tags)
         {
-            if (child == null) throw new IllegalArgumentException("Null compound child");
+            Tag<?> child = NBTModel.requireTag(value);
             if (!names.add(child.getName()))
             {
                 throw new IllegalArgumentException("Duplicate compound key: " + child.getName());
@@ -454,7 +457,7 @@ public class SNBTSerializer
                 }
             }
 
-            Tag<?> tag = tags.get(i);
+            Tag<?> tag = NBTModel.requireTag(tags.get(i));
 
             serializeString(tag.getName(), sb);
             sb.append(':');
@@ -481,15 +484,16 @@ public class SNBTSerializer
         sb.budget.length(list.size());
         sb.budget.requireTags(list.size());
         sb.budget.allocate(32L * list.size());
-        List<Tag<?>> tags = list.getData();
+        List<?> tags = list.getData();
         int listType = list.getListTypeID();
         if (listType < 0 || listType > 12 || (listType == 0 && !tags.isEmpty()))
         {
             throw new IllegalArgumentException("Invalid list element type: " + listType);
         }
-        for (Tag<?> child : tags)
+        for (Object value : tags)
         {
-            if (child == null || child.getId() != listType)
+            Tag<?> child = NBTModel.requireTag(value);
+            if (child.getId() != listType)
             {
                 throw new IllegalArgumentException("Invalid collection child or list element type mismatch");
             }
@@ -511,7 +515,7 @@ public class SNBTSerializer
                 sb.append(' ');
             }
 
-            serializeTag(tags.get(i), sb, depth + 1);
+            serializeTag(NBTModel.requireTag(tags.get(i)), sb, depth + 1);
         }
 
         if (SPACES_IN_LISTS && !tags.isEmpty())

@@ -3,6 +3,7 @@ package de.pauleff.jnbt.core;
 import de.pauleff.jnbt.api.ICompoundTag;
 import de.pauleff.jnbt.api.IListTag;
 import de.pauleff.jnbt.api.ITag;
+import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.util.ArrayList;
@@ -58,8 +59,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
         if (values == null) throw new IllegalArgumentException("Compound data cannot be null");
         ArrayList<Tag<?>> copy = new ArrayList<>(values);
         Set<String> names = new HashSet<>();
-        for (Tag<?> child : copy)
+        for (Object value : copy)
         {
+            Tag<?> child = NBTModel.requireTag(value);
             validateChildTag(child);
             if (!names.add(child.getName()))
             {
@@ -135,7 +137,7 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     @Override
     public void editTag(ITag<?> newTag)
     {
-        if (!(newTag instanceof ICompoundTag compound))
+        if (!(newTag instanceof Tag_Compound compound))
         {
             throw new IllegalArgumentException("Source must be a compound");
         }
@@ -332,9 +334,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public String getString(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_String)
+        if (tag != null && tag.getId() == 8 && tag.getData() instanceof String value)
         {
-            return (String) tag.getData();
+            return value;
         }
         return null;
     }
@@ -346,9 +348,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public int getInt(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Int)
+        if (tag != null && tag.getId() == 3 && tag.getData() instanceof Integer value)
         {
-            return (Integer) tag.getData();
+            return value;
         }
         return 0;
     }
@@ -360,9 +362,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public double getDouble(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Double)
+        if (tag != null && tag.getId() == 6 && tag.getData() instanceof Double value)
         {
-            return (Double) tag.getData();
+            return value;
         }
         return 0.0;
     }
@@ -374,9 +376,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public byte getByte(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Byte)
+        if (tag != null && tag.getId() == 1 && tag.getData() instanceof Byte value)
         {
-            return (Byte) tag.getData();
+            return value;
         }
         return 0;
     }
@@ -388,9 +390,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public float getFloat(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Float)
+        if (tag != null && tag.getId() == 5 && tag.getData() instanceof Float value)
         {
-            return (Float) tag.getData();
+            return value;
         }
         return 0.0f;
     }
@@ -402,9 +404,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public short getShort(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Short)
+        if (tag != null && tag.getId() == 2 && tag.getData() instanceof Short value)
         {
-            return (Short) tag.getData();
+            return value;
         }
         return 0;
     }
@@ -416,9 +418,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public long getLong(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Long)
+        if (tag != null && tag.getId() == 4 && tag.getData() instanceof Long value)
         {
-            return (Long) tag.getData();
+            return value;
         }
         return 0L;
     }
@@ -458,9 +460,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public byte[] getByteArray(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Byte_Array)
+        if (tag != null && tag.getId() == 7 && tag.getData() instanceof byte[] value)
         {
-            return (byte[]) tag.getData();
+            return value;
         }
         return null;
     }
@@ -472,9 +474,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public int[] getIntArray(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Int_Array)
+        if (tag != null && tag.getId() == 11 && tag.getData() instanceof int[] value)
         {
-            return (int[]) tag.getData();
+            return value;
         }
         return null;
     }
@@ -486,9 +488,9 @@ public class Tag_Compound extends Collection_Tag implements ICompoundTag
     public long[] getLongArray(String name)
     {
         Tag<?> tag = findDirectChild(name);
-        if (tag instanceof Tag_Long_Array)
+        if (tag != null && tag.getId() == 12 && tag.getData() instanceof long[] value)
         {
-            return (long[]) tag.getData();
+            return value;
         }
         return null;
     }

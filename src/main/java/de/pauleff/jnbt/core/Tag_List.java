@@ -2,6 +2,7 @@ package de.pauleff.jnbt.core;
 
 import de.pauleff.jnbt.api.IListTag;
 import de.pauleff.jnbt.api.ITag;
+import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.util.ArrayList;
@@ -63,8 +64,9 @@ public class Tag_List extends Collection_Tag implements IListTag
             throw new IllegalArgumentException("List requires a valid element type and non-null data");
         }
         ArrayList<Tag<?>> copy = new ArrayList<>(values);
-        for (Tag<?> child : copy)
+        for (Object value : copy)
         {
+            Tag<?> child = NBTModel.requireTag(value);
             validateChildTag(child);
             if (child.getId() != type)
             {
@@ -104,7 +106,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     @Override
     public void editTag(ITag<?> newTag)
     {
-        if (!(newTag instanceof IListTag list) || list.getListTypeID() != listTypeID)
+        if (!(newTag instanceof Tag_List list) || list.getListTypeID() != listTypeID)
         {
             throw new IllegalArgumentException("Source must be a list with element type " + listTypeID);
         }
@@ -343,6 +345,7 @@ public class Tag_List extends Collection_Tag implements IListTag
     @Override
     public IListTag remove(ITag<?> tag)
     {
+        if (tag != null) NBTModel.requireTag(tag);
         data.remove(tag);
         return this;
     }

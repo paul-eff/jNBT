@@ -2,6 +2,7 @@ package de.pauleff.jnbt.formats.binary;
 
 import de.pauleff.jnbt.api.*;
 import de.pauleff.jnbt.internal.NBTBudget;
+import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.io.*;
@@ -11,6 +12,7 @@ import java.util.*;
 /**
  * Writes validated binary NBT to a file or stream. Uses {@link NBTLimits#DEFAULT}
  * unless explicit limits are supplied.
+ * Tags must use the core hierarchy described by {@link ITag}; unsupported implementations fail validation.
  *
  * @since 0.1
  */
@@ -187,6 +189,7 @@ public class NBTWriter implements INBTWriter
     private void validateForWrite(ITag<?> tag, boolean named, int depth, NBTBudget budget,
                                   Set<ITag<?>> active) throws IOException
     {
+        NBTModel.requireTag(tag);
         budget.tag();
         NBTTags type = NBTTags.getById(tag.getId());
         if (type == null) throw new IOException("Invalid tag type: " + tag.getId());
@@ -200,7 +203,7 @@ public class NBTWriter implements INBTWriter
         }
         if (type == NBTTags.Tag_String)
         {
-            budget.bytes(2L + validateUTFLength((String) tag.getData(), "String payload"));
+            budget.bytes(2L + validateUTFLength((String) validatedPayload(tag, type), "String payload"));
         } else if (type == NBTTags.Tag_Compound || type == NBTTags.Tag_List)
         {
             budget.depth(depth + 1);
@@ -209,7 +212,7 @@ public class NBTWriter implements INBTWriter
             budget.length(length);
             budget.requireTags(length);
             budget.allocate(64L * length);
-            Collection<?> children = (Collection<?>) tag.getData();
+            Collection<?> children = (Collection<?>) validatedPayload(tag, type);
             budget.bytes(type == NBTTags.Tag_List ? 5 : 1);
             int listType = type == NBTTags.Tag_List ? ((IListTag) tag).getListTypeID() : -1;
             if (type == NBTTags.Tag_List && NBTTags.getById(listType) == null)
@@ -223,10 +226,7 @@ public class NBTWriter implements INBTWriter
             Set<String> names = new HashSet<>();
             for (Object value : children)
             {
-                if (!(value instanceof ITag<?> child))
-                {
-                    throw new IOException("Invalid collection child");
-                }
+                ITag<?> child = NBTModel.requireTag(value);
                 if (child.getId() == 0)
                 {
                     throw new IOException("TAG_End is a structural marker, not a value");
@@ -244,13 +244,14 @@ public class NBTWriter implements INBTWriter
             active.remove(tag);
         } else if (type == NBTTags.Tag_Byte_Array || type == NBTTags.Tag_Int_Array || type == NBTTags.Tag_Long_Array)
         {
-            int length = java.lang.reflect.Array.getLength(tag.getData());
+            int length = java.lang.reflect.Array.getLength(validatedPayload(tag, type));
             budget.length(length);
             long bytes = (long) length * (type == NBTTags.Tag_Byte_Array ? 1 : type == NBTTags.Tag_Int_Array ? 4 : 8);
             budget.allocate(16 + bytes);
             budget.bytes(4 + bytes);
         } else
         {
+            validatedPayload(tag, type);
             budget.bytes(switch (type)
             {
                 case Tag_Byte -> 1;
@@ -260,6 +261,37 @@ public class NBTWriter implements INBTWriter
                 default -> throw new IOException("Invalid value type: " + type);
             });
         }
+    }
+
+    /**
+     * Reads a payload and checks its Java type before output casts.
+     * Container callers reserve snapshot storage before invoking this method.
+     *
+     * @param tag the supported core tag
+     * @param type its declared NBT type
+     * @return the validated payload
+     * @throws IOException if the payload is null or incompatible with its type
+     */
+    private Object validatedPayload(ITag<?> tag, NBTTags type) throws IOException
+    {
+        Object payload = tag.getData();
+        boolean valid = switch (type)
+        {
+            case Tag_Byte -> payload instanceof Byte;
+            case Tag_Short -> payload instanceof Short;
+            case Tag_Int -> payload instanceof Integer;
+            case Tag_Long -> payload instanceof Long;
+            case Tag_Float -> payload instanceof Float;
+            case Tag_Double -> payload instanceof Double;
+            case Tag_Byte_Array -> payload instanceof byte[];
+            case Tag_String -> payload instanceof String;
+            case Tag_List, Tag_Compound -> payload instanceof List<?>;
+            case Tag_Int_Array -> payload instanceof int[];
+            case Tag_Long_Array -> payload instanceof long[];
+            default -> false;
+        };
+        if (!valid) throw new IOException("Invalid payload for NBT type " + tag.getId());
+        return payload;
     }
 
     /**

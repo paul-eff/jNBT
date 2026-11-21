@@ -1,8 +1,9 @@
 package de.pauleff.jnbt.builder;
 
 import de.pauleff.jnbt.api.ICompoundTag;
-import de.pauleff.jnbt.core.Tag;
+import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.core.Tag_Compound;
+import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
@@ -34,17 +35,12 @@ public class CompoundBuilder extends NBTBuilder
      *
      * @param existingCompound the existing compound to modify
      * @param parent           the parent builder, or null for a root compound
+     * @throws IllegalArgumentException if existingCompound is null or does not extend Tag_Compound
      */
     public CompoundBuilder(ICompoundTag existingCompound, NBTBuilder parent)
     {
-        super(existingCompound.getName(), parent);
-        if (existingCompound instanceof Tag_Compound)
-        {
-            this.compound = (Tag_Compound) existingCompound;
-        } else
-        {
-            throw new IllegalArgumentException("Cannot build from non-Tag_Compound implementation");
-        }
+        super(NBTModel.requireCompound(existingCompound).getName(), parent);
+        this.compound = NBTModel.requireCompound(existingCompound);
     }
 
     /**
@@ -192,14 +188,11 @@ public class CompoundBuilder extends NBTBuilder
      *
      * @param tag the existing tag to include
      * @return this builder
-     * @throws IllegalArgumentException if tag is null
+     * @throws IllegalArgumentException if tag is null, unsupported, END, or has a duplicate name
      */
-    public CompoundBuilder addTag(Tag<?> tag)
+    public CompoundBuilder addTag(ITag<?> tag)
     {
-        if (tag == null)
-        {
-            throw new IllegalArgumentException("Tag cannot be null");
-        }
+        NBTModel.requireTag(tag);
         validateName(tag.getName());
         compound.addTag(tag);
         return this;
@@ -375,13 +368,11 @@ public class CompoundBuilder extends NBTBuilder
      *
      * @param tag the tag to set
      * @return this builder
+     * @throws IllegalArgumentException if tag is null, unsupported, or an END marker
      */
-    public CompoundBuilder setTag(Tag<?> tag)
+    public CompoundBuilder setTag(ITag<?> tag)
     {
-        if (tag == null)
-        {
-            throw new IllegalArgumentException("Tag cannot be null");
-        }
+        NBTModel.requireTag(tag);
         validateName(tag.getName());
         compound.setTag(tag);
         return this;

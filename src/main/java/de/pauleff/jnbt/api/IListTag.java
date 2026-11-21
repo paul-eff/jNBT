@@ -7,6 +7,7 @@ import java.util.ArrayList;
 /**
  * An ordered list of tags with one fixed element type. Element names are kept in memory but are not
  * stored in binary NBT.
+ * Supported implementations extend {@link de.pauleff.jnbt.core.Tag_List}.
  *
  * @since 1.3
  */
@@ -207,7 +208,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      * @param index the index to update
      * @param tag   the new tag to set
      * @return This list
-     * @throws IllegalArgumentException  if tag type doesn't match list type
+     * @throws IllegalArgumentException  if tag is null, unsupported, or doesn't match the list type
      * @throws IndexOutOfBoundsException if index is invalid
      */
     IListTag setTag(int index, ITag<?> tag);
@@ -226,6 +227,7 @@ public interface IListTag extends ITag<ArrayList<Tag<?>>>
      *
      * @param tag the tag to remove
      * @return This list
+     * @throws IllegalArgumentException if a non-null tag has an unsupported implementation
      */
     IListTag remove(ITag<?> tag);
 

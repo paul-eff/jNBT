@@ -2,6 +2,7 @@ package de.pauleff.jnbt.api;
 
 import de.pauleff.jnbt.core.Tag;
 import de.pauleff.jnbt.core.Tag_Compound;
+import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.formats.binary.Compression_Types;
 import de.pauleff.jnbt.formats.binary.NBTReader;
 import de.pauleff.jnbt.formats.binary.NBTWriter;
@@ -304,24 +305,23 @@ public class NBTFileFactory
      */
     private static void mergeCompounds(ICompoundTag target, ICompoundTag source)
     {
-        if (source instanceof Tag_Compound sourceCompound)
+        NBTModel.requireCompound(target);
+        Tag_Compound sourceCompound = NBTModel.requireCompound(source);
+        for (Tag<?> sourceTag : sourceCompound.getData())
         {
-            for (Tag<?> sourceTag : sourceCompound.getData())
+            if (sourceTag instanceof Tag_Compound && target.hasTag(sourceTag.getName()))
             {
-                if (sourceTag instanceof Tag_Compound && target.hasTag(sourceTag.getName()))
+                ICompoundTag targetNested = target.getCompound(sourceTag.getName());
+                if (targetNested != null)
                 {
-                    ICompoundTag targetNested = target.getCompound(sourceTag.getName());
-                    if (targetNested != null)
-                    {
-                        mergeCompounds(targetNested, (ICompoundTag) sourceTag);
-                    } else
-                    {
-                        target.setTag(sourceTag);
-                    }
+                    mergeCompounds(targetNested, (ICompoundTag) sourceTag);
                 } else
                 {
                     target.setTag(sourceTag);
                 }
+            } else
+            {
+                target.setTag(sourceTag);
             }
         }
     }

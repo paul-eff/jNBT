@@ -1,6 +1,7 @@
 package de.pauleff.jnbt.core;
 
 import de.pauleff.jnbt.api.ITag;
+import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.lang.ref.WeakReference;
@@ -213,7 +214,8 @@ public abstract class Tag<T> implements ITag<T>
      */
     public void editTag(ITag<?> newTag)
     {
-        if (newTag == null || this.getId() != newTag.getId())
+        NBTModel.requireTag(newTag);
+        if (this.getId() != newTag.getId())
         {
             throw new IllegalArgumentException("Source must be a non-null tag with type " + this.getId());
         }

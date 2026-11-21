@@ -1,6 +1,7 @@
 package de.pauleff.jnbt.core;
 
 import de.pauleff.jnbt.api.ITag;
+import de.pauleff.jnbt.internal.NBTModel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,6 +12,7 @@ import java.util.List;
  * collections in depth-first child order, excluding the collection itself. Removing a matching
  * collection detaches its subtree without changing its children. Null children and END markers
  * are rejected.
+ * Children must use the core tag hierarchy described by {@link ITag}.
  *
  * @since 1.0
  */
@@ -48,9 +50,9 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
     public Collection_Tag(int id, String name, ArrayList<Tag<?>> data)
     {
         super(id, name, data);
-        for (Tag<?> tag : data)
+        for (Object value : data)
         {
-            validateChildTag(tag);
+            validateChildTag(NBTModel.requireTag(value));
         }
     }
 
@@ -62,7 +64,8 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      */
     protected static void validateChildTag(ITag<?> tag)
     {
-        if (tag == null || tag.getId() == 0)
+        NBTModel.requireTag(tag);
+        if (tag.getId() == 0)
         {
             throw new IllegalArgumentException("Collection children cannot be null or TAG_End");
         }
@@ -73,7 +76,7 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      *
      * @param tag the tag to add
      * @return this collection tag
-     * @throws IllegalArgumentException if the child is null, is TAG_End, or has an incompatible list type
+     * @throws IllegalArgumentException if the child is null, unsupported, END, or has an incompatible list type
      */
     public Collection_Tag addTag(ITag<?> tag)
     {
@@ -95,8 +98,10 @@ public class Collection_Tag extends Tag<ArrayList<Tag<?>>>
      */
     public Collection_Tag addAllTags(List<Tag<?>> tags)
     {
-        for (Tag<?> tag : tags)
+        if (tags == null) throw new IllegalArgumentException("Collection children cannot be null");
+        for (Object value : tags)
         {
+            Tag<?> tag = NBTModel.requireTag(value);
             validateChildTag(tag);
             if (this instanceof Tag_List list)
             {

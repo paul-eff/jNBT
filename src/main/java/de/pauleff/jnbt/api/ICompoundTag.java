@@ -8,6 +8,7 @@ import java.util.ArrayList;
  * A collection of named child tags. Names must be unique, including after a rename. Add methods reject
  * duplicate names. Set methods replace direct children. Lookups and removals by name only use direct
  * children. getData() returns a shallow copy with shared child objects.
+ * Supported implementations extend {@link de.pauleff.jnbt.core.Tag_Compound}.
  *
  * @since 1.3
  */
@@ -310,6 +311,7 @@ public interface ICompoundTag extends ITag<ArrayList<Tag<?>>>
      *
      * @param tag the tag to set (replaces any existing tag with the same name)
      * @return This compound
+     * @throws IllegalArgumentException if tag is null, unsupported, or an END marker
      */
     ICompoundTag setTag(ITag<?> tag);
 

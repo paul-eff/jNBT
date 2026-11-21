@@ -5,6 +5,7 @@ import de.pauleff.jnbt.api.ITag;
 import de.pauleff.jnbt.api.NBTFileFactory;
 import de.pauleff.jnbt.core.*;
 import de.pauleff.jnbt.formats.binary.Compression_Types;
+import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.util.NBTTags;
 
 /**
@@ -169,18 +170,7 @@ public abstract class NBTBuilder
      */
     public static CompoundBuilder fromFile(java.io.File file) throws java.io.IOException
     {
-        ICompoundTag loadedData = NBTFileFactory.readNBTFile(file);
-        CompoundBuilder builder = new CompoundBuilder(loadedData.getName(), null);
-
-        if (loadedData instanceof Tag_Compound concrete)
-        {
-            for (Tag<?> tag : concrete.getData())
-            {
-                builder.addTag(tag);
-            }
-        }
-
-        return builder;
+        return fromCompound(NBTFileFactory.readNBTFile(file));
     }
 
     /**
@@ -188,17 +178,15 @@ public abstract class NBTBuilder
      *
      * @param compoundTag the {@link ICompoundTag} to load data from
      * @return a {@link CompoundBuilder} containing the loaded data
+     * @throws IllegalArgumentException if compoundTag is null or does not extend Tag_Compound
      */
     public static CompoundBuilder fromCompound(ICompoundTag compoundTag)
     {
-        CompoundBuilder builder = new CompoundBuilder(compoundTag.getName(), null);
-
-        if (compoundTag instanceof Tag_Compound concrete)
+        Tag_Compound concrete = NBTModel.requireCompound(compoundTag);
+        CompoundBuilder builder = new CompoundBuilder(concrete.getName(), null);
+        for (Tag<?> tag : concrete.getData())
         {
-            for (Tag<?> tag : concrete.getData())
-            {
-                builder.addTag(tag);
-            }
+            builder.addTag(tag);
         }
 
         return builder;

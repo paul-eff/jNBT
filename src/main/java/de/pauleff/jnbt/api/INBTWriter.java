@@ -5,6 +5,7 @@ import java.io.IOException;
 /**
  * Writes binary NBT with the selected compression. Writers take ownership of
  * supplied streams after successful construction and support one write operation.
+ * Roots must extend {@link de.pauleff.jnbt.core.Tag_Compound}; tags follow the core hierarchy in {@link ITag}.
  *
  * @since 1.3
  */

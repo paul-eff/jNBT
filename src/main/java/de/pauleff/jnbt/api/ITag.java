@@ -4,6 +4,9 @@ import java.util.function.Consumer;
 
 /**
  * An NBT tag with a name, type ID, and payload.
+ * Library operations require {@link de.pauleff.jnbt.core.Tag} implementations. Lists and compounds
+ * must extend {@link de.pauleff.jnbt.core.Tag_List} and {@link de.pauleff.jnbt.core.Tag_Compound}.
+ * These interfaces are consumer APIs; independent implementations are unsupported.
  *
  * @param <T> the object type this tag stores
  * @since 1.3
@@ -53,7 +56,7 @@ public interface ITag<T>
      * Invalid input leaves this tag unchanged.
      *
      * @param newTag the source tag to copy from
-     * @throws IllegalArgumentException if the source, payload, or proposed name is invalid
+     * @throws IllegalArgumentException if the source implementation, payload, or proposed name is invalid
      */
     void editTag(ITag<?> newTag);
 

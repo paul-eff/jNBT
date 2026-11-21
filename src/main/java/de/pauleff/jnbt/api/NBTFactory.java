@@ -4,10 +4,12 @@ import de.pauleff.jnbt.core.*;
 import de.pauleff.jnbt.formats.snbt.SNBTException;
 import de.pauleff.jnbt.formats.snbt.SNBTParser;
 import de.pauleff.jnbt.formats.snbt.SNBTSerializer;
+import de.pauleff.jnbt.internal.NBTModel;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Creates NBT tags and converts tags to and from SNBT. Null names become the string {@code "null"}.
@@ -44,19 +46,20 @@ public class NBTFactory
     }
 
     /**
-     * Creates a compound tag with initial child tags.
+     * Creates a compound tag with initial core child tags. Copies membership; child objects are shared.
      *
      * @param name the tag name
      * @param data Initial child tags to add
      * @return the new tag
+     * @throws IllegalArgumentException if data is null or contains null, unsupported, END, or duplicate children
      */
-    public static ICompoundTag createCompound(String name, ArrayList<ITag<?>> data)
+    public static ICompoundTag createCompound(String name, List<? extends ITag<?>> data)
     {
         if (data == null) throw new IllegalArgumentException("Compound data cannot be null");
         ArrayList<Tag<?>> tagData = new ArrayList<>();
-        for (ITag<?> tag : data)
+        for (Object tag : data)
         {
-            tagData.add((Tag<?>) tag);
+            tagData.add(NBTModel.requireTag(tag));
         }
         return new Tag_Compound(name, tagData);
     }

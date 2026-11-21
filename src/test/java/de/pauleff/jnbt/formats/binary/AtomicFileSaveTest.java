@@ -169,12 +169,13 @@ class AtomicFileSaveTest
             public Integer getData()
             {
                 attempts[0]++;
+                if (attempts[0] == 1) return 0; // Allow payload validation, then fail during output.
                 return throwUnchecked(failure);
             }
         });
         assertSame(failure, assertThrows(FileNotFoundException.class,
                 () -> NBTFileFactory.writeNBTFile(destination().toFile(), root)));
-        assertEquals(1, attempts[0]);
+        assertEquals(2, attempts[0]);
         assertArrayEquals(original, Files.readAllBytes(destination()));
         assertArrayEquals(original, Files.readAllBytes(backup()));
         assertFiles("save.nbt", "save.nbt.bak");
@@ -196,17 +197,20 @@ class AtomicFileSaveTest
         Files.write(destination(), original);
         Files.write(backup(), OLD_BACKUP);
         IllegalStateException failure = new IllegalStateException("payload failed during serialization");
+        int[] reads = {0};
         Tag_Compound root = root();
         root.addTag(new Tag_Int("bad", 1)
         {
             @Override
             public Integer getData()
             {
+                if (++reads[0] == 1) return 1; // Allow payload validation, then fail during output.
                 throw failure;
             }
         });
         for (int attempt = 0; attempt < 2; attempt++)
         {
+            reads[0] = 0;
             try (NBTWriter writer = new NBTWriter(destination().toFile(), compression))
             {
                 IOException error = assertThrows(IOException.class, () -> writer.write(root));
@@ -218,6 +222,7 @@ class AtomicFileSaveTest
             assertFiles("save.nbt", "save.nbt.bak");
         }
         Path absent = directory.resolve("new.nbt");
+        reads[0] = 0;
         assertThrows(IOException.class, () -> new NBTWriter(absent.toFile(), compression).write(root));
         assertFalse(Files.exists(absent));
         assertFiles("save.nbt", "save.nbt.bak");
