@@ -6,7 +6,6 @@ import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.util.NBTTags;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -28,9 +27,9 @@ public class NBTWriter implements INBTWriter
      * Creates a file writer with compression detected from the existing file.
      *
      * @param nbtFile the existing destination file
-     * @throws FileNotFoundException if the file does not exist
+     * @throws IOException if opening or compression detection fails
      */
-    public NBTWriter(File nbtFile) throws FileNotFoundException
+    public NBTWriter(File nbtFile) throws IOException
     {
         this(nbtFile, NBTLimits.DEFAULT);
     }
@@ -40,16 +39,12 @@ public class NBTWriter implements INBTWriter
      *
      * @param nbtFile the existing target file
      * @param limits  the limits for this operation
-     * @throws FileNotFoundException if the file does not exist
+     * @throws IOException if opening or compression detection fails
      * @throws NullPointerException  if limits is null
      */
-    public NBTWriter(File nbtFile, NBTLimits limits) throws FileNotFoundException
+    public NBTWriter(File nbtFile, NBTLimits limits) throws IOException
     {
         this.limits = java.util.Objects.requireNonNull(limits, "limits");
-        if (Files.notExists(nbtFile.toPath()))
-        {
-            throw new FileNotFoundException(String.format("The file %s doesn't exist. It's needed to determine the compression type!", nbtFile.getPath()));
-        }
         this.file = nbtFile;
         this.compression = NBTFileFactory.getCompressionType(nbtFile);
     }

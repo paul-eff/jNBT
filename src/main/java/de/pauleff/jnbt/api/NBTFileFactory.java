@@ -2,15 +2,14 @@ package de.pauleff.jnbt.api;
 
 import de.pauleff.jnbt.core.Tag;
 import de.pauleff.jnbt.core.Tag_Compound;
-import de.pauleff.jnbt.internal.NBTModel;
 import de.pauleff.jnbt.formats.binary.Compression_Types;
 import de.pauleff.jnbt.formats.binary.NBTReader;
 import de.pauleff.jnbt.formats.binary.NBTWriter;
-import de.pauleff.jnbt.internal.StandaloneCompressedInputStream;
+import de.pauleff.jnbt.internal.NBTInput;
+import de.pauleff.jnbt.internal.NBTModel;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.zip.GZIPInputStream;
 
 /**
  * Reads, writes, and updates binary NBT files.
@@ -25,43 +24,33 @@ public class NBTFileFactory
     }
 
     /**
-     * Opens a decompressed NBT input stream. The caller must close it. Reading to EOF
-     * validates one GZIP member or ZLIB stream, including its checksum, and rejects
-     * trailing compressed bytes or additional members. Closing alone does not validate it.
+     * Opens buffered, decompressed input; caller closes it. Reading to EOF
+     * validates one GZIP member or ZLIB stream and rejects trailing bytes.
+     * Closing alone does not validate integrity.
      *
      * @param file the source file
      * @return the decompressed input stream
-     * @throws IOException if opening or decompression initialization fails
+     * @throws IOException if opening, detection, or initialization fails
      */
     public static DataInputStream loadNBTToReader(File file) throws IOException
     {
-        if (Files.notExists(file.toPath()))
-        {
-            throw new FileNotFoundException(String.format("The file %s doesn't exist!", file.getPath()));
-        }
-
-        Compression_Types compression = getCompressionType(file);
-        InputStream fileStream = new FileInputStream(file);
-        return new DataInputStream(switch (compression)
-        {
-            case NONE -> fileStream;
-            case GZIP -> new StandaloneCompressedInputStream(fileStream, true);
-            case ZLIB -> new StandaloneCompressedInputStream(fileStream, false);
-            default -> throw new IllegalArgumentException("Unsupported compression: " + file.getName());
-        });
+        return NBTInput.open(new FileInputStream(file));
     }
 
     /**
-     * Detects compression from the file header. Returns {@code NONE} if detection fails.
+     * Detects compression from up to two bytes without validating the body.
+     * Empty files and unknown prefixes return {@code NONE}. ZLIB dictionaries are unsupported.
      *
      * @param file the source file
      * @return the detected compression
+     * @throws IOException if reading fails or a recognized header is invalid or unsupported
      */
-    public static Compression_Types getCompressionType(File file)
+    public static Compression_Types getCompressionType(File file) throws IOException
     {
-        if (isGzipped(file)) return Compression_Types.GZIP;
-        if (isZlibed(file)) return Compression_Types.ZLIB;
-        return Compression_Types.NONE;
+        try (InputStream input = new FileInputStream(file))
+        {
+            return NBTInput.detect(input);
+        }
     }
 
     /**
@@ -94,10 +83,10 @@ public class NBTFileFactory
      *
      * @param nbtFile the existing destination file
      * @return the file writer
-     * @throws FileNotFoundException if the destination does not exist
+     * @throws IOException if opening or compression detection fails
      * @see NBTWriter#write(ICompoundTag)
      */
-    public static INBTWriter createWriter(File nbtFile) throws FileNotFoundException
+    public static INBTWriter createWriter(File nbtFile) throws IOException
     {
         return new NBTWriter(nbtFile);
     }
@@ -143,15 +132,8 @@ public class NBTFileFactory
      */
     public static void writeNBTFile(File nbtFile, ICompoundTag root) throws IOException
     {
-        INBTWriter selectedWriter;
-        try
-        {
-            selectedWriter = createWriter(nbtFile);
-        } catch (FileNotFoundException e)
-        {
-            selectedWriter = createWriter(nbtFile, Compression_Types.NONE);
-        }
-        try (INBTWriter writer = selectedWriter)
+        try (INBTWriter writer = Files.notExists(nbtFile.toPath())
+                ? createWriter(nbtFile, Compression_Types.NONE) : createWriter(nbtFile))
         {
             writer.write(root);
         }
@@ -323,59 +305,6 @@ public class NBTFileFactory
             {
                 target.setTag(sourceTag);
             }
-        }
-    }
-
-    /**
-     * Checks for a GZIP header. Returns false on read errors.
-     *
-     * @param file the target file to check
-     * @return {@code true} if the file has GZIP magic bytes, {@code false} otherwise
-     */
-    private static boolean isGzipped(File file)
-    {
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
-        {
-            if (raf.length() < 2) return false;
-            int magic = raf.read() & 0xff | (raf.read() << 8) & 0xff00;
-            return magic == GZIPInputStream.GZIP_MAGIC;
-        } catch (IOException e)
-        {
-            System.err.printf("Warning: Could not check GZIP magic for file %s: %s%n",
-                    file.getName(), e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Checks for a ZLIB header. Returns false on read errors.
-     *
-     * @param file the target file to check
-     * @return {@code true} if the file has ZLIB magic bytes, {@code false} otherwise
-     */
-    private static boolean isZlibed(File file)
-    {
-        try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
-        {
-            if (raf.length() < 2) return false;
-
-            byte[] header = new byte[2];
-            raf.readFully(header);
-
-            // Check zlib header: first two bytes form a 16-bit value that must be divisible by 31
-            int headerValue = ((header[0] & 0xFF) << 8) | (header[1] & 0xFF);
-
-            if (headerValue % 31 != 0)
-            {
-                return false;
-            }
-
-            // The low four bits hold the compression method. Method 8 is DEFLATE.
-            int compressionMethod = header[0] & 0x0F;
-            return compressionMethod == 8;
-        } catch (IOException e)
-        {
-            return false;
         }
     }
 }
