@@ -49,35 +49,33 @@ dependencies {
 To use the development version, build and publish it to your local Maven repository as described below,
 then use `de.pauleff:jnbt:2.0.0-SNAPSHOT` with `mavenLocal()` in your consuming Gradle project.
 
-## Quick Start
+## Quick Start (Java Edition 26.3)
 
-**Read NBT file:**
+**Build an item stack:**
 ```java
-ICompoundTag root = NBTFileFactory.readNBTFile(new File("level.dat"));
-ICompoundTag data = root.getCompound("Data");
-String worldName = data.getString("LevelName");
-```
-
-**Create with Builder:**
-```java
-ICompoundTag player = NBTBuilder.compound("Player")
-    .addString("name", "Steve")
-    .addInt("level", 25)
-    .addCompound("inventory")
-        .addString("item", "diamond_sword")
+ICompoundTag item = NBTBuilder.compound("")
+    .addString("id", "minecraft:diamond_sword")
+    .addInt("count", 1)
+    .addCompound("components")
+        .addCompound("minecraft:custom_name")
+            .addString("text", "Trail Finder")
+        .endCompound()
     .endCompound()
     .build();
 ```
 
-**Parse SNBT:**
+**Write and read a file:**
 ```java
-ITag<?> tag = NBTFactory.parseFromSNBT("{display:{Name:\"Custom Item\"}}");
+File file = new File("item.nbt");
+NBTFileFactory.writeNBTFile(file, item, Compression_Types.GZIP);
+ICompoundTag loaded = NBTFileFactory.readNBTFile(file);
+String id = loaded.getString("id");
 ```
 
-**Generate SNBT:**
+**Convert to and from SNBT:**
 ```java
-SNBTSerializer serializer = new SNBTSerializer();
-String snbt = serializer.serialize(tag);
+String snbt = NBTFactory.toSNBT(item);
+ICompoundTag parsed = NBTFactory.parseCompoundFromSNBT(snbt);
 ```
 
 ### Supported
@@ -93,7 +91,10 @@ String snbt = serializer.serialize(tag);
 
 ## Documentation
 
-Explore [`src/examples`](src/examples) for some basic usage patterns.
+- [Basic tags](src/examples/BasicOperationsExample.java): create, read, and edit an item stack.
+- [Builders](src/examples/BuilderPatternExample.java): nested compounds and a list of lore lines.
+- [File I/O](src/examples/CompressionAndIOExample.java): save and reload compressed NBT.
+- [SNBT](src/examples/SNBTExample.java): parse, edit, and serialize an item stack.
 
 ## Building
 
