@@ -35,10 +35,10 @@ public enum NBTTags
     private final String name;
 
     /**
-     * Creates an NBT tag type entry with its official specification values.
+     * Creates an NBT tag type entry.
      *
-     * @param id   the official NBT type ID (0-12)
-     * @param name the official tag type name
+     * @param id   the NBT type ID (0-12)
+     * @param name the tag type name used by jNBT
      */
     NBTTags(int id, String name)
     {
@@ -58,9 +58,9 @@ public enum NBTTags
     }
 
     /**
-     * Returns the official NBT type ID for this tag type.
+     * Returns the NBT type ID.
      *
-     * @return the numeric ID as defined in the NBT specification
+     * @return the numeric type ID (0-12)
      */
     public int getId()
     {
@@ -68,9 +68,9 @@ public enum NBTTags
     }
 
     /**
-     * Returns the official tag type name.
+     * Returns the tag type name used by jNBT.
      *
-     * @return the tag name as defined in the NBT specification
+     * @return the tag type name
      */
     public String getName()
     {

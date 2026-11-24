@@ -3,7 +3,7 @@
 <div align="center">
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
-![Minecraft](https://img.shields.io/badge/minecraft-26.2%20(Java)-green)
+![Minecraft](https://img.shields.io/badge/minecraft-26.3%20(Java)-green)
 ![Java](https://img.shields.io/badge/java-25-red)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 
@@ -13,12 +13,12 @@
 
 ## Features
 
-**jNBT** provides a complete solution for NBT file manipulation with both low-level control and high-level convenience:
+**jNBT** is a library for reading, editing, and writing Java Edition NBT files.
 
-- **Complete NBT Support** - All tags from the [official specification](https://minecraft.wiki/w/NBT_format)
+- **All Java Edition NBT Tag Types** - See the [Minecraft Wiki's community NBT reference](https://minecraft.wiki/w/NBT_format)
 - **Fluent Builder API** - Modern builder pattern for easy structure creation
 - **Smart Compression** - Automatic detection and support for GZIP, ZLIB, and uncompressed files
-- **SNBT Support** - Parse and generate Stringified NBT for Minecraft commands
+- **SNBT Support** - Parse and generate Java Edition Stringified NBT
 
 ## Installation
 
@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    implementation("de.pauleff:jnbt:1.7.0")
+    implementation("de.pauleff:jnbt:2.0.0")
 }
 ```
 
@@ -41,7 +41,7 @@ dependencies {
     <dependency>
         <groupId>de.pauleff</groupId>
         <artifactId>jnbt</artifactId>
-        <version>1.7.0</version>
+        <version>2.0.0</version>
     </dependency>
 </dependencies>
 ```
@@ -80,19 +80,16 @@ SNBTSerializer serializer = new SNBTSerializer();
 String snbt = serializer.serialize(tag);
 ```
 
-## Status
-
 ### Supported
-- All NBT tag types (Byte, Short, Int, Long, Float, Double, String, List, Compound, Arrays)
-- Complete CRUD operations (Create, Read, Update, Delete)
+
+- All Java Edition NBT tag types (Byte, Short, Int, Long, Float, Double, String, List, Compound, Arrays)
+- Create, read, update, and delete tags
 - Compression formats: **GZIP**, **ZLIB**, **None**
 - SNBT (Stringified NBT) parsing and generation
-- Many convenience methods
 
 ### Future Plans
 - Bedrock Edition NBT support
 - Conversion to JSON
-- Graphical NBT editor (maybe)
 
 ## Documentation
 
@@ -117,17 +114,13 @@ Install the development version into your local Maven repository:
 
 ## Important Notice
 
-**Always backup your files before modification.** While thoroughly tested, data corruption is always possible with file manipulation tools.
+**Back up your files before modifying them.**
 
 ## Related Projects
 
 This library powers:
 - [jMCX](https://github.com/paul-eff/jMCX) - Edit Minecraft world files
 - [MinecraftOfflineOnlineConverter](https://github.com/paul-eff/MinecraftOfflineOnlineConverter) - Player data migration
-
-## References
-
-- [Official NBT Format Specification](https://minecraft.wiki/w/NBT_format)
 
 ## Remark
 

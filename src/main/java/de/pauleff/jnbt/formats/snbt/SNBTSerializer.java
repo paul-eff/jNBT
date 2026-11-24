@@ -35,7 +35,7 @@ public class SNBTSerializer
     private final NBTLimits limits;
 
     /**
-     * Creates a serializer with Minecraft-compatible formatting.
+     * Creates an SNBT serializer with {@link NBTLimits#DEFAULT}.
      */
     public SNBTSerializer()
     {
